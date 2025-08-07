@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: chartboost/ruff-action@v1
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
+      - name: Check with mypy
+        run: |
+          uv run -m mypy .
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
+      - name: Test with pytest
+        run: |
+          uv run -m pytest --cov-report html
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: htmlcov
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
+      - name: Check version consistency
+        run: |
+          echo "Checking if versions in __init__.py, pyproject.toml, and uv.lock match..."
+          PACKAGE_NAME="example"
+          INIT_VERSION=$(uv run python -c "import ${PACKAGE_NAME}; print(${PACKAGE_NAME}.__version__)")
+          TOML_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          LOCK_VERSION=$(uv run python -c "import tomli; lock_data = tomli.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '${PACKAGE_NAME/_/-}'), None); print(pkg['version'] if pkg else 'not found')")
+          echo "Version in __init__.py: $INIT_VERSION"
+          echo "Version in pyproject.toml: $TOML_VERSION"
+          echo "Version in uv.lock: $LOCK_VERSION"
+          if [ "$INIT_VERSION" != "$TOML_VERSION" ]; then
+            echo "::error::Version mismatch! __init__.py has $INIT_VERSION but pyproject.toml has $TOML_VERSION"
+            exit 1
+          fi
+          if [ "$INIT_VERSION" != "$LOCK_VERSION" ]; then
+            echo "::error::Version mismatch! __init__.py has $INIT_VERSION but uv.lock has $LOCK_VERSION"
+            exit 1
+          fi
+          echo "All versions match!"
