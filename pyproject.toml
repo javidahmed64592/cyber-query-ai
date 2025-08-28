@@ -20,7 +20,7 @@ classifiers = [
 dependencies = [
     "fastapi[standard]",
     "langchain",
-    "ollama",
+    "langchain-ollama",
 ]
 
 [project.optional-dependencies]
@@ -148,6 +148,6 @@ pretty = true
 module = [
     "fastapi.*",
     "langchain.*",
-    "ollama.*",
+    "langchain-ollama.*",
 ]
 ignore_missing_imports = true
