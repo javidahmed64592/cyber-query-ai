@@ -35,12 +35,6 @@ dev = [
 [project.urls]
 repository = "https://github.com/javidahmed64592/cyber-query-ai"
 
-[project.scripts]
-cyber-crew = "cyber_crew.main:run"
-train-crew = "cyber_crew.main:train"
-replay-crew = "cyber_crew.main:replay"
-test-crew = "cyber_crew.main:crew_test"
-
 [tool.pytest.ini_options]
 addopts = [
     "-vv",
