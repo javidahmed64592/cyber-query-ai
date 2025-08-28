@@ -1,4 +1,4 @@
-"""Example main module."""
+"""Cyber Query AI main entry point."""
 
 
 def example_function() -> str:
