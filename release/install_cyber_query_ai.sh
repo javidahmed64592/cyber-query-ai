@@ -66,7 +66,6 @@ StandardError=append:${LOG_PATH}
 ProtectSystem=full
 ReadWriteDirectories=${WD}
 ReadWriteDirectories=${FULL_VENV_PATH}
-ReadWriteDirectories=${LOGS_DIR}
 
 [Install]
 WantedBy=multi-user.target
