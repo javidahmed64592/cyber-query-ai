@@ -75,20 +75,16 @@ jobs:
           uv sync --extra dev
       - name: Check version consistency
         run: |
-          echo "Checking if versions in __init__.py, pyproject.toml, and uv.lock match..."
-          PACKAGE_NAME="example"
-          INIT_VERSION=$(uv run python -c "import ${PACKAGE_NAME}; print(${PACKAGE_NAME}.__version__)")
+          echo "Checking if versions in pyproject.toml and uv.lock match..."
+          PACKAGE_NAME="cyber-query-ai"
           TOML_VERSION=$(uv run python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
           LOCK_VERSION=$(uv run python -c "import tomli; lock_data = tomli.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '${PACKAGE_NAME/_/-}'), None); print(pkg['version'] if pkg else 'not found')")
-          echo "Version in __init__.py: $INIT_VERSION"
           echo "Version in pyproject.toml: $TOML_VERSION"
           echo "Version in uv.lock: $LOCK_VERSION"
-          if [ "$INIT_VERSION" != "$TOML_VERSION" ]; then
-            echo "::error::Version mismatch! __init__.py has $INIT_VERSION but pyproject.toml has $TOML_VERSION"
+
+          if [ "$TOML_VERSION" != "$LOCK_VERSION" ]; then
+            echo "::error::Version mismatch! pyproject.toml has $TOML_VERSION but uv.lock has $LOCK_VERSION"
             exit 1
           fi
-          if [ "$INIT_VERSION" != "$LOCK_VERSION" ]; then
-            echo "::error::Version mismatch! __init__.py has $INIT_VERSION but uv.lock has $LOCK_VERSION"
-            exit 1
-          fi
+
           echo "All versions match!"
