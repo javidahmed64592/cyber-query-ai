@@ -19,6 +19,7 @@ SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
+EXE_PATH="${WD}/${EXE_NAME}"
 LOG_PATH="${WD}/${LOG_FILE}"
 SERVICE_PATH="${SERVICE_DIR}/${SERVICE_FILE}"
 CREATE_SERVICE_PATH="${SERVICE_DIR}/${CREATE_SERVICE_FILE}"
@@ -37,13 +38,13 @@ WHEEL_FILE=$(find "${WD}" -name "${PACKAGE_NAME}-*-py3-none-any.whl")
 uv pip install "${WHEEL_FILE}"
 rm "${WHEEL_FILE}"
 
-echo "Creating API executables..."
-cat > "${WD}/${EXE_NAME}" << EOF
+echo "Creating API executable..."
+cat > "${EXE_PATH}" << EOF
 #!/bin/bash
 export CYBER_QUERY_AI_ROOT_DIR=${WD}
 ${BIN_DIR}/${EXE_NAME} "\$@"
 EOF
-chmod +x "${WD}/${EXE_NAME}"
+chmod +x "${EXE_PATH}"
 
 echo "Creating service..."
 cat > "${SERVICE_PATH}" << EOF
