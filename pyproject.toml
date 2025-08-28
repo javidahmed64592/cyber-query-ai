@@ -35,6 +35,9 @@ dev = [
 [project.urls]
 repository = "https://github.com/javidahmed64592/cyber-query-ai"
 
+[project.scripts]
+cyber-query-ai = "cyber_query_ai.main:run"
+
 [tool.pytest.ini_options]
 addopts = [
     "-vv",
