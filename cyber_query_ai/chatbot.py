@@ -7,7 +7,7 @@ from langchain_ollama import OllamaLLM
 class Chatbot:
     """Chatbot class for LLM queries."""
 
-    def __init__(self, model: str = "mistral") -> None:
+    def __init__(self, model: str) -> None:
         """Initialize the Chatbot with necessary components."""
         self.llm = OllamaLLM(model=model)
 

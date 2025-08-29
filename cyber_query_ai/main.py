@@ -8,9 +8,11 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 
 from cyber_query_ai.chatbot import Chatbot
+from cyber_query_ai.config import load_config
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
-chatbot = Chatbot()
+config = load_config()
+chatbot = Chatbot(model=config.model)
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -31,14 +33,9 @@ async def generate_command(request: PromptRequest) -> CommandGenerationResponse:
         parsed = json.loads(response_text)
         if missing_keys := {"commands", "explanation"} - parsed.keys():
             msg = f"Missing required keys in LLM response: {missing_keys}"
-            raise ValueError(msg)
+            return CommandGenerationResponse(commands=[], explanation=msg)
 
-        # Ensure commands is a list
-        commands = parsed["commands"]
-        if not isinstance(commands, list):
-            commands = [commands] if commands else []
-
-        return CommandGenerationResponse(commands=commands, explanation=parsed["explanation"])
+        return CommandGenerationResponse(**parsed)
     except Exception as e:
         raise HTTPException(
             status_code=500,
@@ -54,7 +51,7 @@ def run() -> None:
     """Run the FastAPI app using uvicorn."""
     uvicorn.run(
         "cyber_query_ai.main:app",
-        host="127.0.0.1",
-        port=8000,
+        host=config.host,
+        port=config.port,
         reload=True,
     )
