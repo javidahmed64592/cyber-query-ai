@@ -9,7 +9,7 @@ from pydantic import BaseModel
 CONFIG_FILENAME = "config.json"
 
 
-class ConfigType(BaseModel):
+class Config(BaseModel):
     """Configuration settings for the Cyber Query AI application."""
 
     model: str
@@ -22,7 +22,7 @@ def get_config_path() -> Path:
     return Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".")) / CONFIG_FILENAME
 
 
-def load_config() -> ConfigType:
+def load_config() -> Config:
     """Load the configuration from the config file."""
     config_path = get_config_path()
     if not config_path.exists():
@@ -30,4 +30,4 @@ def load_config() -> ConfigType:
         raise FileNotFoundError(msg)
 
     with config_path.open() as f:
-        return ConfigType(**json.load(f))
+        return Config(**json.load(f))
