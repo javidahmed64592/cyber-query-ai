@@ -3,7 +3,7 @@
 import json
 
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, FastAPI, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -21,9 +21,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+api_router = APIRouter(prefix="/api")
 
 
-@app.post("/generate-command", response_model=CommandGenerationResponse)
+@api_router.post("/generate-command", response_model=CommandGenerationResponse)
 async def generate_command(request: PromptRequest) -> CommandGenerationResponse:
     """Generate cybersecurity commands based on user prompt."""
     formatted_prompt = chatbot.prompt_command_generation(task=request.prompt)
@@ -45,6 +46,9 @@ async def generate_command(request: PromptRequest) -> CommandGenerationResponse:
                 "raw": str(response_text) if response_text else "No response",
             },
         ) from e
+
+
+app.include_router(api_router)
 
 
 def run() -> None:
