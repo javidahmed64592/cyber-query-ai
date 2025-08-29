@@ -28,6 +28,7 @@ dev = [
     "ruff",
     "mypy",
     "pytest",
+    "pytest-asyncio",
     "pytest-cov",
     "tomli",
 ]
