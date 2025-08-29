@@ -43,7 +43,7 @@ class Chatbot:
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
             "Task: {task}\n\n"
-            "Respond in this format: {{'commands': [...], 'explanation': '...'}}"
+            "Respond in JSON format: {{'commands': [...], 'explanation': '...'}}"
         )
         return PromptTemplate(input_variables=["task"], template=template)
 
