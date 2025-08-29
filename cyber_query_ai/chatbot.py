@@ -9,7 +9,8 @@ class Chatbot:
 
     def __init__(self, model: str) -> None:
         """Initialize the Chatbot with necessary components."""
-        self.llm = OllamaLLM(model=model)
+        self.model = model
+        self.llm = OllamaLLM(model=self.model)
 
     @property
     def profile(self) -> str:
