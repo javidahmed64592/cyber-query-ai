@@ -55,7 +55,8 @@ jobs:
           WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
           PACKAGE_VERSION=$(echo "$WHEEL_FILE" | sed -n "s/.*${PACKAGE_NAME}-\(.*\)-py3-none-any\.whl/\1/p")
 
-          mv "$WHEEL_FILE" "release/$(basename "$WHEEL_FILE")"
+          mv "$WHEEL_FILE" release/
+          mv config.json release/
           chmod +x release/install_cyber_query_ai.sh
           mv release ${PACKAGE_NAME}_${PACKAGE_VERSION}
 
@@ -118,11 +119,6 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f "cyber-query-ai" ]; then
-            echo "Executable 'cyber-query-ai' not found"
-            exit 1
-          fi
-
           if [ ! -f "service/start_service.sh" ]; then
             echo "Executable 'service/start_service.sh' not found"
             exit 1
@@ -133,12 +129,22 @@ jobs:
             exit 1
           fi
 
-          if [ ! -f "uninstall_cyber_query_ai.sh" ]; then
-            echo "Uninstallation file not found"
+          if [ ! -f "config.json" ]; then
+            echo "Config file not found"
             exit 1
           fi
 
           if [ ! -f "README.txt" ]; then
             echo "README file not found"
+            exit 1
+          fi
+
+          if [ ! -f "cyber-query-ai" ]; then
+            echo "Executable 'cyber-query-ai' not found"
+            exit 1
+          fi
+
+          if [ ! -f "uninstall_cyber_query_ai.sh" ]; then
+            echo "Uninstallation file not found"
             exit 1
           fi
