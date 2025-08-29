@@ -85,7 +85,7 @@ class TestCreateApp:
 
         cors_middleware = None
         for middleware in app.user_middleware:
-            if middleware.cls.__name__ == "CORSMiddleware":
+            if hasattr(middleware.cls, "__name__") and middleware.cls.__name__ == "CORSMiddleware":
                 cors_middleware = middleware
                 break
 
@@ -103,7 +103,7 @@ class TestGenerateCommand:
     def mock_request(self, test_app: TestClient) -> MagicMock:
         """Fixture to create a mock FastAPI Request object."""
         mock_req = MagicMock()
-        mock_req.app.state.chatbot = test_app.app.state.chatbot
+        mock_req.app.state.chatbot = test_app.app.state.chatbot  # type: ignore[attr-defined]
         return mock_req
 
     @pytest.mark.asyncio
@@ -132,7 +132,7 @@ class TestGenerateCommand:
     ) -> None:
         """Test command generation with missing required keys in LLM response."""
         prompt_request = PromptRequest(prompt="test command")
-        mock_response = {"commands": ["ls -la"]}  # Missing 'explanation' key
+        mock_response = {"commands": ["ls -la"]}
         mock_run_in_threadpool.return_value = json.dumps(mock_response)
         mock_request.app.state.chatbot = mock_chatbot.return_value
 
@@ -156,8 +156,9 @@ class TestGenerateCommand:
             await generate_command(prompt_request, mock_request)
 
         assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        assert "Failed to generate or parse LLM response" in exc_info.value.detail["error"]
-        assert "invalid json response" in exc_info.value.detail["raw"]
+        detail = exc_info.value.detail
+        assert "Failed to generate or parse LLM response" in detail["error"]  # type: ignore[index]
+        assert "invalid json response" in detail["raw"]  # type: ignore[index]
 
     @pytest.mark.asyncio
     async def test_generate_command_llm_exception(
@@ -172,8 +173,9 @@ class TestGenerateCommand:
             await generate_command(prompt_request, mock_request)
 
         assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        assert "Failed to generate or parse LLM response" in exc_info.value.detail["error"]
-        assert "LLM connection failed" in exc_info.value.detail["details"]
+        detail = exc_info.value.detail
+        assert "Failed to generate or parse LLM response" in detail["error"]  # type: ignore[index]
+        assert "LLM connection failed" in detail["details"]  # type: ignore[index]
 
     @pytest.mark.asyncio
     async def test_generate_command_empty_response(
@@ -188,7 +190,8 @@ class TestGenerateCommand:
             await generate_command(prompt_request, mock_request)
 
         assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        assert "No response" in exc_info.value.detail["raw"]
+        detail = exc_info.value.detail
+        assert "No response" in detail["raw"]  # type: ignore[index]
 
 
 class TestGenerateCommandIntegration:

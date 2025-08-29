@@ -21,10 +21,10 @@ def mock_config() -> Config:
 
 
 @pytest.fixture
-def mock_config_file(mock_config: Config) -> mock_open:
+def mock_config_file(mock_config: Config) -> MagicMock:
     """Fixture that mocks the config file using mock_open."""
     config_json = json.dumps(mock_config.model_dump())
-    return mock_open(read_data=config_json)
+    return mock_open(read_data=config_json)  # type: ignore[no-any-return]
 
 
 class TestConfig:
@@ -63,7 +63,7 @@ class TestConfigUtils:
         assert config_path == Path(".") / "config.json"
 
     def test_load_config_with_mock_file(
-        self, mock_config: Config, mock_config_file: mock_open, mock_get_config_path: MagicMock
+        self, mock_config: Config, mock_config_file: MagicMock, mock_get_config_path: MagicMock
     ) -> None:
         """Test load_config using the mock file fixture."""
         mock_get_config_path.return_value.exists.return_value = True

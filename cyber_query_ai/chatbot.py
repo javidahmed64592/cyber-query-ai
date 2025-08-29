@@ -47,6 +47,6 @@ class Chatbot:
         )
         return PromptTemplate(input_variables=["task"], template=template)
 
-    def prompt_command_generation(self, task: str) -> PromptTemplate:
+    def prompt_command_generation(self, task: str) -> str:
         """Generate the prompt template for command generation."""
         return self.pt_command_generation.format(task=task)
