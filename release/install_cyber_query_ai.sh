@@ -8,6 +8,7 @@ PACKAGE_NAME="cyber_query_ai"
 WD=$(pwd)
 VENV_NAME=".venv"
 EXE_NAME="cyber-query-ai"
+CONFIG_FILE="config.json"
 LOG_FILE="cyber_query_ai.log"
 SERVICE_FILE="cyber_query_ai.service"
 CREATE_SERVICE_FILE="start_service.sh"
@@ -20,6 +21,7 @@ FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
 EXE_PATH="${WD}/${EXE_NAME}"
+CONFIG_PATH="${WD}/${CONFIG_FILE}"
 LOG_PATH="${WD}/${LOG_FILE}"
 SERVICE_PATH="${SERVICE_DIR}/${SERVICE_FILE}"
 CREATE_SERVICE_PATH="${SERVICE_DIR}/${CREATE_SERVICE_FILE}"
@@ -120,6 +122,7 @@ chmod +x "${UNINSTALL_PATH}"
 cat > "${README_PATH}" << EOF
 Cyber Query AI has been installed successfully.
 Run the application using: './${EXE_NAME}'
+Configure the application by editing: ${CONFIG_PATH}
 
 To create a start-up service for the Cyber Query AI, run: './service/${CREATE_SERVICE_FILE}'
 To stop the service, run: './service/${STOP_SERVICE_FILE}'
