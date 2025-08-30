@@ -12,11 +12,23 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Extend Next.js configs
+  ...compat.extends("next"),
+  ...compat.extends("next/core-web-vitals"),
+  ...compat.extends("next/typescript"),
   {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     plugins: {
       prettier: prettierPlugin,
       import: importPlugin,
+    },
+    settings: {
+      next: {
+        rootDir: __dirname,
+      },
+      react: {
+        version: "detect",
+      },
     },
     rules: {
       // Prettier integration

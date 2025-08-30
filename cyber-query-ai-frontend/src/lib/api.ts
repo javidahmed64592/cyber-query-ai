@@ -2,9 +2,22 @@ import axios from "axios";
 
 import { PromptRequest, CommandGenerationResponse } from "./types";
 
+// Determine the base URL based on environment
+const getBaseURL = () => {
+  if (typeof window === "undefined") return "";
+
+  // In production static build, API is served from same origin
+  if (process.env.NODE_ENV === "production") {
+    return window.location.origin;
+  }
+
+  // In development, proxy to backend (handled by Next.js rewrites)
+  return "";
+};
+
 // API client configuration
 const api = axios.create({
-  baseURL: "/api", // This will be proxied to localhost:8000/api
+  baseURL: getBaseURL() + "/api", // This will be proxied in dev, direct in production
   timeout: 30000, // 30 seconds timeout for LLM responses
   headers: {
     "Content-Type": "application/json",

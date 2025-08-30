@@ -13,6 +13,7 @@ from cyber_query_ai.main import api_router, clean_json_response, create_app, gen
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
 HTTP_OK = 200
+HTTP_NOT_FOUND = 404
 HTTP_UNPROCESSABLE_ENTITY = 422
 HTTP_INTERNAL_SERVER_ERROR = 500
 
@@ -62,6 +63,34 @@ def mock_create_app() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
+def mock_path() -> Generator[MagicMock, None, None]:
+    """Fixture to mock Path in main module."""
+    with patch("cyber_query_ai.main.Path") as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_env_get() -> Generator[MagicMock, None, None]:
+    """Fixture to mock os.environ.get in main module."""
+    with patch("cyber_query_ai.main.os.environ.get") as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_static_files() -> Generator[MagicMock, None, None]:
+    """Fixture to mock StaticFiles in main module."""
+    with patch("cyber_query_ai.main.StaticFiles") as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_isdir() -> Generator[MagicMock, None, None]:
+    """Fixture to mock os.path.isdir in main module."""
+    with patch("cyber_query_ai.main.os.path.isdir", return_value=True) as mock:
+        yield mock
+
+
+@pytest.fixture
 def test_app(mock_config: Config) -> TestClient:
     """Fixture to create a test FastAPI app."""
     app = create_app(mock_config)
@@ -90,10 +119,206 @@ class TestCreateApp:
                 break
 
         assert cors_middleware is not None
-        assert cors_middleware.kwargs["allow_origins"] == ["*"]
+        assert cors_middleware.kwargs["allow_origins"] == [f"http://{mock_config.host}:{mock_config.port}"]
         assert cors_middleware.kwargs["allow_credentials"] is True
-        assert cors_middleware.kwargs["allow_methods"] == ["*"]
-        assert cors_middleware.kwargs["allow_headers"] == ["*"]
+        assert cors_middleware.kwargs["allow_methods"] == ["GET", "POST"]
+        assert cors_middleware.kwargs["allow_headers"] == ["Content-Type"]
+
+    def test_create_app_static_files_not_exist(
+        self, mock_env_get: MagicMock, mock_path: MagicMock, mock_config: Config, mock_chatbot: MagicMock
+    ) -> None:
+        """Test create_app when static directory doesn't exist."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = False
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+
+        # Should not mount static files or add catch-all route
+        static_routes = [
+            route for route in app.routes if hasattr(route, "path") and route.path == "/static/{path:path}"
+        ]
+        assert len(static_routes) == 0
+
+    def test_create_app_static_files_exist(
+        self,
+        mock_static_files: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test create_app when static directory exists."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+
+        # Should mount static files
+        mock_static_files.assert_called_once_with(directory=mock_static_dir)
+        # Should have catch-all route for SPA
+        catch_all_routes = [
+            route for route in app.routes if hasattr(route, "path") and route.path == "/{full_path:path}"
+        ]
+        assert len(catch_all_routes) == 1
+
+    def test_create_app_uses_environment_variable(
+        self, mock_env_get: MagicMock, mock_path: MagicMock, mock_config: Config, mock_chatbot: MagicMock
+    ) -> None:
+        """Test that create_app uses CYBER_QUERY_AI_ROOT_DIR environment variable."""
+        mock_env_get.return_value = "/custom/root/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = False
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        create_app(mock_config)
+
+        mock_env_get.assert_called_once_with("CYBER_QUERY_AI_ROOT_DIR", ".")
+        mock_path.assert_called_once_with("/custom/root/dir")
+
+    def test_create_app_defaults_to_current_directory(
+        self, mock_env_get: MagicMock, mock_path: MagicMock, mock_config: Config, mock_chatbot: MagicMock
+    ) -> None:
+        """Test that create_app defaults to current directory when env var not set."""
+        mock_env_get.return_value = None
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = False
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        create_app(mock_config)
+
+        mock_env_get.assert_called_once_with("CYBER_QUERY_AI_ROOT_DIR", ".")
+        mock_path.assert_called_once_with(".")
+
+
+class TestStaticFileServing:
+    """Unit tests for static file serving functionality."""
+
+    def test_spa_route_serves_static_files(
+        self,
+        mock_isdir: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test that SPA route serves static files correctly."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+        app.include_router(api_router)
+        client = TestClient(app)
+
+        # Mock file existence and content
+        mock_file_path = MagicMock()
+        mock_file_path.is_file.return_value = True
+        mock_static_dir.__truediv__.return_value = mock_file_path
+
+        with patch("cyber_query_ai.main.FileResponse") as mock_file_response:
+            mock_file_response.return_value = MagicMock()
+            client.get("/some-file.js")
+
+            # FileResponse should be called with the correct file path
+            mock_file_response.assert_called_once_with(mock_file_path)
+
+    def test_spa_route_fallback_to_index(
+        self,
+        mock_isdir: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test that SPA route falls back to index.html for non-existent files."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+        app.include_router(api_router)
+        client = TestClient(app)
+
+        # Mock file doesn't exist but index.html does
+        mock_file_path = MagicMock()
+        mock_file_path.is_file.return_value = False
+        mock_static_dir.__truediv__.return_value = mock_file_path
+
+        mock_index_path = MagicMock()
+        mock_index_path.exists.return_value = True
+        mock_static_dir.__truediv__.side_effect = (
+            lambda path: mock_index_path if path == "index.html" else mock_file_path
+        )
+
+        with patch("cyber_query_ai.main.FileResponse") as mock_file_response:
+            mock_file_response.return_value = MagicMock()
+            client.get("/non-existent-page")
+
+            # Should serve index.html for SPA routing
+            mock_file_response.assert_called_once_with(mock_index_path)
+
+    def test_spa_route_api_requests_return_404(
+        self,
+        mock_isdir: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test that API requests to SPA route return 404."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+        app.include_router(api_router)
+        client = TestClient(app)
+
+        response = client.get("/api/some-endpoint")
+
+        assert response.status_code == HTTP_NOT_FOUND
+        assert response.json()["detail"] == "API endpoint not found"
+
+    def test_spa_route_no_index_html_returns_404(
+        self,
+        mock_isdir: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test that SPA route returns 404 when index.html doesn't exist."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+        app.include_router(api_router)
+        client = TestClient(app)
+
+        # Mock file doesn't exist and index.html doesn't exist
+        mock_file_path = MagicMock()
+        mock_file_path.is_file.return_value = False
+        mock_static_dir.__truediv__.return_value = mock_file_path
+
+        mock_index_path = MagicMock()
+        mock_index_path.exists.return_value = False
+        mock_static_dir.__truediv__.side_effect = (
+            lambda path: mock_index_path if path == "index.html" else mock_file_path
+        )
+
+        response = client.get("/non-existent-page")
+
+        assert response.status_code == HTTP_NOT_FOUND
+        assert response.json()["detail"] == "File not found"
 
 
 class TestCleanJsonResponse:

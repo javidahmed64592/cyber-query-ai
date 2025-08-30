@@ -1,12 +1,16 @@
 """Cyber Query AI."""
 
 import json
+import os
 import re
+from pathlib import Path
 
 import uvicorn
 from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.config import Config, load_config
@@ -42,12 +46,38 @@ def create_app(config: Config) -> FastAPI:
     app = FastAPI()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=[f"http://{config.host}:{config.port}"],
         allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
     )
     app.state.chatbot = Chatbot(model=config.model)
+
+    # Serve static files if they exist
+    static_dir = Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".") or ".") / "static"
+    if static_dir.exists():
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+
+        # Serve index.html for SPA routing (must be defined after API routes)
+        @app.get("/{full_path:path}")
+        async def serve_spa(full_path: str) -> FileResponse:
+            """Serve the SPA for all non-API routes."""
+            # Skip API routes - they should be handled by the API router
+            if full_path.startswith("api/"):
+                raise HTTPException(status_code=404, detail="API endpoint not found")
+
+            # Serve specific static files
+            file_path = static_dir / full_path
+            if file_path.is_file():
+                return FileResponse(file_path)
+
+            # Fallback to index.html for SPA routing
+            index_path = static_dir / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path)
+
+            raise HTTPException(status_code=404, detail="File not found")
+
     return app
 
 
@@ -92,6 +122,7 @@ def run() -> None:
     """Run the FastAPI app using uvicorn."""
     config = load_config()
     app = create_app(config)
+    # Include API router before any catch-all routes
     app.include_router(api_router)
     uvicorn.run(
         app,
