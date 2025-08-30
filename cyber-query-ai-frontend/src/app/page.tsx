@@ -38,8 +38,9 @@ export default function Home() {
           Command Generation
         </h1>
         <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-          Describe your cybersecurity task in natural language and get precise CLI commands
-          for ethical penetration testing and security research.
+          Describe your cybersecurity task and get precise CLI commands for ethical
+          penetration testing and security research. AI can make mistakes - please
+          verify the generated commands before use.
         </p>
       </div>
 
