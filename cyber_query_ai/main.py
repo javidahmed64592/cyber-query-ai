@@ -54,7 +54,7 @@ def create_app(config: Config) -> FastAPI:
     app.state.chatbot = Chatbot(model=config.model)
 
     # Serve static files if they exist
-    static_dir = Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".")) / "static"
+    static_dir = Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".") or ".") / "static"
     if static_dir.exists():
         app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
