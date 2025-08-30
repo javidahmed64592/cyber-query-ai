@@ -80,7 +80,6 @@ jobs:
         run: npm run format:check
       - name: Run tests
         run: npm run test
-        continue-on-error: true # TODO: Remove this once tests have been implemented
   version-check:
     runs-on: ubuntu-latest
     steps:
