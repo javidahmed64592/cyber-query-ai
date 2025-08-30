@@ -1,4 +1,3 @@
-
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
@@ -11,11 +10,15 @@
 [![License](https://img.shields.io/github/license/javidahmed64592/cyber-query-ai?style=for-the-badge)](https://github.com/javidahmed64592/cyber-query-ai/blob/main/LICENSE)
 
 <!-- omit from toc -->
+
 # CyberQueryAI Frontend
+
 A Next.js frontend for the CyberQueryAI cybersecurity assistant application.
 
 <!-- omit from toc -->
+
 ## Table of Contents
+
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
 - [Development](#development)
@@ -24,10 +27,10 @@ A Next.js frontend for the CyberQueryAI cybersecurity assistant application.
 - [API Integration](#api-integration)
 - [License](#license)
 
-
 ## Overview
 
 This is the web interface for CyberQueryAI, providing an intuitive dark-themed UI for:
+
 - Cybersecurity command generation
 - Ethical penetration testing assistance
 - Security research tool recommendations
