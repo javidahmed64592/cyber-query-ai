@@ -40,7 +40,7 @@ const Navigation = () => {
                   ${item.disabled
                     ? 'text-[var(--text-muted)] cursor-not-allowed opacity-50'
                     : item.active
-                      ? 'bg-[var(--border-accent)] text-[var(--background)] font-bold neon-glow'
+                      ? 'text-[var(--border-accent)] font-bold neon-glow'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]'
                   }
                 `}
