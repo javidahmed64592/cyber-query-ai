@@ -11,7 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
-    "test": "echo \"No tests implemented yet\" && exit 1",
+    "test": "jest",
     "quality": "npm run type-check && npm run lint:check && npm run format:check",
     "quality:fix": "npm run type-check && npm run format && npm run lint"
   },
@@ -29,6 +29,10 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.8.0",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
@@ -39,6 +43,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.4",
+    "jest": "^30.1.1",
+    "jest-environment-jsdom": "^30.1.1",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5"
