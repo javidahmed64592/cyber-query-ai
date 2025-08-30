@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import PromptInput from "@/components/PromptInput";
+
 import CommandBox from "@/components/CommandBox";
 import ExplanationBox from "@/components/ExplanationBox";
+import PromptInput from "@/components/PromptInput";
 import { generateCommand } from "@/lib/api";
 import { CommandGenerationResponse } from "@/lib/types";
 
