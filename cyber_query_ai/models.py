@@ -1,4 +1,4 @@
-"""Data classes for the Cyber Query AI application."""
+"""Data classes for the CyberQueryAI application."""
 
 from pydantic import BaseModel
 

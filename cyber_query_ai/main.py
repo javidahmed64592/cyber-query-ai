@@ -1,4 +1,4 @@
-"""Cyber Query AI."""
+"""CyberQueryAI."""
 
 import json
 import os

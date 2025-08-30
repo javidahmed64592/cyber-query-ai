@@ -1,4 +1,4 @@
-"""Chatbot logic for the Cyber Query AI application."""
+"""Chatbot logic for the CyberQueryAI application."""
 
 from langchain.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
