@@ -7,9 +7,9 @@ const Navigation = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: 'Command Gen', href: '/', active: pathname === '/' },
-    { name: 'Exploit Search', href: '/exploit-search', active: pathname === '/exploit-search', disabled: true },
+    { name: 'Command Gen', href: '/command-generation', active: pathname === '/command-generation' || pathname === '/' },
     { name: 'Script Gen', href: '/script-generation', active: pathname === '/script-generation', disabled: true },
+    { name: 'Exploit Search', href: '/exploit-search', active: pathname === '/exploit-search', disabled: true },
     { name: 'Settings', href: '/settings', active: pathname === '/settings', disabled: true },
   ];
 

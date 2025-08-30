@@ -19,7 +19,7 @@
   --terminal-border: #30363d;
 
   /* Shadows */
-  --shadow-neon: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
+  --shadow-neon: 0 0 1px currentColor, 0 0 1px currentColor, 0 0 2px currentColor;
   --shadow-terminal: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
 
@@ -99,7 +99,7 @@ body {
 .cyber-input:focus {
   outline: none;
   border-color: var(--border-accent);
-  box-shadow: 0 0 5px var(--border-accent);
+  box-shadow: 0 0 2px var(--border-accent);
 }
 
 .cyber-button {
@@ -119,7 +119,7 @@ body {
 .cyber-button:hover {
   background: var(--border-accent);
   color: var(--background);
-  box-shadow: 0 0 10px var(--border-accent);
+  box-shadow: 0 0 2px var(--border-accent);
 }
 
 .cyber-button:disabled {
@@ -136,10 +136,14 @@ body {
   color: var(--text-secondary);
   position: relative;
   overflow-x: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .command-box:before {
-  content: '$ ';
+  content: '$';
   color: var(--text-primary);
   font-weight: bold;
+  flex-shrink: 0;
 }

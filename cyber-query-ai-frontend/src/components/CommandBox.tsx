@@ -13,9 +13,9 @@ const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
           ✅ Generated Command(s):
         </h3>
         <div className="command-box animate-pulse-neon">
-          <div className="text-[var(--text-muted)]">
+          <span className="text-[var(--text-muted)]">
             Generating commands...
-          </div>
+          </span>
         </div>
       </div>
     );
@@ -28,9 +28,9 @@ const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
           ✅ Generated Command(s):
         </h3>
         <div className="command-box">
-          <div className="text-[var(--neon-red)]">
+          <span className="text-[var(--neon-red)]">
             No suitable tool identified. Try rephrasing your prompt.
-          </div>
+          </span>
         </div>
       </div>
     );
@@ -44,7 +44,7 @@ const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
       <div className="space-y-3">
         {commands.map((command, index) => (
           <div key={index} className="command-box group relative">
-            <code className="text-[var(--text-secondary)] break-all">
+            <code className="text-[var(--text-secondary)] break-all flex-1">
               {command}
             </code>
             <button
