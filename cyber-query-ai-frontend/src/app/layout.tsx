@@ -3,7 +3,7 @@ import "./globals.css";
 import Navigation from "@/components/Navigation";
 
 export const metadata: Metadata = {
-  title: "CyberQueryAI - Cybersecurity Command Generation",
+  title: "CyberQueryAI",
   description: "AI-powered cybersecurity assistant for ethical penetration testing and security research",
 };
 
