@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 
 export const metadata: Metadata = {
   title: "CyberQueryAI",
-  description: "AI-powered cybersecurity assistant for ethical penetration testing and security research",
+  description:
+    "AI-powered cybersecurity assistant for ethical penetration testing and security research",
 };
 
 export default function RootLayout({

@@ -1,4 +1,5 @@
 import axios from "axios";
+
 import { PromptRequest, CommandGenerationResponse } from "./types";
 
 // API client configuration
