@@ -140,6 +140,11 @@ jobs:
             exit 1
           fi
 
+          if [ -f "install_cyber_query_ai.bat" ]; then
+            echo "Windows installer script not removed"
+            exit 1
+          fi
+
           if [ ! -d ".venv" ]; then
             echo "Virtual environment not found"
             exit 1
