@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from cyber_query_ai.config import Config
-from cyber_query_ai.main import api_router, create_app, generate_command, run
+from cyber_query_ai.main import api_router, clean_json_response, create_app, generate_command, run
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
 HTTP_OK = 200
@@ -96,6 +96,56 @@ class TestCreateApp:
         assert cors_middleware.kwargs["allow_headers"] == ["*"]
 
 
+class TestCleanJsonResponse:
+    """Unit tests for the clean_json_response function."""
+
+    @pytest.mark.parametrize(
+        ("input_json", "expected", "test_description"),
+        [
+            # Test trailing commas removal
+            (
+                '{"commands": ["nmap -sS target",], "explanation": "test",}',
+                '{"commands": ["nmap -sS target"], "explanation": "test"}',
+                "removes trailing commas from arrays and objects",
+            ),
+            # Test markdown blocks removal
+            (
+                '```json\n{"commands": ["ls"], "explanation": "list files"}\n```',
+                '{"commands": ["ls"], "explanation": "list files"}',
+                "removes markdown code blocks",
+            ),
+            # Test structural issues fix
+            (
+                '{"commands": ["nmap -sS target", "explanation": "SYN scan"]}',
+                '{"commands": ["nmap -sS target"], "explanation": "SYN scan"}',
+                "fixes structural issues with explanation inside commands array",
+            ),
+            # Test whitespace stripping
+            (
+                '  \n{"commands": ["ls"], "explanation": "test"}  \n',
+                '{"commands": ["ls"], "explanation": "test"}',
+                "strips leading and trailing whitespace",
+            ),
+            # Test combined issues
+            (
+                '```json\n{"commands": ["nmap", "explanation": "scan",], "extra": "data",}\n```',
+                '{"commands": ["nmap"], "explanation": "scan", "extra": "data"}',
+                "fixes multiple issues simultaneously",
+            ),
+            # Test valid JSON unchanged
+            (
+                '{"commands": ["ls"], "explanation": "test"}',
+                '{"commands": ["ls"], "explanation": "test"}',
+                "leaves valid JSON unchanged except for whitespace",
+            ),
+        ],
+    )
+    def test_clean_json_response(self, input_json: str, expected: str, test_description: str) -> None:
+        """Test that clean_json_response function handles various JSON formatting issues."""
+        result = clean_json_response(input_json)
+        assert result == expected, f"Failed to {test_description}"
+
+
 class TestGenerateCommand:
     """Unit tests for the generate_command endpoint."""
 
@@ -125,6 +175,23 @@ class TestGenerateCommand:
         assert result.commands == mock_response["commands"]
         assert result.explanation == mock_response["explanation"]
         mock_chatbot.return_value.prompt_command_generation.assert_called_once_with(task="scan for open ports")
+
+    @pytest.mark.asyncio
+    async def test_generate_command_with_json_cleaning(
+        self, mock_run_in_threadpool: MagicMock, mock_request: MagicMock, mock_chatbot: MagicMock
+    ) -> None:
+        """Test command generation with malformed JSON that needs cleaning."""
+        prompt_request = PromptRequest(prompt="scan ports")
+        malformed_json = '{"commands": ["nmap -sS target", "explanation": "SYN scan"],}'
+        mock_run_in_threadpool.return_value = malformed_json
+        mock_request.app.state.chatbot = mock_chatbot.return_value
+
+        result = await generate_command(prompt_request, mock_request)
+
+        assert isinstance(result, CommandGenerationResponse)
+        assert result.commands == ["nmap -sS target"]
+        assert result.explanation == "SYN scan"
+        mock_chatbot.return_value.prompt_command_generation.assert_called_once_with(task="scan ports")
 
     @pytest.mark.asyncio
     async def test_generate_command_missing_keys(
@@ -157,7 +224,8 @@ class TestGenerateCommand:
 
         assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
         detail = exc_info.value.detail
-        assert "Failed to generate or parse LLM response" in detail["error"]  # type: ignore[index]
+        assert "Invalid JSON response from LLM" in detail["error"]  # type: ignore[index]
+        assert "JSON parsing failed" in detail["details"]  # type: ignore[index]
         assert "invalid json response" in detail["raw"]  # type: ignore[index]
 
     @pytest.mark.asyncio
@@ -208,6 +276,21 @@ class TestGenerateCommandIntegration:
         data = response.json()
         assert data["commands"] == mock_response["commands"]
         assert data["explanation"] == mock_response["explanation"]
+
+    def test_generate_command_endpoint_with_malformed_json(
+        self, mock_run_in_threadpool: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test the generate_command endpoint with malformed JSON that gets cleaned."""
+        # Simulate malformed JSON response from LLM
+        malformed_json = '{"commands": ["nmap -A target", "explanation": "Aggressive scan"],}'
+        mock_run_in_threadpool.return_value = malformed_json
+
+        response = test_app.post("/api/generate-command", json={"prompt": "aggressive scan"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["commands"] == ["nmap -A target"]
+        assert data["explanation"] == "Aggressive scan"
 
     def test_generate_command_endpoint_invalid_request(self, test_app: TestClient) -> None:
         """Test the generate_command endpoint with invalid request data."""
