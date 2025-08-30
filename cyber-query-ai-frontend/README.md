@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![ESLint](https://img.shields.io/badge/ESLint-9-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)](https://eslint.org/)
+[![Prettier](https://img.shields.io/badge/Prettier-3-F7B93E?style=for-the-badge&logo=prettier&logoColor=black)](https://prettier.io/)
 
-First, run the development server:
+[![CI](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/ci.yml?branch=main&style=for-the-badge&label=CI&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions)
+[![License](https://img.shields.io/github/license/javidahmed64592/cyber-query-ai?style=for-the-badge)](https://github.com/javidahmed64592/cyber-query-ai/blob/main/LICENSE)
+
+<!-- omit from toc -->
+# CyberQueryAI Frontend
+A Next.js frontend for the CyberQueryAI cybersecurity assistant application.
+
+<!-- omit from toc -->
+## Table of Contents
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Development](#development)
+- [Project Structure](#project-structure)
+- [Features](#features)
+- [API Integration](#api-integration)
+- [License](#license)
+
+
+## Overview
+
+This is the web interface for CyberQueryAI, providing an intuitive dark-themed UI for:
+- Cybersecurity command generation
+- Ethical penetration testing assistance
+- Security research tool recommendations
+
+## Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS v4
+- **UI Theme**: Dark cybersecurity/hacker aesthetic
+- **API Integration**: FastAPI backend via proxy
+
+## Development
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Code quality checks
+npm run quality:fix
+
+# Production build
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── command-generation/ # Main command generation interface
+│   ├── layout.tsx         # Root layout with navigation
+│   └── page.tsx           # Homepage (redirects to command-generation)
+├── components/            # Reusable React components
+│   ├── Navigation.tsx     # Main navigation bar
+│   ├── PromptInput.tsx    # User input component
+│   ├── CommandBox.tsx     # Generated command display
+│   └── ExplanationBox.tsx # AI explanation display
+└── lib/                   # Utilities and API client
+    ├── api.ts            # API communication functions
+    └── types.ts          # TypeScript type definitions
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Features
 
-## Learn More
+- **Command Generation**: AI-powered cybersecurity command suggestions
+- **Dark Theme**: Hacker-inspired UI with neon accents
+- **Responsive Design**: Works on desktop and mobile
+- **Type Safety**: Full TypeScript integration
+- **Code Quality**: ESLint, Prettier, and automated formatting
 
-To learn more about Next.js, take a look at the following resources:
+## API Integration
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The frontend communicates with a FastAPI backend running on `localhost:8000`. API calls are proxied through Next.js for seamless integration.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
