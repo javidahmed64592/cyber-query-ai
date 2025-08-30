@@ -136,4 +136,4 @@ echo "${SEPARATOR}"
 cat "${README_PATH}"
 echo "${SEPARATOR}"
 
-rm -f "${WD}/install*"
+rm -f install*
