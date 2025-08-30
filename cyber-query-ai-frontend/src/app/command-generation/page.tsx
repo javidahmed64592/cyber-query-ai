@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import PromptInput from '@/components/PromptInput';
-import CommandBox from '@/components/CommandBox';
-import ExplanationBox from '@/components/ExplanationBox';
-import { generateCommand } from '@/lib/api';
-import { CommandGenerationResponse } from '@/lib/types';
+import { useState } from "react";
+import PromptInput from "@/components/PromptInput";
+import CommandBox from "@/components/CommandBox";
+import ExplanationBox from "@/components/ExplanationBox";
+import { generateCommand } from "@/lib/api";
+import { CommandGenerationResponse } from "@/lib/types";
 
 export default function CommandGeneration() {
-  const [prompt, setPrompt] = useState('');
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<CommandGenerationResponse | null>(null);
+  const [response, setResponse] = useState<CommandGenerationResponse | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
@@ -23,7 +25,7 @@ export default function CommandGeneration() {
       const result = await generateCommand(prompt);
       setResponse(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
       setResponse(null);
     } finally {
       setIsLoading(false);
@@ -38,9 +40,9 @@ export default function CommandGeneration() {
           Command Generation
         </h1>
         <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-          Describe your cybersecurity task and get precise CLI commands for ethical
-          penetration testing and security research. AI can make mistakes - please
-          verify the generated commands before use.
+          Describe your cybersecurity task and get precise CLI commands for
+          ethical penetration testing and security research. AI can make
+          mistakes - please verify the generated commands before use.
         </p>
       </div>
 
@@ -76,7 +78,7 @@ export default function CommandGeneration() {
 
           {/* Explanation */}
           <ExplanationBox
-            explanation={response?.explanation || ''}
+            explanation={response?.explanation || ""}
             isLoading={isLoading}
           />
         </div>

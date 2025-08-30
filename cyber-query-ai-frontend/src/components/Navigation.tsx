@@ -1,16 +1,35 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const Navigation = () => {
   const pathname = usePathname();
 
   const navItems = [
-    { name: 'Command Gen', href: '/command-generation', active: pathname === '/command-generation' || pathname === '/' },
-    { name: 'Script Gen', href: '/script-generation', active: pathname === '/script-generation', disabled: true },
-    { name: 'Exploit Search', href: '/exploit-search', active: pathname === '/exploit-search', disabled: true },
-    { name: 'Settings', href: '/settings', active: pathname === '/settings', disabled: true },
+    {
+      name: "Command Gen",
+      href: "/command-generation",
+      active: pathname === "/command-generation" || pathname === "/",
+    },
+    {
+      name: "Script Gen",
+      href: "/script-generation",
+      active: pathname === "/script-generation",
+      disabled: true,
+    },
+    {
+      name: "Exploit Search",
+      href: "/exploit-search",
+      active: pathname === "/exploit-search",
+      disabled: true,
+    },
+    {
+      name: "Settings",
+      href: "/settings",
+      active: pathname === "/settings",
+      disabled: true,
+    },
   ];
 
   return (
@@ -31,20 +50,21 @@ const Navigation = () => {
 
           {/* Navigation Links */}
           <div className="flex space-x-1">
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={`
                   px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
-                  ${item.disabled
-                    ? 'text-[var(--text-muted)] cursor-not-allowed opacity-50'
-                    : item.active
-                      ? 'text-[var(--border-accent)] font-bold neon-glow'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]'
+                  ${
+                    item.disabled
+                      ? "text-[var(--text-muted)] cursor-not-allowed opacity-50"
+                      : item.active
+                        ? "text-[var(--border-accent)] font-bold neon-glow"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
                   }
                 `}
-                onClick={(e) => item.disabled && e.preventDefault()}
+                onClick={e => item.disabled && e.preventDefault()}
               >
                 {item.name}
                 {item.disabled && (

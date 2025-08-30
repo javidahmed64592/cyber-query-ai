@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 interface PromptInputProps {
   value: string;
@@ -7,9 +7,14 @@ interface PromptInputProps {
   isLoading: boolean;
 }
 
-const PromptInput = ({ value, onChange, onSubmit, isLoading }: PromptInputProps) => {
+const PromptInput = ({
+  value,
+  onChange,
+  onSubmit,
+  isLoading,
+}: PromptInputProps) => {
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
       e.preventDefault();
       onSubmit();
     }
@@ -23,7 +28,7 @@ const PromptInput = ({ value, onChange, onSubmit, isLoading }: PromptInputProps)
         </label>
         <textarea
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Describe the task you want to perform... (Ctrl+Enter to submit)"
           className="cyber-input w-full h-32 resize-none"
@@ -42,7 +47,7 @@ const PromptInput = ({ value, onChange, onSubmit, isLoading }: PromptInputProps)
             <span>Generating...</span>
           </span>
         ) : (
-          '🚀 Generate Command'
+          "🚀 Generate Command"
         )}
       </button>
     </div>
