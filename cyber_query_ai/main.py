@@ -11,12 +11,18 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 
 from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.config import Config, load_config
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
+LIMITER_INTERVAL = "5/minute"
+
 api_router = APIRouter(prefix="/api")
+limiter = Limiter(key_func=lambda request: request.client.host)
 
 
 def clean_json_response(response_text: str) -> str:
@@ -53,6 +59,11 @@ def create_app(config: Config) -> FastAPI:
     )
     app.state.chatbot = Chatbot(model=config.model)
 
+    # Rate limiter setup
+    app.state.limiter = limiter
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    app.add_middleware(SlowAPIMiddleware)
+
     # Serve static files if they exist
     static_dir = Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".") or ".") / "static"
     if static_dir.exists():
@@ -84,26 +95,27 @@ def create_app(config: Config) -> FastAPI:
 
             raise HTTPException(status_code=404, detail="File not found")
 
+    app.include_router(api_router)
     return app
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)
-async def generate_command(request: PromptRequest, app_request: Request) -> CommandGenerationResponse:
+@limiter.limit(LIMITER_INTERVAL)
+async def generate_command(request: Request, prompt: PromptRequest) -> CommandGenerationResponse:
     """Generate cybersecurity commands based on user prompt."""
-    chatbot = app_request.app.state.chatbot
-    formatted_prompt = chatbot.prompt_command_generation(task=request.prompt)
+    chatbot: Chatbot = request.app.state.chatbot
+    formatted_prompt = chatbot.prompt_command_generation(task=prompt.prompt)
     response_text = None
 
     try:
-        response_text = await run_in_threadpool(chatbot.llm, formatted_prompt)
-        cleaned_response = clean_json_response(response_text)
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        parsed = json.loads(response_text)
 
-        parsed = json.loads(cleaned_response)
-        if not (missing_keys := {"commands", "explanation"} - parsed.keys()):
-            return CommandGenerationResponse(**parsed)
+        if missing_keys := {"commands", "explanation"} - parsed.keys():
+            msg = f"Missing required keys in LLM response: {missing_keys}"
+            return CommandGenerationResponse(commands=[], explanation=msg)
 
-        msg = f"Missing required keys in LLM response: {missing_keys}"
-        return CommandGenerationResponse(commands=[], explanation=msg)
+        return CommandGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         raise HTTPException(
             status_code=500,
@@ -128,8 +140,6 @@ def run() -> None:
     """Run the FastAPI app using uvicorn."""
     config = load_config()
     app = create_app(config)
-    # Include API router before any catch-all routes
-    app.include_router(api_router)
     uvicorn.run(
         app,
         host=config.host,
