@@ -6,6 +6,7 @@ import CommandBox from "@/components/CommandBox";
 import ExplanationBox from "@/components/ExplanationBox";
 import PromptInput from "@/components/PromptInput";
 import { generateCommand } from "@/lib/api";
+import { sanitizeInput } from "@/lib/sanitization";
 import { CommandGenerationResponse } from "@/lib/types";
 
 export default function CommandGeneration() {
@@ -23,7 +24,7 @@ export default function CommandGeneration() {
     setError(null);
 
     try {
-      const result = await generateCommand(prompt);
+      const result = await generateCommand(sanitizeInput(prompt));
       setResponse(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

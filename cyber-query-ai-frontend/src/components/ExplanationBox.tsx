@@ -1,5 +1,7 @@
 "use client";
 
+import { sanitizeOutput } from "@/lib/sanitization";
+
 interface ExplanationBoxProps {
   explanation: string;
   isLoading: boolean;
@@ -32,7 +34,7 @@ const ExplanationBox = ({ explanation, isLoading }: ExplanationBoxProps) => {
       </h3>
       <div className="terminal-border rounded-lg p-4 max-h-64 overflow-y-auto">
         <div className="text-[var(--text-secondary)] whitespace-pre-wrap">
-          {explanation}
+          {sanitizeOutput(explanation)}
         </div>
       </div>
     </div>
