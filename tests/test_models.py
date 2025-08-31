@@ -1,6 +1,18 @@
 """Unit tests for the cyber_query_ai.models module."""
 
-from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
+from cyber_query_ai.models import CommandGenerationResponse, HealthResponse, PromptRequest
+
+
+class TestHealthResponse:
+    """Unit tests for the HealthResponse model."""
+
+    def test_model_dump(self) -> None:
+        """Test the model_dump method."""
+        status = "ok"
+        timestamp = "<timestamp>"
+        response = HealthResponse(status=status, timestamp=timestamp)
+        expected = {"status": status, "timestamp": timestamp}
+        assert response.model_dump() == expected
 
 
 class TestPromptRequest:

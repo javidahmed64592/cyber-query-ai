@@ -11,6 +11,13 @@ class PromptRequest(BaseModel):
 
 
 # Response schema
+class HealthResponse(BaseModel):
+    """Response model for health check."""
+
+    status: str
+    timestamp: str
+
+
 class CommandGenerationResponse(BaseModel):
     """Response model for command generation."""
 
