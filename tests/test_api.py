@@ -51,6 +51,20 @@ def test_app() -> TestClient:
     return TestClient(app)
 
 
+class TestHealthCheck:
+    """Tests for the health check endpoint."""
+
+    def test_health_check_success(self, test_app: TestClient) -> None:
+        """Test successful health check."""
+        response = test_app.get("/api/health")
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["status"] == "healthy"
+        assert "timestamp" in data
+        assert data["timestamp"].endswith("Z")
+
+
 class TestGenerateCommand:
     """Integration tests for the generate_command endpoint."""
 

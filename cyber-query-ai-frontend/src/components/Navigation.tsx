@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { version } from "../lib/version";
+
+import HealthIndicator from "./HealthIndicator";
+
 const Navigation = () => {
   const pathname = usePathname();
 
@@ -43,15 +47,16 @@ const Navigation = () => {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16 w-full justify-between">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             <Link href="/" className="flex items-center space-x-2">
               <div className="text-2xl font-bold neon-glow text-[var(--text-primary)]">
                 CyberQueryAI
               </div>
               <div className="text-xs text-[var(--text-muted)] hidden sm:block">
-                v0.1.0
+                v{version}
               </div>
             </Link>
+            <HealthIndicator />
           </div>
 
           {/* Navigation Links */}

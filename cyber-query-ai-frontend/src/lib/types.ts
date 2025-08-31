@@ -6,6 +6,11 @@ export interface PromptRequest {
 }
 
 // Response types
+export interface HealthResponse {
+  status: string;
+  timestamp: string;
+}
+
 export interface CommandGenerationResponse {
   commands: string[];
   explanation: string;
