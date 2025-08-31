@@ -1,4 +1,4 @@
-"""Configuration utilities for the Cyber Query AI application."""
+"""Configuration utilities for the CyberQueryAI application."""
 
 import json
 import os
@@ -10,7 +10,7 @@ CONFIG_FILENAME = "config.json"
 
 
 class Config(BaseModel):
-    """Configuration settings for the Cyber Query AI application."""
+    """Configuration settings for the CyberQueryAI application."""
 
     model: str
     host: str

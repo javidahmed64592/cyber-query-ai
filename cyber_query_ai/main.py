@@ -1,4 +1,4 @@
-"""Cyber Query AI."""
+"""CyberQueryAI."""
 
 import json
 import os
@@ -70,6 +70,12 @@ def create_app(config: Config) -> FastAPI:
             file_path = static_dir / full_path
             if file_path.is_file():
                 return FileResponse(file_path)
+
+            # Check if it's a directory with index.html
+            if file_path.is_dir():
+                index_path = file_path / "index.html"
+                if index_path.is_file():
+                    return FileResponse(index_path)
 
             # Fallback to index.html for SPA routing
             index_path = static_dir / "index.html"

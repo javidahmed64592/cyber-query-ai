@@ -248,6 +248,7 @@ class TestStaticFileServing:
         # Mock file doesn't exist but index.html does
         mock_file_path = MagicMock()
         mock_file_path.is_file.return_value = False
+        mock_file_path.is_dir.return_value = False
         mock_static_dir.__truediv__.return_value = mock_file_path
 
         mock_index_path = MagicMock()
@@ -307,6 +308,7 @@ class TestStaticFileServing:
         # Mock file doesn't exist and index.html doesn't exist
         mock_file_path = MagicMock()
         mock_file_path.is_file.return_value = False
+        mock_file_path.is_dir.return_value = False
         mock_static_dir.__truediv__.return_value = mock_file_path
 
         mock_index_path = MagicMock()
@@ -319,6 +321,55 @@ class TestStaticFileServing:
 
         assert response.status_code == HTTP_NOT_FOUND
         assert response.json()["detail"] == "File not found"
+
+    def test_spa_route_serves_directory_index(
+        self,
+        mock_isdir: MagicMock,
+        mock_env_get: MagicMock,
+        mock_path: MagicMock,
+        mock_config: Config,
+        mock_chatbot: MagicMock,
+    ) -> None:
+        """Test that SPA route serves index.html from directories."""
+        mock_env_get.return_value = "/test/dir"
+        mock_static_dir = MagicMock()
+        mock_static_dir.exists.return_value = True
+        mock_path.return_value.__truediv__.return_value = mock_static_dir
+
+        app = create_app(mock_config)
+        app.include_router(api_router)
+        client = TestClient(app)
+
+        # Mock directory with index.html
+        mock_dir_path = MagicMock()
+        mock_dir_path.is_file.return_value = False
+        mock_dir_path.is_dir.return_value = True
+
+        mock_index_in_dir = MagicMock()
+        mock_index_in_dir.is_file.return_value = True
+
+        # Mock the path resolution for static_dir
+        def mock_static_truediv(path: str) -> MagicMock:
+            if path in ("command-generation", "command-generation/"):
+                return mock_dir_path
+            return MagicMock()
+
+        mock_static_dir.__truediv__.side_effect = mock_static_truediv
+
+        # Mock the path resolution for the directory
+        def mock_dir_truediv(path: str) -> MagicMock:
+            if path == "index.html":
+                return mock_index_in_dir
+            return MagicMock()
+
+        mock_dir_path.__truediv__.side_effect = mock_dir_truediv
+
+        with patch("cyber_query_ai.main.FileResponse") as mock_file_response:
+            mock_file_response.return_value = MagicMock()
+            client.get("/command-generation/")
+
+            # Should serve index.html from the directory
+            mock_file_response.assert_called_once_with(mock_index_in_dir)
 
 
 class TestCleanJsonResponse:

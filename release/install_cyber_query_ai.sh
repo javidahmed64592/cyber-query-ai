@@ -51,7 +51,7 @@ chmod +x "${EXE_PATH}"
 echo "Creating service..."
 cat > "${SERVICE_PATH}" << EOF
 [Unit]
-Description=Cyber Query AI Service
+Description=CyberQueryAI Service
 After=network.target
 StartLimitBurst=5
 StartLimitIntervalSec=60s
@@ -120,11 +120,11 @@ EOF
 chmod +x "${UNINSTALL_PATH}"
 
 cat > "${README_PATH}" << EOF
-Cyber Query AI has been installed successfully.
+CyberQueryAI has been installed successfully.
 Run the application using: './${EXE_NAME}'
 Configure the application by editing: ${CONFIG_PATH}
 
-To create a start-up service for the Cyber Query AI, run: './service/${CREATE_SERVICE_FILE}'
+To create a start-up service for the CyberQueryAI, run: './service/${CREATE_SERVICE_FILE}'
 To stop the service, run: './service/${STOP_SERVICE_FILE}'
 
 To view the logs: 'cat ${LOG_FILE}'
@@ -136,4 +136,4 @@ echo "${SEPARATOR}"
 cat "${README_PATH}"
 echo "${SEPARATOR}"
 
-rm -- "$0"
+rm -f install*
