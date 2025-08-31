@@ -30,4 +30,4 @@ def clean_json_response(response_text: str) -> str:
 def sanitize_text(prompt: str) -> str:
     """Sanitize user input and LLM output for security."""
     prompt = re.sub(r"<script[^>]*>.*?</script>", "", prompt, flags=re.IGNORECASE | re.DOTALL)
-    return bleach.clean(prompt, tags=[], strip=True).strip()
+    return str(bleach.clean(prompt, tags=[], strip=True)).strip()

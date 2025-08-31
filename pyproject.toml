@@ -149,8 +149,10 @@ pretty = true
 
 [[tool.mypy.overrides]]
 module = [
+    "bleach.*",
     "fastapi.*",
     "langchain.*",
     "langchain-ollama.*",
+    "slowapi.*"
 ]
 ignore_missing_imports = true
