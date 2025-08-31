@@ -16,7 +16,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.config import Config, load_config
-from cyber_query_ai.helpers import clean_json_response
+from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
 LIMITER_INTERVAL = "5/minute"
@@ -82,7 +82,7 @@ def create_app(config: Config) -> FastAPI:
 async def generate_command(request: Request, prompt: PromptRequest) -> CommandGenerationResponse:
     """Generate cybersecurity commands based on user prompt."""
     chatbot: Chatbot = request.app.state.chatbot
-    formatted_prompt = chatbot.prompt_command_generation(task=prompt.prompt)
+    formatted_prompt = sanitize_text(chatbot.prompt_command_generation(task=prompt.prompt))
     response_text = None
 
     try:
@@ -93,6 +93,8 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return CommandGenerationResponse(commands=[], explanation=msg)
 
+        parsed["commands"] = [sanitize_text(cmd) for cmd in parsed["commands"]]
+        parsed["explanation"] = sanitize_text(parsed["explanation"])
         return CommandGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         raise HTTPException(

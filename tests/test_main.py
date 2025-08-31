@@ -5,12 +5,10 @@ from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
 
 from cyber_query_ai.config import Config
-from cyber_query_ai.main import api_router, create_app, generate_command, limiter, run
-from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
+from cyber_query_ai.main import api_router, create_app, limiter, run
 
 HTTP_OK = 200
 HTTP_NOT_FOUND = 404
@@ -387,185 +385,98 @@ class TestStaticFileServing:
 
 
 class TestGenerateCommand:
-    """Unit tests for the generate_command endpoint."""
+    """Integration tests for the generate_command endpoint."""
 
-    @pytest.fixture
-    def mock_request(self, test_app: TestClient) -> MagicMock:
-        """Fixture to create a mock FastAPI Request object."""
-        mock_req = MagicMock()
-        mock_req.app.state.chatbot = test_app.app.state.chatbot  # type: ignore[attr-defined]
-        return mock_req
-
-    @pytest.mark.asyncio
-    async def test_generate_command_success(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
+    def test_generate_command_success(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
-        """Test successful command generation."""
-        prompt_request = PromptRequest(prompt="scan for open ports")
+        """Test successful command generation via endpoint."""
         mock_response = {
             "commands": ["nmap -sS -O target"],
             "explanation": "Perform a SYN scan to detect open ports and OS fingerprinting",
         }
         mock_run_in_threadpool.return_value = json.dumps(mock_response)
         mock_clean_json_response.return_value = json.dumps(mock_response)
-        mock_request.app.state.chatbot = mock_chatbot.return_value
 
-        result = await generate_command(mock_request, prompt_request)
-
-        assert isinstance(result, CommandGenerationResponse)
-        assert result.commands == mock_response["commands"]
-        assert result.explanation == mock_response["explanation"]
-        mock_chatbot.return_value.prompt_command_generation.assert_called_once_with(task="scan for open ports")
-
-    @pytest.mark.asyncio
-    async def test_generate_command_with_json_cleaning(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
-    ) -> None:
-        """Test command generation with malformed JSON that needs cleaning."""
-        prompt_request = PromptRequest(prompt="scan ports")
-        malformed_json = '{"commands": ["nmap -sS target", "explanation": "SYN scan"],}'
-        cleaned_json = '{"commands": ["nmap -sS target"], "explanation": "SYN scan"}'
-        mock_run_in_threadpool.return_value = malformed_json
-        mock_clean_json_response.return_value = cleaned_json
-        mock_request.app.state.chatbot = mock_chatbot.return_value
-
-        result = await generate_command(mock_request, prompt_request)
-
-        assert isinstance(result, CommandGenerationResponse)
-        assert result.commands == ["nmap -sS target"]
-        assert result.explanation == "SYN scan"
-        mock_chatbot.return_value.prompt_command_generation.assert_called_once_with(task="scan ports")
-
-    @pytest.mark.asyncio
-    async def test_generate_command_missing_keys(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
-    ) -> None:
-        """Test command generation with missing required keys in LLM response."""
-        prompt_request = PromptRequest(prompt="test command")
-        mock_response = {"commands": ["ls -la"]}
-        mock_run_in_threadpool.return_value = json.dumps(mock_response)
-        mock_clean_json_response.return_value = json.dumps(mock_response)
-        mock_request.app.state.chatbot = mock_chatbot.return_value
-
-        result = await generate_command(mock_request, prompt_request)
-
-        assert isinstance(result, CommandGenerationResponse)
-        assert result.commands == []
-        assert "Missing required keys in LLM response" in result.explanation
-        assert "explanation" in result.explanation
-
-    @pytest.mark.asyncio
-    async def test_generate_command_invalid_json(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
-    ) -> None:
-        """Test command generation with invalid JSON response from LLM."""
-        prompt_request = PromptRequest(prompt="test command")
-        mock_run_in_threadpool.return_value = "invalid json response"
-        mock_clean_json_response.return_value = "invalid json response"
-        mock_request.app.state.chatbot = mock_chatbot.return_value
-
-        with pytest.raises(HTTPException) as exc_info:
-            await generate_command(mock_request, prompt_request)
-
-        assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        detail = exc_info.value.detail
-        assert "Invalid JSON response from LLM" in detail["error"]  # type: ignore[index]
-        assert "JSON parsing failed" in detail["details"]  # type: ignore[index]
-        assert "invalid json response" in detail["raw"]  # type: ignore[index]
-
-    @pytest.mark.asyncio
-    async def test_generate_command_llm_exception(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
-    ) -> None:
-        """Test command generation when LLM raises an exception."""
-        prompt_request = PromptRequest(prompt="test command")
-        mock_run_in_threadpool.side_effect = Exception("LLM connection failed")
-        mock_request.app.state.chatbot = mock_chatbot.return_value
-
-        with pytest.raises(HTTPException) as exc_info:
-            await generate_command(mock_request, prompt_request)
-
-        assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        detail = exc_info.value.detail
-        assert "Failed to generate or parse LLM response" in detail["error"]  # type: ignore[index]
-        assert "LLM connection failed" in detail["details"]  # type: ignore[index]
-
-    @pytest.mark.asyncio
-    async def test_generate_command_empty_response(
-        self,
-        mock_run_in_threadpool: MagicMock,
-        mock_request: MagicMock,
-        mock_chatbot: MagicMock,
-        mock_clean_json_response: MagicMock,
-    ) -> None:
-        """Test command generation with empty response from LLM."""
-        prompt_request = PromptRequest(prompt="test command")
-        mock_run_in_threadpool.return_value = None
-        mock_clean_json_response.side_effect = lambda x: x
-        mock_request.app.state.chatbot = mock_chatbot.return_value
-
-        with pytest.raises(HTTPException) as exc_info:
-            await generate_command(mock_request, prompt_request)
-
-        assert exc_info.value.status_code == HTTP_INTERNAL_SERVER_ERROR
-        detail = exc_info.value.detail
-        assert "No response" in detail["raw"]  # type: ignore[index]
-
-
-class TestGenerateCommandIntegration:
-    """Integration tests for the generate_command endpoint using TestClient."""
-
-    def test_generate_command_endpoint_success(
-        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
-    ) -> None:
-        """Test the generate_command endpoint through HTTP request."""
-        mock_response = {"commands": ["nmap -sT 192.168.1.1"], "explanation": "TCP connect scan of target host"}
-        mock_run_in_threadpool.return_value = json.dumps(mock_response)
-        mock_clean_json_response.return_value = json.dumps(mock_response)
-
-        response = test_app.post("/api/generate-command", json={"prompt": "scan host 192.168.1.1"})
+        response = test_app.post("/api/generate-command", json={"prompt": "scan for open ports"})
 
         assert response.status_code == HTTP_OK
         data = response.json()
         assert data["commands"] == mock_response["commands"]
         assert data["explanation"] == mock_response["explanation"]
 
-    def test_generate_command_endpoint_with_malformed_json(
+    def test_generate_command_with_json_cleaning(
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
-        """Test the generate_command endpoint with malformed JSON that gets cleaned."""
-        # Simulate malformed JSON response from LLM
-        malformed_json = '{"commands": ["nmap -A target", "explanation": "Aggressive scan"],}'
-        cleaned_json = '{"commands": ["nmap -A target"], "explanation": "Aggressive scan"}'
+        """Test command generation with malformed JSON that gets cleaned via endpoint."""
+        malformed_json = '{"commands": ["nmap -sS target", "explanation": "SYN scan"],}'
+        cleaned_json = '{"commands": ["nmap -sS target"], "explanation": "SYN scan"}'
         mock_run_in_threadpool.return_value = malformed_json
         mock_clean_json_response.return_value = cleaned_json
 
-        response = test_app.post("/api/generate-command", json={"prompt": "aggressive scan"})
+        response = test_app.post("/api/generate-command", json={"prompt": "scan ports"})
 
         assert response.status_code == HTTP_OK
         data = response.json()
-        assert data["commands"] == ["nmap -A target"]
-        assert data["explanation"] == "Aggressive scan"
+        assert data["commands"] == ["nmap -sS target"]
+        assert data["explanation"] == "SYN scan"
+
+    def test_generate_command_missing_keys(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command generation with missing required keys in LLM response via endpoint."""
+        mock_response = {"commands": ["ls -la"]}
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/generate-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["commands"] == []
+        assert "Missing required keys in LLM response" in data["explanation"]
+        assert "explanation" in data["explanation"]
+
+    def test_generate_command_invalid_json(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command generation with invalid JSON response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = "invalid json response"
+        mock_clean_json_response.return_value = "invalid json response"
+
+        response = test_app.post("/api/generate-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Invalid JSON response from LLM" in data["detail"]["error"]
+        assert "JSON parsing failed" in data["detail"]["details"]
+        assert "invalid json response" in data["detail"]["raw"]
+
+    def test_generate_command_llm_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command generation when LLM raises an exception via endpoint."""
+        mock_run_in_threadpool.side_effect = Exception("LLM connection failed")
+
+        response = test_app.post("/api/generate-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "LLM connection failed" in data["detail"]["details"]
+
+    def test_generate_command_empty_response(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command generation with empty response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = None
+        mock_clean_json_response.side_effect = lambda x: x
+
+        response = test_app.post("/api/generate-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "No response" in data["detail"]["raw"]
 
     def test_generate_command_endpoint_invalid_request(self, test_app: TestClient) -> None:
         """Test the generate_command endpoint with invalid request data."""
@@ -575,18 +486,6 @@ class TestGenerateCommandIntegration:
         )
 
         assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
-
-    def test_generate_command_endpoint_server_error(
-        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
-    ) -> None:
-        """Test the generate_command endpoint when server error occurs."""
-        mock_run_in_threadpool.side_effect = Exception("Server error")
-
-        response = test_app.post("/api/generate-command", json={"prompt": "test command"})
-
-        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
-        data = response.json()
-        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
 
 
 class TestRun:
