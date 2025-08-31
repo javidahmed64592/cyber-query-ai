@@ -10,32 +10,38 @@ const Navigation = () => {
     {
       name: "Command Gen",
       href: "/command-generation",
-      active: pathname === "/command-generation" || pathname === "/",
+      active: pathname === "/command-generation/",
     },
     {
       name: "Script Gen",
       href: "/script-generation",
-      active: pathname === "/script-generation",
+      active: pathname === "/script-generation/",
+      disabled: true,
+    },
+    {
+      name: "Command Explain",
+      href: "/command-explanation",
+      active: pathname === "/command-explanation/",
       disabled: true,
     },
     {
       name: "Exploit Search",
       href: "/exploit-search",
-      active: pathname === "/exploit-search",
+      active: pathname === "/exploit-search/",
       disabled: true,
     },
     {
-      name: "Settings",
-      href: "/settings",
-      active: pathname === "/settings",
+      name: "About",
+      href: "/about",
+      active: pathname === "/about/",
       disabled: true,
     },
   ];
 
   return (
-    <nav className="bg-[var(--background-secondary)] border-b border-[var(--terminal-border)] sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+    <nav className="bg-[var(--background-secondary)] border-b border-[var(--terminal-border)] sticky top-0 z-50 w-full">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-16 w-full justify-between">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
@@ -49,29 +55,37 @@ const Navigation = () => {
           </div>
 
           {/* Navigation Links */}
-          <div className="flex space-x-1">
-            {navItems.map(item => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`
-                  px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
-                  ${
-                    item.disabled
-                      ? "text-[var(--text-muted)] cursor-not-allowed opacity-50"
-                      : item.active
-                        ? "text-[var(--border-accent)] font-bold neon-glow"
-                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
-                  }
-                `}
-                onClick={e => item.disabled && e.preventDefault()}
-              >
-                {item.name}
-                {item.disabled && (
-                  <span className="ml-1 text-xs opacity-50">(Soon)</span>
-                )}
-              </Link>
-            ))}
+          <div className="flex flex-1 justify-end space-x-1">
+            {navItems.map(item => {
+              const normalized = (pathname || "").replace(/\/$/, "") || "/";
+              const isActive =
+                !item.disabled &&
+                (normalized === item.href ||
+                  (item.href === "/command-generation" && normalized === "/"));
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`
+                    px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
+                    ${
+                      item.disabled
+                        ? "text-[var(--text-muted)] cursor-not-allowed opacity-50"
+                        : isActive
+                          ? "text-[var(--border-accent)] font-bold neon-glow"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
+                    }
+                  `}
+                  onClick={e => item.disabled && e.preventDefault()}
+                >
+                  {item.name}
+                  {item.disabled && (
+                    <span className="ml-1 text-xs opacity-50">(Soon)</span>
+                  )}
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
