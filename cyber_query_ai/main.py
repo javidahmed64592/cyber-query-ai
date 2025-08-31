@@ -36,6 +36,7 @@ def create_app(config: Config) -> FastAPI:
         allow_headers=["Content-Type"],
     )
     app.state.chatbot = Chatbot(model=config.model)
+    app.include_router(api_router)
 
     # Rate limiter setup
     app.state.limiter = limiter
@@ -73,7 +74,6 @@ def create_app(config: Config) -> FastAPI:
 
             raise HTTPException(status_code=404, detail="File not found")
 
-    app.include_router(api_router)
     return app
 
 
