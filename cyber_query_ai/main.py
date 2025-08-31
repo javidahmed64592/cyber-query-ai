@@ -2,7 +2,6 @@
 
 import json
 import os
-import re
 from pathlib import Path
 
 import uvicorn
@@ -17,34 +16,13 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.config import Config, load_config
+from cyber_query_ai.helpers import clean_json_response
 from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
 
 LIMITER_INTERVAL = "5/minute"
 
 api_router = APIRouter(prefix="/api")
 limiter = Limiter(key_func=lambda request: request.client.host)
-
-
-def clean_json_response(response_text: str) -> str:
-    """Clean common JSON formatting issues from LLM responses."""
-    # Remove trailing commas in arrays and objects
-    response_text = re.sub(r",(\s*[}\]])", r"\1", response_text)
-
-    # Remove any markdown code blocks if present
-    response_text = re.sub(r"```json\s*", "", response_text)
-    response_text = re.sub(r"```\s*$", "", response_text)
-
-    # Fix common structural issues where explanation is inside commands array
-    # Pattern: ["command", "explanation": "text"] -> ["command"], "explanation": "text"
-    response_text = re.sub(
-        r'(\["[^"]*"\s*),\s*"(explanation?)":\s*"([^"]*)"(\s*\])',
-        r'\1], "\2": "\3"',
-        response_text,
-        flags=re.IGNORECASE,
-    )
-
-    # Strip whitespace
-    return response_text.strip()
 
 
 def create_app(config: Config) -> FastAPI:
