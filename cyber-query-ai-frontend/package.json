@@ -16,8 +16,10 @@
     "quality:fix": "npm run type-check && npm run format && npm run lint"
   },
   "dependencies": {
+    "@types/dompurify": "^3.0.5",
     "axios": "^1.11.0",
     "clsx": "^2.1.1",
+    "dompurify": "^3.2.6",
     "framer-motion": "^12.23.12",
     "next": "15.5.2",
     "react": "19.1.0",

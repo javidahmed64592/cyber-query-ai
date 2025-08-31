@@ -102,9 +102,9 @@ describe("CommandBox", () => {
 
     const commandBoxes = screen
       .getAllByText("ls -la")
-      .map(el => el.closest("div"));
+      .map(el => el.closest(".command-box"));
     commandBoxes.forEach(box => {
-      expect(box).toHaveClass("command-box");
+      expect(box).toHaveClass("command-box", "group", "relative");
     });
   });
 
@@ -115,7 +115,7 @@ describe("CommandBox", () => {
     // The group class is applied to the container that holds all commands
     const commandsContainer =
       screen.getByText("ls -la").parentElement?.parentElement;
-    expect(commandsContainer).toHaveClass("space-y-3");
+    expect(commandsContainer).toHaveClass("command-box", "group", "relative");
   });
 
   it("renders code element with correct styling", () => {
@@ -146,5 +146,43 @@ describe("CommandBox", () => {
 
     const copyButtons = screen.getAllByTitle("Copy to clipboard");
     expect(copyButtons).toHaveLength(2);
+  });
+
+  it("shows unsafe command warning for dangerous commands", () => {
+    const commands = ["rm -rf /"];
+    render(<CommandBox commands={commands} isLoading={false} />);
+
+    // Check that the warning message is displayed
+    expect(screen.getByText("⚠️ POTENTIALLY UNSAFE")).toBeInTheDocument();
+
+    // Check that the warning has the correct styling
+    const warningElement = screen.getByText("⚠️ POTENTIALLY UNSAFE");
+    expect(warningElement).toHaveClass(
+      "text-[var(--neon-red)]",
+      "text-xs",
+      "font-bold",
+      "whitespace-nowrap",
+      "flex-shrink-0"
+    );
+  });
+
+  it("does not show unsafe command warning for safe commands", () => {
+    const commands = ["ls -la"];
+    render(<CommandBox commands={commands} isLoading={false} />);
+
+    // Check that the warning message is not displayed
+    expect(screen.queryByText("⚠️ POTENTIALLY UNSAFE")).not.toBeInTheDocument();
+  });
+
+  it("shows warning for multiple unsafe commands", () => {
+    const commands = ["rm -rf /", "shutdown now", "ls -la"];
+    render(<CommandBox commands={commands} isLoading={false} />);
+
+    // Check that warning messages are displayed for unsafe commands
+    const warningElements = screen.getAllByText("⚠️ POTENTIALLY UNSAFE");
+    expect(warningElements).toHaveLength(2); // rm -rf and shutdown should show warnings
+
+    // Check that safe command doesn't have warning
+    expect(screen.getByText("ls -la")).toBeInTheDocument();
   });
 });

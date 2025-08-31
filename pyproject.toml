@@ -18,9 +18,11 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
+    "bleach>=6.2.0",
     "fastapi[standard]",
     "langchain",
     "langchain-ollama",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
@@ -147,8 +149,10 @@ pretty = true
 
 [[tool.mypy.overrides]]
 module = [
+    "bleach.*",
     "fastapi.*",
     "langchain.*",
     "langchain-ollama.*",
+    "slowapi.*"
 ]
 ignore_missing_imports = true
