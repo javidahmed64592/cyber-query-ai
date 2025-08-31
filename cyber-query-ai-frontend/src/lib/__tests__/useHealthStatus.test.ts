@@ -29,6 +29,11 @@ describe("useHealthStatus", () => {
   it("should set status to 'online' when fetch succeeds", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     const { result } = renderHook(() => useHealthStatus());
@@ -66,6 +71,11 @@ describe("useHealthStatus", () => {
   it("should poll every 30 seconds", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     renderHook(() => useHealthStatus());
@@ -93,6 +103,11 @@ describe("useHealthStatus", () => {
 
     mockFetch.mockResolvedValue({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     const { unmount } = renderHook(() => useHealthStatus());
@@ -107,6 +122,11 @@ describe("useHealthStatus", () => {
     // First call succeeds
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     const { result } = renderHook(() => useHealthStatus());
@@ -129,6 +149,11 @@ describe("useHealthStatus", () => {
     // Third call succeeds again
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     act(() => {
@@ -143,6 +168,11 @@ describe("useHealthStatus", () => {
   it("should call fetch with correct URL", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     renderHook(() => useHealthStatus());
@@ -170,6 +200,11 @@ describe("useHealthStatus", () => {
   it("should return the correct type", () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
+      json: () =>
+        Promise.resolve({
+          status: "healthy",
+          timestamp: "2023-01-01T00:00:00Z",
+        }),
     });
 
     const { result } = renderHook(() => useHealthStatus());

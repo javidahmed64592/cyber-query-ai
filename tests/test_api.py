@@ -60,7 +60,7 @@ class TestHealthCheck:
 
         assert response.status_code == HTTP_OK
         data = response.json()
-        assert data["status"] == "ok"
+        assert data["status"] == "healthy"
         assert "timestamp" in data
         assert data["timestamp"].endswith("Z")
 

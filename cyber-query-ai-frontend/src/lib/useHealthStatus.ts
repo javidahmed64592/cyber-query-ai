@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 
+import type { HealthResponse } from "./types";
+
 export type HealthStatus = "online" | "offline" | "checking";
 
 export function useHealthStatus(): HealthStatus {
@@ -10,7 +12,12 @@ export function useHealthStatus(): HealthStatus {
       try {
         const res = await fetch("/api/health");
         if (res.ok) {
-          setStatus("online");
+          const data: HealthResponse = await res.json();
+          if (data.status === "healthy") {
+            setStatus("online");
+          } else {
+            setStatus("offline");
+          }
         } else {
           setStatus("offline");
         }

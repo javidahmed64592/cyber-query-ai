@@ -29,7 +29,7 @@ def get_limiter() -> Limiter:
 @api_router.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     """Check the health of the server."""
-    return HealthResponse(status="ok", timestamp=datetime.now().isoformat() + "Z")
+    return HealthResponse(status="healthy", timestamp=datetime.now().isoformat() + "Z")
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)
