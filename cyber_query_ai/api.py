@@ -1,13 +1,14 @@
 """API router for the CyberQueryAI application."""
 
 import json
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from slowapi import Limiter
 
 from cyber_query_ai.helpers import clean_json_response, sanitize_text
-from cyber_query_ai.models import CommandGenerationResponse, PromptRequest
+from cyber_query_ai.models import CommandGenerationResponse, HealthResponse, PromptRequest
 
 LIMITER_INTERVAL = "5/minute"
 
@@ -23,6 +24,12 @@ def get_api_router() -> APIRouter:
 def get_limiter() -> Limiter:
     """Get the rate limiter."""
     return limiter
+
+
+@api_router.get("/health", response_model=HealthResponse)
+async def health_check() -> HealthResponse:
+    """Check the health of the server."""
+    return HealthResponse(status="ok", timestamp=datetime.now().isoformat() + "Z")
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)
