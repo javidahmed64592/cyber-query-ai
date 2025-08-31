@@ -1,8 +1,92 @@
 """Unit tests for the cyber_query_ai.helpers module."""
 
-import pytest
+from collections.abc import Generator
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
-from cyber_query_ai.helpers import clean_json_response, sanitize_text
+import pytest
+from fastapi.responses import FileResponse
+
+from cyber_query_ai.helpers import clean_json_response, get_static_dir, get_static_files, sanitize_text
+
+
+class TestStaticFiles:
+    """Unit tests for the static file serving functions."""
+
+    @pytest.fixture
+    def mock_is_file(self) -> Generator[MagicMock, None, None]:
+        """Mock the is_file method of Path."""
+        with patch("cyber_query_ai.helpers.Path.is_file") as mock:
+            yield mock
+
+    @pytest.fixture
+    def mock_is_dir(self) -> Generator[MagicMock, None, None]:
+        """Mock the is_dir method of Path."""
+        with patch("cyber_query_ai.helpers.Path.is_dir") as mock:
+            yield mock
+
+    @pytest.fixture
+    def mock_exists(self) -> Generator[MagicMock, None, None]:
+        """Mock the exists method of Path."""
+        with patch("cyber_query_ai.helpers.Path.exists") as mock:
+            yield mock
+
+    def test_get_static_dir(self) -> None:
+        """Test that get_static_dir returns the correct path."""
+        static_dir = get_static_dir()
+        assert static_dir == Path("static")
+
+    def test_get_static_files_api_route(self) -> None:
+        """Test that get_static_files returns None for API routes."""
+        static_dir = get_static_dir()
+        response = get_static_files("api/test", static_dir)
+        assert response is None
+
+    def test_get_static_files_specific_file(self, mock_is_file: MagicMock) -> None:
+        """Test that get_static_files serves a specific static file."""
+        static_dir = get_static_dir()
+        mock_is_file.side_effect = [True]
+        response = get_static_files("test.txt", static_dir)
+        assert isinstance(response, FileResponse)
+        assert response.path == static_dir / "test.txt"
+
+    def test_get_static_files_directory_with_index(self, mock_is_file: MagicMock, mock_is_dir: MagicMock) -> None:
+        """Test that get_static_files serves index.html for a directory."""
+        static_dir = get_static_dir()
+        mock_is_file.side_effect = [False, True]
+        mock_is_dir.side_effect = [True]
+        response = get_static_files("some_dir", static_dir)
+        assert isinstance(response, FileResponse)
+        assert response.path == static_dir / "some_dir" / "index.html"
+
+    def test_get_static_files_fallback_to_index(
+        self,
+        mock_is_file: MagicMock,
+        mock_is_dir: MagicMock,
+        mock_exists: MagicMock,
+    ) -> None:
+        """Test that get_static_files falls back to static/index.html."""
+        static_dir = get_static_dir()
+        mock_is_file.side_effect = [False]
+        mock_is_dir.side_effect = [False]
+        mock_exists.side_effect = [True]
+        response = get_static_files("nonexistent", static_dir)
+        assert isinstance(response, FileResponse)
+        assert response.path == static_dir / "index.html"
+
+    def test_get_static_files_not_found(
+        self,
+        mock_is_file: MagicMock,
+        mock_is_dir: MagicMock,
+        mock_exists: MagicMock,
+    ) -> None:
+        """Test that get_static_files returns None when file not found."""
+        static_dir = get_static_dir()
+        mock_is_file.side_effect = [False]
+        mock_is_dir.side_effect = [False]
+        mock_exists.side_effect = [False]
+        response = get_static_files("nonexistent", static_dir)
+        assert response is None
 
 
 class TestCleanJsonResponse:
