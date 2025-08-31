@@ -2,6 +2,8 @@
 
 import re
 
+import bleach
+
 
 def clean_json_response(response_text: str) -> str:
     """Clean common JSON formatting issues from LLM responses."""
@@ -23,3 +25,9 @@ def clean_json_response(response_text: str) -> str:
 
     # Strip whitespace
     return response_text.strip()
+
+
+def sanitize_text(prompt: str) -> str:
+    """Sanitize user input and LLM output for security."""
+    prompt = re.sub(r"<script[^>]*>.*?</script>", "", prompt, flags=re.IGNORECASE | re.DOTALL)
+    return bleach.clean(prompt, tags=[], strip=True).strip()
