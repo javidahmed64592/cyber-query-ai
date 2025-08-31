@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { version } from "../lib/version";
+
 import HealthIndicator from "./HealthIndicator";
 
 const Navigation = () => {
@@ -51,7 +53,7 @@ const Navigation = () => {
                 CyberQueryAI
               </div>
               <div className="text-xs text-[var(--text-muted)] hidden sm:block">
-                v0.1.0
+                v{version}
               </div>
             </Link>
             <HealthIndicator />
