@@ -2,17 +2,19 @@
 
 import { useState } from "react";
 
-import CommandBox from "@/components/CommandBox";
 import ExplanationBox from "@/components/ExplanationBox";
+import LanguageSelector from "@/components/LanguageSelector";
+import ScriptBox from "@/components/ScriptBox";
 import TextInput from "@/components/TextInput";
-import { generateCommand } from "@/lib/api";
+import { generateScript } from "@/lib/api";
 import { sanitizeInput } from "@/lib/sanitization";
-import { CommandGenerationResponse } from "@/lib/types";
+import { ScriptGenerationResponse } from "@/lib/types";
 
-export default function CommandGeneration() {
+export default function ScriptGeneration() {
   const [prompt, setPrompt] = useState("");
+  const [language, setLanguage] = useState("python");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<CommandGenerationResponse | null>(
+  const [response, setResponse] = useState<ScriptGenerationResponse | null>(
     null
   );
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +26,7 @@ export default function CommandGeneration() {
     setError(null);
 
     try {
-      const result = await generateCommand(sanitizeInput(prompt));
+      const result = await generateScript(sanitizeInput(prompt), language);
       setResponse(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -39,24 +41,30 @@ export default function CommandGeneration() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
-          Command Generation
+          Script Generation
         </h1>
         <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-          Describe your cybersecurity task and get precise CLI commands for
-          ethical penetration testing and security research. AI can make
-          mistakes - please verify the generated commands before use.
+          Generate cybersecurity scripts in your preferred programming language
+          for ethical penetration testing and security research. AI can make
+          mistakes - please verify the generated scripts before use.
         </p>
       </div>
 
       {/* Input Section */}
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <LanguageSelector
+          value={language}
+          onChange={setLanguage}
+          disabled={isLoading}
+        />
+
         <TextInput
           label="🧠 Prompt:"
           value={prompt}
           onChange={setPrompt}
           onSubmit={handleSubmit}
-          placeholder="Describe the task you want to perform... (Ctrl+Enter to submit)"
-          buttonText="🚀 Generate Command"
+          placeholder="Describe the script you want to generate... (Ctrl+Enter to submit)"
+          buttonText="🚀 Generate Script"
           isLoading={isLoading}
           loadingText="Generating..."
         />
@@ -76,9 +84,10 @@ export default function CommandGeneration() {
             </div>
           )}
 
-          {/* Command Output */}
-          <CommandBox
-            commands={response?.commands || []}
+          {/* Script Output */}
+          <ScriptBox
+            script={response?.script || ""}
+            language={language}
             isLoading={isLoading}
           />
 
@@ -94,15 +103,17 @@ export default function CommandGeneration() {
       {!isLoading && !response && !error && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <div className="text-[var(--text-muted)] text-lg">
-            Welcome to CyberQueryAI! 🚀
+            Generate powerful cybersecurity scripts! 🐍
           </div>
           <div className="text-sm text-[var(--text-muted)] space-y-2">
-            <p>Try asking for commands like:</p>
+            <p>Try asking for scripts like:</p>
             <ul className="space-y-1 text-left list-disc list-inside">
-              <li>&quot;Scan a network for open ports&quot;</li>
-              <li>&quot;Crack an MD5 hash using a dictionary attack&quot;</li>
-              <li>&quot;Perform a basic web vulnerability scan&quot;</li>
-              <li>&quot;Extract metadata from an image file&quot;</li>
+              <li>&quot;Create a port scanner in Python&quot;</li>
+              <li>&quot;Write a password brute-forcer in Bash&quot;</li>
+              <li>
+                &quot;Generate a web crawler for vulnerability scanning&quot;
+              </li>
+              <li>&quot;Build a network packet analyzer&quot;</li>
             </ul>
           </div>
         </div>

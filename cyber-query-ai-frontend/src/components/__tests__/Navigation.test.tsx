@@ -58,12 +58,6 @@ describe("Navigation", () => {
     expect(screen.getByText("About")).toBeInTheDocument();
   });
 
-  it('shows "(Soon)" for disabled navigation items', () => {
-    render(<Navigation />);
-    const soonLabels = screen.getAllByText("(Soon)");
-    expect(soonLabels).toHaveLength(5);
-  });
-
   it("renders navigation links with correct hrefs", () => {
     render(<Navigation />);
     expect(screen.getByRole("link", { name: /Command Gen/ })).toHaveAttribute(
@@ -98,14 +92,6 @@ describe("Navigation", () => {
     render(<Navigation />);
     const commandGenLink = screen.getByRole("link", { name: /Command Gen/ });
     expect(commandGenLink).toHaveClass("neon-glow");
-  });
-
-  it("applies disabled styling to inactive navigation items", () => {
-    render(<Navigation />);
-    const scriptGenLink = screen.getByRole("link", {
-      name: /Script Gen \(Soon\)/,
-    });
-    expect(scriptGenLink).toHaveClass("cursor-not-allowed", "opacity-50");
   });
 
   describe("HealthIndicator integration", () => {

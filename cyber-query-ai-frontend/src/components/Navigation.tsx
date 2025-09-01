@@ -20,31 +20,26 @@ const Navigation = () => {
       name: "Script Gen",
       href: "/script-generation",
       active: pathname === "/script-generation/",
-      disabled: true,
     },
     {
       name: "Command Explain",
       href: "/command-explanation",
       active: pathname === "/command-explanation/",
-      disabled: true,
     },
     {
       name: "Script Explain",
       href: "/script-explanation",
       active: pathname === "/script-explanation/",
-      disabled: true,
     },
     {
       name: "Exploit Search",
       href: "/exploit-search",
       active: pathname === "/exploit-search/",
-      disabled: true,
     },
     {
       name: "About",
       href: "/about",
       active: pathname === "/about/",
-      disabled: true,
     },
   ];
 
@@ -70,9 +65,8 @@ const Navigation = () => {
             {navItems.map(item => {
               const normalized = (pathname || "").replace(/\/$/, "") || "/";
               const isActive =
-                !item.disabled &&
-                (normalized === item.href ||
-                  (item.href === "/command-generation" && normalized === "/"));
+                normalized === item.href ||
+                (item.href === "/command-generation" && normalized === "/");
 
               return (
                 <Link
@@ -81,19 +75,13 @@ const Navigation = () => {
                   className={`
                     px-4 py-2 rounded-md text-sm font-medium transition-all duration-200
                     ${
-                      item.disabled
-                        ? "text-[var(--text-muted)] cursor-not-allowed opacity-50"
-                        : isActive
-                          ? "text-[var(--border-accent)] font-bold neon-glow"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
+                      isActive
+                        ? "text-[var(--border-accent)] font-bold neon-glow"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
                     }
                   `}
-                  onClick={e => item.disabled && e.preventDefault()}
                 >
                   {item.name}
-                  {item.disabled && (
-                    <span className="ml-1 text-xs opacity-50">(Soon)</span>
-                  )}
                 </Link>
               );
             })}
