@@ -3,14 +3,21 @@
 from pydantic import BaseModel
 
 
-# Request schema
+# Request schemas
 class PromptRequest(BaseModel):
-    """Request model for command generation."""
+    """Request model with prompt."""
 
     prompt: str
 
 
-# Response schema
+class PromptWithLanguageRequest(BaseModel):
+    """Request model with prompt and language."""
+
+    prompt: str
+    language: str
+
+
+# Response schemas
 class HealthResponse(BaseModel):
     """Response model for health check."""
 
@@ -23,3 +30,32 @@ class CommandGenerationResponse(BaseModel):
 
     commands: list[str]
     explanation: str
+
+
+class ScriptGenerationResponse(BaseModel):
+    """Response model for script generation."""
+
+    script: str
+    explanation: str
+
+
+class ExplanationResponse(BaseModel):
+    """Response model for explanation."""
+
+    explanation: str
+
+
+class Exploit(BaseModel):
+    """Response model for exploit."""
+
+    title: str
+    link: str
+    description: str
+    severity: str
+
+
+class ExploitSearchResponse(BaseModel):
+    """Response model for exploit search."""
+
+    attack_vector: str
+    exploits: list[Exploit]
