@@ -8,7 +8,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from cyber_query_ai.api import api_router, limiter
+from cyber_query_ai.api import api_router, get_server_error, limiter
 
 HTTP_OK = 200
 HTTP_UNPROCESSABLE_ENTITY = 422
@@ -49,6 +49,21 @@ def test_app() -> TestClient:
     mock_chatbot.llm = MagicMock()
     app.state.chatbot = mock_chatbot
     return TestClient(app)
+
+
+class TestGetServerError:
+    """Tests for the get_server_error function."""
+
+    def test_get_server_error(self) -> None:
+        """Test get_server_error returns a 500 response."""
+        error = "Something went wrong"
+        exception = Exception("Test exception")
+        response_text = "Something went wrong"
+        server_error = get_server_error(error, exception, response_text)
+        assert server_error.status_code == HTTP_INTERNAL_SERVER_ERROR
+        assert server_error.detail["error"] == error
+        assert server_error.detail["details"] == str(exception)
+        assert server_error.detail["raw"] == response_text
 
 
 class TestHealthCheck:
@@ -130,7 +145,7 @@ class TestGenerateCommand:
         assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
         data = response.json()
         assert "Invalid JSON response from LLM" in data["detail"]["error"]
-        assert "JSON parsing failed" in data["detail"]["details"]
+        assert "Expecting value: line 1 column 1 (char 0)" in data["detail"]["details"]
         assert "invalid json response" in data["detail"]["raw"]
 
     def test_generate_command_llm_exception(

@@ -26,6 +26,18 @@ def get_limiter() -> Limiter:
     return limiter
 
 
+def get_server_error(error: str, exception: Exception, response_text: str | None) -> HTTPException:
+    """Handle generic server errors."""
+    return HTTPException(
+        status_code=500,
+        detail={
+            "error": error,
+            "details": f"{exception!s}",
+            "raw": str(response_text) if response_text else "No response",
+        },
+    )
+
+
 @api_router.get("/health", response_model=HealthResponse)
 async def health_check() -> HealthResponse:
     """Check the health of the server."""
@@ -44,27 +56,14 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
         response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
         parsed = json.loads(response_text)
 
-        if missing_keys := {"commands", "explanation"} - parsed.keys():
+        if missing_keys := set(CommandGenerationResponse.model_fields) - parsed.keys():
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return CommandGenerationResponse(commands=[], explanation=msg)
 
-        parsed = sanitize_dictionary(parsed)
-        return CommandGenerationResponse(**parsed)
+        return CommandGenerationResponse(**sanitize_dictionary(parsed))
     except json.JSONDecodeError as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "Invalid JSON response from LLM",
-                "details": f"JSON parsing failed: {e!s}",
-                "raw": str(response_text) if response_text else "No response",
-            },
-        ) from e
+        msg = "Invalid JSON response from LLM"
+        raise get_server_error(msg, e, response_text) from e
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "error": "Failed to generate or parse LLM response",
-                "details": f"{e!s}",
-                "raw": str(response_text) if response_text else "No response",
-            },
-        ) from e
+        msg = "Failed to generate or parse LLM response"
+        raise get_server_error(msg, e, response_text) from e
