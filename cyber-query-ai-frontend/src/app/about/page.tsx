@@ -25,7 +25,7 @@ export default function About() {
             <p>
               CyberQueryAI is an advanced AI-powered platform designed to assist
               cybersecurity professionals, researchers, and ethical hackers in
-              their security assessment activities. Our tool leverages
+              their security assessment activities. This tool leverages
               state-of-the-art language models to generate commands, scripts,
               and explanations for various cybersecurity tasks.
             </p>
@@ -45,9 +45,8 @@ export default function About() {
           </h2>
           <div className="text-[var(--text-secondary)] space-y-4">
             <p>
-              Our platform uses advanced AI models trained on cybersecurity
-              knowledge to understand your requests and generate appropriate
-              responses:
+              This tool uses advanced AI models to understand your requests and
+              generate appropriate responses:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>
@@ -144,43 +143,19 @@ export default function About() {
                 Unauthorized access to computer systems is illegal and
                 unethical.
               </li>
-              <li>
-                The developers of CyberQueryAI are not responsible for misuse of
-                this tool.
-              </li>
+              <li>I am not responsible for misuse of this tool.</li>
               <li>
                 Always follow responsible disclosure practices when discovering
                 vulnerabilities.
+              </li>
+              <li>
+                This tool is as smart as its training data. Always stay updated
+                with the latest security practices.
               </li>
             </ul>
             <p>
               By using this tool, you agree to use it responsibly and in
               compliance with all applicable laws and regulations.
-            </p>
-          </div>
-        </div>
-
-        {/* Contact Section */}
-        <div className="terminal-border rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-4 flex items-center">
-            📧 Contact & Support
-          </h2>
-          <div className="text-[var(--text-secondary)] space-y-4">
-            <p>
-              CyberQueryAI is an open-source project. If you encounter issues,
-              have suggestions, or want to contribute:
-            </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>Report bugs or request features on our GitHub repository</li>
-              <li>
-                Join our community discussions for tips and best practices
-              </li>
-              <li>Contribute to the project by submitting pull requests</li>
-            </ul>
-            <p className="text-sm text-[var(--text-muted)]">
-              Remember: This tool is as smart as its training data. Always
-              double-check outputs and stay updated with the latest security
-              practices.
             </p>
           </div>
         </div>
