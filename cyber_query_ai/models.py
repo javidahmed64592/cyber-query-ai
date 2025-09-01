@@ -51,7 +51,7 @@ class Exploit(BaseModel):
     title: str
     link: str
     severity: str
-    explanation: str
+    description: str
 
 
 class ExploitSearchResponse(BaseModel):

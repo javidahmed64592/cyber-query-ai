@@ -95,9 +95,9 @@ class TestExploit:
         title = "Sample Exploit"
         link = "http://example.com"
         severity = "high"
-        explanation = "A description"
-        exploit = Exploit(title=title, link=link, severity=severity, explanation=explanation)
-        expected = {"title": title, "link": link, "severity": severity, "explanation": explanation}
+        description = "A description"
+        exploit = Exploit(title=title, link=link, severity=severity, description=description)
+        expected = {"title": title, "link": link, "severity": severity, "description": description}
         assert exploit.model_dump() == expected
 
 
@@ -107,8 +107,8 @@ class TestExploitSearchResponse:
     def test_model_dump(self) -> None:
         """Test the model_dump method."""
         exploits = [
-            Exploit(title="Exploit1", link="link1", severity="low", explanation="desc1"),
-            Exploit(title="Exploit2", link="link2", severity="medium", explanation="desc2"),
+            Exploit(title="Exploit1", link="link1", severity="low", description="desc1"),
+            Exploit(title="Exploit2", link="link2", severity="medium", description="desc2"),
         ]
         explanation = "web"
         response = ExploitSearchResponse(exploits=exploits, explanation=explanation)
