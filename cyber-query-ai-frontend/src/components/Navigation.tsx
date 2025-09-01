@@ -29,6 +29,12 @@ const Navigation = () => {
       disabled: true,
     },
     {
+      name: "Script Explain",
+      href: "/script-explanation",
+      active: pathname === "/script-explanation/",
+      disabled: true,
+    },
+    {
       name: "Exploit Search",
       href: "/exploit-search",
       active: pathname === "/exploit-search/",

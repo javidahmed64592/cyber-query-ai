@@ -52,15 +52,16 @@ describe("Navigation", () => {
     render(<Navigation />);
     expect(screen.getByText("Command Gen")).toBeInTheDocument();
     expect(screen.getByText("Script Gen")).toBeInTheDocument();
-    expect(screen.getByText("Exploit Search")).toBeInTheDocument();
     expect(screen.getByText("Command Explain")).toBeInTheDocument();
+    expect(screen.getByText("Script Explain")).toBeInTheDocument();
+    expect(screen.getByText("Exploit Search")).toBeInTheDocument();
     expect(screen.getByText("About")).toBeInTheDocument();
   });
 
   it('shows "(Soon)" for disabled navigation items', () => {
     render(<Navigation />);
     const soonLabels = screen.getAllByText("(Soon)");
-    expect(soonLabels).toHaveLength(4);
+    expect(soonLabels).toHaveLength(5);
   });
 
   it("renders navigation links with correct hrefs", () => {
@@ -74,11 +75,14 @@ describe("Navigation", () => {
       "/script-generation"
     );
     expect(
-      screen.getByRole("link", { name: /Exploit Search/ })
-    ).toHaveAttribute("href", "/exploit-search");
-    expect(
       screen.getByRole("link", { name: /Command Explain/ })
     ).toHaveAttribute("href", "/command-explanation");
+    expect(
+      screen.getByRole("link", { name: /Script Explain/ })
+    ).toHaveAttribute("href", "/script-explanation");
+    expect(
+      screen.getByRole("link", { name: /Exploit Search/ })
+    ).toHaveAttribute("href", "/exploit-search");
     expect(screen.getByRole("link", { name: /About/ })).toHaveAttribute(
       "href",
       "/about"
