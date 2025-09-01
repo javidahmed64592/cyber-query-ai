@@ -65,9 +65,9 @@ class TestGetServerError:
         response_text = "Something went wrong"
         server_error = get_server_error(error, exception, response_text)
         assert server_error.status_code == HTTP_INTERNAL_SERVER_ERROR
-        assert server_error.detail["error"] == error
-        assert server_error.detail["details"] == str(exception)
-        assert server_error.detail["raw"] == response_text
+        assert server_error.detail["error"] == error  # type: ignore[index]
+        assert server_error.detail["details"] == str(exception)  # type: ignore[index]
+        assert server_error.detail["raw"] == response_text  # type: ignore[index]
 
 
 class TestHealthCheck:
@@ -473,7 +473,7 @@ class TestSearchExploits:
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
         """Test exploit search with missing required keys in LLM response via endpoint."""
-        mock_response = {"exploits": []}
+        mock_response: dict[str, list] = {"exploits": []}
         mock_run_in_threadpool.return_value = json.dumps(mock_response)
         mock_clean_json_response.return_value = json.dumps(mock_response)
 

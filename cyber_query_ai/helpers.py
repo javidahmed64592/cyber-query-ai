@@ -101,7 +101,7 @@ def sanitize_text(prompt: str) -> str:
 
 def sanitize_dictionary(response_dict: dict) -> dict:
     """Sanitize the response dictionary."""
-    sanitized = {}
+    sanitized: dict = {}
     for key, value in response_dict.items():
         if isinstance(value, str):
             sanitized[key] = sanitize_text(value)
