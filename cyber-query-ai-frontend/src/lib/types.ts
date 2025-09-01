@@ -59,10 +59,3 @@ export interface ExplanationBoxProps {
   explanation: string;
   isLoading: boolean;
 }
-
-export interface PromptInputProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-  isLoading: boolean;
-}
