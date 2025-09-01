@@ -137,6 +137,24 @@ class TestCleanJsonResponse:
                 '{"commands": ["ls"], "explanation": "test"}',
                 "leaves valid JSON unchanged except for whitespace",
             ),
+            # Test simple single quotes to double quotes conversion
+            (
+                "{'script': 'print(hello)', 'explanation': 'prints hello'}",
+                '{"script": "print(hello)", "explanation": "prints hello"}',
+                "converts simple single quotes to double quotes",
+            ),
+            # Test mixed single and double quotes
+            (
+                "{'key1': 'value1', \"key2\": \"value2\"}",
+                '{"key1": "value1", "key2": "value2"}',
+                "handles mixed single and double quotes",
+            ),
+            # Test single quotes in arrays
+            (
+                "{'commands': ['cmd1', 'cmd2'], 'explanation': 'test'}",
+                '{"commands": ["cmd1", "cmd2"], "explanation": "test"}',
+                "converts single quotes in arrays",
+            ),
         ],
     )
     def test_clean_json_response(self, input_json: str, expected: str, test_description: str) -> None:

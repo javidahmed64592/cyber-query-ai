@@ -43,7 +43,15 @@ class Chatbot:
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
             "Task: `{prompt}`\n\n"
-            "Respond in JSON format: {{'commands': [...], 'explanation': '...'}}"
+            "CRITICAL JSON FORMATTING RULES:\n"
+            "- Respond in valid JSON format only\n"
+            "- Use double quotes (not single quotes) for all strings\n"
+            "- The explanation must be ONE continuous string, not multiple separate strings\n"
+            "- Use \\n for line breaks within the explanation string\n"
+            "- Do NOT create multiple separate quoted strings\n"
+            '- Escape any quotes within strings using backslash (\\")\n\n'
+            'Example format: {{"commands": ["command1", "command2"], "explanation": "Description here."}}\n\n'
+            'Respond in JSON format: {{"commands": [...], "explanation": "..."}}'
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -54,7 +62,18 @@ class Chatbot:
             f"{self.profile}"
             "Write a script in {language} that performs the following task:\n\n"
             "Task: `{prompt}`\n\n"
-            "Respond in JSON format: {{'script': '...', 'explanation': '...'}}"
+            "CRITICAL JSON FORMATTING RULES:\n"
+            "- Respond in valid JSON format only\n"
+            "- Use double quotes (not single quotes) for all strings\n"
+            "- Do NOT include markdown code blocks (```python, ```) in the script content\n"
+            "- The script should be plain text code without formatting\n"
+            "- The explanation must be ONE continuous string, not multiple separate strings\n"
+            "- Use \\n for line breaks within strings\n"
+            "- Do NOT create multiple separate quoted strings\n"
+            '- Escape any quotes within strings using backslash (\\")\n\n'
+            'Example format: {{"script": "import os\\nprint(\\"Hello World\\")", '
+            '"explanation": "This script imports os and prints Hello World."}}\n\n'
+            'Respond in JSON format: {{"script": "...", "explanation": "..."}}'
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -65,7 +84,15 @@ class Chatbot:
             f"{self.profile}"
             "Explain the following CLI command step-by-step:\n\n"
             "Command: `{prompt}`\n\n"
-            "Respond in JSON format: {{'explanation': '...'}}"
+            "CRITICAL JSON FORMATTING RULES:\n"
+            "- Respond in valid JSON format only\n"
+            "- Use double quotes (not single quotes) for all strings\n"
+            "- The explanation must be ONE continuous string, not multiple separate strings\n"
+            "- Use \\n for line breaks within the explanation string\n"
+            "- Do NOT create multiple separate quoted strings\n"
+            '- Escape any quotes within the explanation using backslash (\\")\n\n'
+            'Example format: {{"explanation": "This command does X.\\nIt works by Y.\\nImportant note: Z."}}\n\n'
+            'Respond in JSON format: {{"explanation": "..."}}'
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -77,7 +104,16 @@ class Chatbot:
             "Explain the following {language} script step-by-step. "
             "Describe what each line does and highlight any risks or important behaviors.\n\n"
             "Script:\n```\n{prompt}\n```\n\n"
-            "Respond in JSON format: {{'explanation': '...'}}"
+            "CRITICAL JSON FORMATTING RULES:\n"
+            "- Respond in valid JSON format only\n"
+            "- Use double quotes (not single quotes) for all strings\n"
+            "- The explanation must be ONE continuous string, not multiple separate strings\n"
+            "- Use \\n for line breaks within the explanation string\n"
+            "- Do NOT create multiple separate quoted strings\n"
+            '- Escape any quotes within the explanation using backslash (\\")\n\n'
+            'Example format: {{"explanation": "Step 1: This does X.\\n'
+            'Step 2: This does Y.\\nStep 3: This does Z."}}\n\n'
+            'Respond in JSON format: {{"explanation": "..."}}'
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -88,8 +124,18 @@ class Chatbot:
             f"{self.profile}"
             "Based on the following target description, suggest known exploits.\n\n"
             "Target: `{prompt}`\n\n"
-            "Respond in JSON format: {{'exploits': [{{'title': '...', 'link': '...', "
-            "'severity': '...', 'description': '...'}}], 'explanation': '...'}}"
+            "CRITICAL JSON FORMATTING RULES:\n"
+            "- Respond in valid JSON format only\n"
+            "- Use double quotes (not single quotes) for all strings\n"
+            "- The explanation must be ONE continuous string, not multiple separate strings\n"
+            "- Use \\n for line breaks within the explanation string\n"
+            "- Do NOT create multiple separate quoted strings\n"
+            '- Escape any quotes within strings using backslash (\\")\n\n'
+            'Example format: {{"exploits": [{{"title": "CVE-2021-1234", "link": "https://...", '
+            '"severity": "High", "description": "Buffer overflow vulnerability"}}], '
+            '"explanation": "Found 1 exploit affecting this target."}}\n\n'
+            'Respond in JSON format: {{"exploits": [{{"title": "...", "link": "...", '
+            '"severity": "...", "description": "..."}}], "explanation": "..."}}'
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
