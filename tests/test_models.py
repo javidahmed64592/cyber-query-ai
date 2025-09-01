@@ -94,10 +94,10 @@ class TestExploit:
         """Test the model_dump method."""
         title = "Sample Exploit"
         link = "http://example.com"
-        description = "A description"
         severity = "high"
-        exploit = Exploit(title=title, link=link, description=description, severity=severity)
-        expected = {"title": title, "link": link, "description": description, "severity": severity}
+        explanation = "A description"
+        exploit = Exploit(title=title, link=link, severity=severity, explanation=explanation)
+        expected = {"title": title, "link": link, "severity": severity, "explanation": explanation}
         assert exploit.model_dump() == expected
 
 
@@ -106,11 +106,11 @@ class TestExploitSearchResponse:
 
     def test_model_dump(self) -> None:
         """Test the model_dump method."""
-        attack_vector = "web"
         exploits = [
-            Exploit(title="Exploit1", link="link1", description="desc1", severity="low"),
-            Exploit(title="Exploit2", link="link2", description="desc2", severity="medium"),
+            Exploit(title="Exploit1", link="link1", severity="low", explanation="desc1"),
+            Exploit(title="Exploit2", link="link2", severity="medium", explanation="desc2"),
         ]
-        response = ExploitSearchResponse(attack_vector=attack_vector, exploits=exploits)
-        expected = {"attack_vector": attack_vector, "exploits": [e.model_dump() for e in exploits]}
+        explanation = "web"
+        response = ExploitSearchResponse(exploits=exploits, explanation=explanation)
+        expected = {"exploits": [e.model_dump() for e in exploits], "explanation": explanation}
         assert response.model_dump() == expected

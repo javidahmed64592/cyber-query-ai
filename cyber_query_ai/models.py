@@ -50,12 +50,12 @@ class Exploit(BaseModel):
 
     title: str
     link: str
-    description: str
     severity: str
+    explanation: str
 
 
 class ExploitSearchResponse(BaseModel):
     """Response model for exploit search."""
 
-    attack_vector: str
     exploits: list[Exploit]
+    explanation: str

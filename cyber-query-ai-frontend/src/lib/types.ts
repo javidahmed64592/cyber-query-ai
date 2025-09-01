@@ -33,13 +33,13 @@ export interface ExplanationResponse {
 export interface Exploit {
   title: string;
   link: string;
-  description: string;
   severity: string;
+  explanation: string;
 }
 
 export interface ExploitSearchResponse {
-  attack_vector: string;
   exploits: Exploit[];
+  explanation: string;
 }
 
 // UI State types
