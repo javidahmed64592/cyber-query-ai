@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from slowapi import Limiter
 
-from cyber_query_ai.helpers import clean_json_response, sanitize_text
+from cyber_query_ai.helpers import clean_json_response, sanitize_dictionary, sanitize_text
 from cyber_query_ai.models import CommandGenerationResponse, HealthResponse, PromptRequest
 
 LIMITER_INTERVAL = "5/minute"
@@ -48,8 +48,7 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return CommandGenerationResponse(commands=[], explanation=msg)
 
-        parsed["commands"] = [sanitize_text(cmd) for cmd in parsed["commands"]]
-        parsed["explanation"] = sanitize_text(parsed["explanation"])
+        parsed = sanitize_dictionary(parsed)
         return CommandGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         raise HTTPException(

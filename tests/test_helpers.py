@@ -7,7 +7,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.responses import FileResponse
 
-from cyber_query_ai.helpers import clean_json_response, get_static_dir, get_static_files, sanitize_text
+from cyber_query_ai.helpers import (
+    clean_json_response,
+    get_static_dir,
+    get_static_files,
+    sanitize_dictionary,
+    sanitize_text,
+)
 
 
 class TestStaticFiles:
@@ -205,3 +211,18 @@ class TestSanitizeText:
         """Test that sanitize_text function handles various input scenarios."""
         result = sanitize_text(input_text)
         assert result == expected, f"Failed to {test_description}"
+
+    def test_sanitize_dictionary(self) -> None:
+        """Test that sanitize_dictionary function handles various input scenarios."""
+        input_dict = {
+            "key1": "  value1  ",
+            "key2": ["  value2  ", "  value3  "],
+            "key3": 123,
+        }
+        expected = {
+            "key1": "value1",
+            "key2": ["value2", "value3"],
+            "key3": 123,
+        }
+        result = sanitize_dictionary(input_dict)
+        assert result == expected, "Failed to sanitize dictionary"
