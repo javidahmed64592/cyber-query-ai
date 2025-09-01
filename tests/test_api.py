@@ -46,6 +46,10 @@ def test_app() -> TestClient:
     # Mock the chatbot
     mock_chatbot = MagicMock()
     mock_chatbot.prompt_command_generation.return_value = "formatted prompt"
+    mock_chatbot.prompt_script_generation.return_value = "formatted prompt"
+    mock_chatbot.prompt_command_explanation.return_value = "formatted prompt"
+    mock_chatbot.prompt_script_explanation.return_value = "formatted prompt"
+    mock_chatbot.prompt_exploit_search.return_value = "formatted prompt"
     mock_chatbot.llm = MagicMock()
     app.state.chatbot = mock_chatbot
     return TestClient(app)
@@ -161,6 +165,26 @@ class TestGenerateCommand:
         assert "Failed to generate or parse LLM response" in data["detail"]["error"]
         assert "LLM connection failed" in data["detail"]["details"]
 
+    def test_generate_command_generic_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command generation when a generic exception occurs during processing."""
+        mock_response = {
+            "commands": ["nmap -sS target"],
+            "explanation": "SYN scan",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        # Mock sanitize_dictionary to raise an exception
+        with patch("cyber_query_ai.api.sanitize_dictionary", side_effect=Exception("Sanitization failed")):
+            response = test_app.post("/api/generate-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "Sanitization failed" in data["detail"]["details"]
+
     def test_generate_command_empty_response(
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
@@ -179,6 +203,326 @@ class TestGenerateCommand:
         response = test_app.post(
             "/api/generate-command",
             json={},
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+
+class TestGenerateScript:
+    """Integration tests for the generate_script endpoint."""
+
+    def test_generate_script_success(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test successful script generation via endpoint."""
+        mock_response = {
+            "script": "import socket\ns = socket.socket()\ns.connect(('target', 80))",
+            "explanation": "Create a socket connection to test port 80 connectivity",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/generate-script", json={"prompt": "connect to port 80", "language": "python"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["script"] == mock_response["script"]
+        assert data["explanation"] == mock_response["explanation"]
+
+    def test_generate_script_missing_keys(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script generation with missing required keys in LLM response via endpoint."""
+        mock_response = {"script": "print('hello')"}
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/generate-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["script"] == ""
+        assert "Missing required keys in LLM response" in data["explanation"]
+        assert "explanation" in data["explanation"]
+
+    def test_generate_script_invalid_json(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script generation with invalid JSON response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = "invalid json response"
+        mock_clean_json_response.return_value = "invalid json response"
+
+        response = test_app.post("/api/generate-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_generate_script_generic_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script generation when a generic exception occurs during processing."""
+        mock_response = {
+            "script": "print('hello')",
+            "explanation": "Simple print script",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        # Mock sanitize_dictionary to raise an exception
+        with patch("cyber_query_ai.api.sanitize_dictionary", side_effect=Exception("Sanitization failed")):
+            response = test_app.post("/api/generate-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "Sanitization failed" in data["detail"]["details"]
+
+    def test_generate_script_endpoint_invalid_request(self, test_app: TestClient) -> None:
+        """Test the generate_script endpoint with invalid request data."""
+        response = test_app.post(
+            "/api/generate-script",
+            json={"prompt": "test script"},  # Missing language
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+
+class TestExplainCommand:
+    """Integration tests for the explain_command endpoint."""
+
+    def test_explain_command_success(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test successful command explanation via endpoint."""
+        mock_response = {
+            "explanation": "This nmap command performs a SYN scan on all TCP ports to identify open services",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/explain-command", json={"prompt": "nmap -sS -p- target"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["explanation"] == mock_response["explanation"]
+
+    def test_explain_command_missing_keys(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command explanation with missing required keys in LLM response via endpoint."""
+        mock_response = {"other_key": "value"}
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/explain-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert "Missing required keys in LLM response" in data["explanation"]
+        assert "explanation" in data["explanation"]
+
+    def test_explain_command_invalid_json(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command explanation with invalid JSON response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = "invalid json response"
+        mock_clean_json_response.return_value = "invalid json response"
+
+        response = test_app.post("/api/explain-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_explain_command_generic_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test command explanation when a generic exception occurs during processing."""
+        mock_response = {
+            "explanation": "This is a test command",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        # Mock sanitize_dictionary to raise an exception
+        with patch("cyber_query_ai.api.sanitize_dictionary", side_effect=Exception("Sanitization failed")):
+            response = test_app.post("/api/explain-command", json={"prompt": "test command"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "Sanitization failed" in data["detail"]["details"]
+
+    def test_explain_command_endpoint_invalid_request(self, test_app: TestClient) -> None:
+        """Test the explain_command endpoint with invalid request data."""
+        response = test_app.post(
+            "/api/explain-command",
+            json={},  # Missing prompt
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+
+class TestExplainScript:
+    """Integration tests for the explain_script endpoint."""
+
+    def test_explain_script_success(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test successful script explanation via endpoint."""
+        mock_response = {
+            "explanation": "This Python script creates a socket and attempts to connect to port 80 on the target host",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/explain-script", json={"prompt": "socket code", "language": "python"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["explanation"] == mock_response["explanation"]
+
+    def test_explain_script_missing_keys(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script explanation with missing required keys in LLM response via endpoint."""
+        mock_response = {"other_key": "value"}
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/explain-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert "Missing required keys in LLM response" in data["explanation"]
+        assert "explanation" in data["explanation"]
+
+    def test_explain_script_invalid_json(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script explanation with invalid JSON response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = "invalid json response"
+        mock_clean_json_response.return_value = "invalid json response"
+
+        response = test_app.post("/api/explain-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_explain_script_generic_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test script explanation when a generic exception occurs during processing."""
+        mock_response = {
+            "explanation": "This is a test script",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        # Mock sanitize_dictionary to raise an exception
+        with patch("cyber_query_ai.api.sanitize_dictionary", side_effect=Exception("Sanitization failed")):
+            response = test_app.post("/api/explain-script", json={"prompt": "test script", "language": "python"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "Sanitization failed" in data["detail"]["details"]
+
+    def test_explain_script_endpoint_invalid_request(self, test_app: TestClient) -> None:
+        """Test the explain_script endpoint with invalid request data."""
+        response = test_app.post(
+            "/api/explain-script",
+            json={"prompt": "test script"},  # Missing language
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+
+class TestSearchExploits:
+    """Integration tests for the search_exploits endpoint."""
+
+    def test_search_exploits_success(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test successful exploit search via endpoint."""
+        mock_response = {
+            "exploits": [
+                {
+                    "title": "CVE-2017-5638",
+                    "link": "https://example.com/cve-2017-5638",
+                    "severity": "high",
+                    "description": "Apache Struts remote code execution vulnerability",
+                }
+            ],
+            "explanation": "Found known vulnerability in Apache Struts 2.3.15.1",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "Apache Struts 2.3.15.1"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert len(data["exploits"]) == 1
+        assert data["exploits"][0]["title"] == "CVE-2017-5638"
+        assert data["explanation"] == mock_response["explanation"]
+
+    def test_search_exploits_missing_keys(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search with missing required keys in LLM response via endpoint."""
+        mock_response = {"exploits": []}
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "test target"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["exploits"] == []
+        assert "Missing required keys in LLM response" in data["explanation"]
+        assert "explanation" in data["explanation"]
+
+    def test_search_exploits_invalid_json(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search with invalid JSON response from LLM via endpoint."""
+        mock_run_in_threadpool.return_value = "invalid json response"
+        mock_clean_json_response.return_value = "invalid json response"
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "test target"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_search_exploits_generic_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search when a generic exception occurs during processing."""
+        mock_response = {
+            "exploits": [],
+            "explanation": "No exploits found",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        # Mock sanitize_dictionary to raise an exception
+        with patch("cyber_query_ai.api.sanitize_dictionary", side_effect=Exception("Sanitization failed")):
+            response = test_app.post("/api/search-exploits", json={"prompt": "test target"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "Sanitization failed" in data["detail"]["details"]
+
+    def test_search_exploits_endpoint_invalid_request(self, test_app: TestClient) -> None:
+        """Test the search_exploits endpoint with invalid request data."""
+        response = test_app.post(
+            "/api/search-exploits",
+            json={},  # Missing prompt
         )
 
         assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
