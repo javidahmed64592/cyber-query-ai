@@ -212,17 +212,15 @@ class TestSanitizeText:
         result = sanitize_text(input_text)
         assert result == expected, f"Failed to {test_description}"
 
-    def test_sanitize_dictionary(self) -> None:
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("  value1  ", "value1"),
+            (["  value2  ", "  value3  "], ["value2", "value3"]),
+            (123, 123),
+        ],
+    )
+    def test_sanitize_dictionary(self, value: str | int | list, expected: str | int | list) -> None:
         """Test that sanitize_dictionary function handles various input scenarios."""
-        input_dict = {
-            "key1": "  value1  ",
-            "key2": ["  value2  ", "  value3  "],
-            "key3": 123,
-        }
-        expected = {
-            "key1": "value1",
-            "key2": ["value2", "value3"],
-            "key3": 123,
-        }
-        result = sanitize_dictionary(input_dict)
-        assert result == expected, "Failed to sanitize dictionary"
+        result = sanitize_dictionary({"key": value})
+        assert result == {"key": expected}, "Failed to sanitize dictionary"
