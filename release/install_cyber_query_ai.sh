@@ -14,7 +14,7 @@ SERVICE_FILE="cyber_query_ai.service"
 CREATE_SERVICE_FILE="start_service.sh"
 STOP_SERVICE_FILE="stop_service.sh"
 UNINSTALL_FILE="uninstall_cyber_query_ai.sh"
-README_FILE="README.txt"
+README_FILE="readme.txt"
 
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"

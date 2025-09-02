@@ -7,7 +7,7 @@ set VENV_NAME=.venv
 set EXE_FILENAME=cyber-query-ai.bat
 set CONFIG_FILENAME=config.json
 set LOG_FILENAME=cyber_query_ai.log
-set README_FILENAME=README.txt
+set README_FILENAME=readme.txt
 
 set SCRIPT_DIR=%~dp0
 set FULL_VENV_PATH=%SCRIPT_DIR%%VENV_NAME%
