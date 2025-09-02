@@ -23,7 +23,7 @@ LICENSE_FILE="LICENSE"
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
-SITE_PACKAGES_DIR="${FULL_VENV_PATH}/lib/python*/site-packages"
+SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
 
 EXE_PATH="${WD}/${EXE_NAME}"
 LOG_PATH="${WD}/${LOG_FILE}"
