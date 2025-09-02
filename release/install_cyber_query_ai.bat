@@ -17,14 +17,6 @@ set LICENSE_FILENAME=LICENSE
 set SCRIPT_DIR=%~dp0
 set FULL_VENV_PATH=%SCRIPT_DIR%%VENV_NAME%
 set BIN_DIR=%FULL_VENV_PATH%\Scripts
-set SITE_PACKAGES_DIR=%FULL_VENV_PATH%\Lib\site-packages
-
-REM === Prepare root directory ===
-echo Preparing root directory...
-move "%SITE_PACKAGES_DIR%%CONFIG_FILENAME%" "%SCRIPT_DIR%%CONFIG_FILENAME%"
-move "%SITE_PACKAGES_DIR%%APP_README_FILENAME%" "%SCRIPT_DIR%%APP_README_FILENAME%"
-move "%SITE_PACKAGES_DIR%%SECURITY_FILENAME%" "%SCRIPT_DIR%%SECURITY_FILENAME%"
-move "%SITE_PACKAGES_DIR%%LICENSE_FILENAME%" "%SCRIPT_DIR%%LICENSE_FILENAME%"
 
 REM === Create virtual environment ===
 echo Creating virtual environment...
@@ -36,6 +28,14 @@ for %%f in (%PACKAGE_NAME%-*-py3-none-any.whl) do (
     uv pip install "%%f"
     del "%%f"
 )
+
+REM === Prepare root directory ===
+echo Preparing root directory...
+set SITE_PACKAGES_DIR=%FULL_VENV_PATH%\Lib\site-packages
+move "%SITE_PACKAGES_DIR%\%CONFIG_FILENAME%" "%SCRIPT_DIR%%CONFIG_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%APP_README_FILENAME%" "%SCRIPT_DIR%%APP_README_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%SECURITY_FILENAME%" "%SCRIPT_DIR%%SECURITY_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%LICENSE_FILENAME%" "%SCRIPT_DIR%%LICENSE_FILENAME%"
 
 REM === Create executable launcher ===
 echo Creating launcher...
