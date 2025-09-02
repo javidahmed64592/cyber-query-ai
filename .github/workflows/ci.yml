@@ -25,6 +25,9 @@ jobs:
       - name: Validate pyproject.toml
         run: |
           uv run validate-pyproject pyproject.toml
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
   ruff:
     runs-on: ubuntu-latest
     steps:
