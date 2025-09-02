@@ -23,6 +23,6 @@ When using CyberQueryAI:
 - Follow responsible disclosure practices
 - Respect all applicable laws and regulations
 
-## 📝 Legal Disclaimer
+## Legal Disclaimer
 
 This tool is provided for educational and authorized testing purposes only. Users are solely responsible for compliance with all applicable laws and regulations. The project maintainers disclaim all liability for misuse of this software.
