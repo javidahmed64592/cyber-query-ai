@@ -8,30 +8,35 @@ PACKAGE_NAME="cyber_query_ai"
 WD=$(pwd)
 VENV_NAME=".venv"
 EXE_NAME="cyber-query-ai"
-CONFIG_FILE="config.json"
 LOG_FILE="cyber_query_ai.log"
 SERVICE_FILE="cyber_query_ai.service"
 CREATE_SERVICE_FILE="start_service.sh"
 STOP_SERVICE_FILE="stop_service.sh"
 UNINSTALL_FILE="uninstall_cyber_query_ai.sh"
-README_FILE="README.txt"
+
+INSTALLER_README_FILE="readme.txt"
+CONFIG_FILE="config.json"
+APP_README_FILE="README.md"
+SECURITY_FILE="SECURITY.md"
+LICENSE_FILE="LICENSE"
 
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
 EXE_PATH="${WD}/${EXE_NAME}"
-CONFIG_PATH="${WD}/${CONFIG_FILE}"
 LOG_PATH="${WD}/${LOG_FILE}"
 SERVICE_PATH="${SERVICE_DIR}/${SERVICE_FILE}"
 CREATE_SERVICE_PATH="${SERVICE_DIR}/${CREATE_SERVICE_FILE}"
 STOP_SERVICE_PATH="${SERVICE_DIR}/${STOP_SERVICE_FILE}"
 UNINSTALL_PATH="${WD}/${UNINSTALL_FILE}"
-README_PATH="${WD}/${README_FILE}"
 
-mkdir -p "${SERVICE_DIR}"
+INSTALLER_README_PATH="${WD}/${INSTALLER_README_FILE}"
+CONFIG_PATH="${WD}/${CONFIG_FILE}"
+APP_README_PATH="${WD}/${APP_README_FILE}"
+SECURITY_PATH="${WD}/${SECURITY_FILE}"
+LICENSE_PATH="${WD}/${LICENSE_FILE}"
 
-echo ${SEPARATOR}
 echo "Creating virtual environment..."
 uv venv ${VENV_NAME}
 
@@ -39,6 +44,16 @@ echo "Installing from wheel..."
 WHEEL_FILE=$(find "${WD}" -name "${PACKAGE_NAME}-*-py3-none-any.whl")
 uv pip install "${WHEEL_FILE}"
 rm "${WHEEL_FILE}"
+
+echo ${SEPARATOR}
+echo "Preparing root directory..."
+mkdir -p "${SERVICE_DIR}"
+
+SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
+mv "${SITE_PACKAGES_DIR}/${CONFIG_FILE}" "${CONFIG_PATH}"
+mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
+mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
+mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
 
 echo "Creating API executable..."
 cat > "${EXE_PATH}" << EOF
@@ -115,25 +130,20 @@ cat > "${UNINSTALL_PATH}" << EOF
 #!/bin/bash
 set -eu
 cd "${WD}"
+rm -rf ${VENV_NAME}
 rm -rf *
 EOF
 chmod +x "${UNINSTALL_PATH}"
 
-cat > "${README_PATH}" << EOF
-CyberQueryAI has been installed successfully.
-Run the application using: './${EXE_NAME}'
-Configure the application by editing: ${CONFIG_PATH}
-
-To create a start-up service for the CyberQueryAI, run: './service/${CREATE_SERVICE_FILE}'
-To stop the service, run: './service/${STOP_SERVICE_FILE}'
-
-To view the logs: 'cat ${LOG_FILE}'
-
-To uninstall, run: './${UNINSTALL_FILE}'
-EOF
-
 echo "${SEPARATOR}"
-cat "${README_PATH}"
+echo "CyberQueryAI has been installed successfully."
+echo "Run the application using: './${EXE_NAME}'"
+echo "Configure the application by editing: ${CONFIG_PATH}"
+echo "To create a start-up service for the CyberQueryAI, run: './service/${CREATE_SERVICE_FILE}'"
+echo "To stop the service, run: './service/${STOP_SERVICE_FILE}'"
+echo "To view the logs: 'cat ${LOG_FILE}'"
+echo "To uninstall, run: './${UNINSTALL_FILE}'"
 echo "${SEPARATOR}"
 
 rm -f install*
+rm -f "${INSTALLER_README_PATH}"

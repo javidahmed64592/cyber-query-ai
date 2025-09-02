@@ -85,7 +85,7 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
   - Set up Python from `.python-version`
   - Download backend wheel artifact
   - Download frontend build artifact
-  - Prepare release directory (move wheel, config, static files, make scripts executable)
+  - Prepare release directory (move wheel and static files, make scripts executable)
   - Create release tarball
   - Upload release tarball artifact
 

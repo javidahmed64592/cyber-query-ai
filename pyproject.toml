@@ -33,6 +33,7 @@ dev = [
     "pytest-asyncio",
     "pytest-cov",
     "tomli",
+    "validate-pyproject>=0.24.1",
 ]
 
 [project.urls]
@@ -40,6 +41,15 @@ repository = "https://github.com/javidahmed64592/cyber-query-ai"
 
 [project.scripts]
 cyber-query-ai = "cyber_query_ai.main:run"
+
+[tool.hatch.build]
+include = [
+  "config.json",
+  "README.md",
+  "SECURITY.md",
+  "LICENSE",
+  "cyber_query_ai/**",
+]
 
 [tool.pytest.ini_options]
 addopts = [

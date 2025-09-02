@@ -7,7 +7,12 @@ set VENV_NAME=.venv
 set EXE_FILENAME=cyber-query-ai.bat
 set CONFIG_FILENAME=config.json
 set LOG_FILENAME=cyber_query_ai.log
-set README_FILENAME=README.txt
+
+set INSTALLER_README_FILENAME=readme.txt
+set CONFIG_FILENAME=config.json
+set APP_README_FILENAME=README.md
+set SECURITY_FILENAME=SECURITY.md
+set LICENSE_FILENAME=LICENSE
 
 set SCRIPT_DIR=%~dp0
 set FULL_VENV_PATH=%SCRIPT_DIR%%VENV_NAME%
@@ -24,6 +29,14 @@ for %%f in (%PACKAGE_NAME%-*-py3-none-any.whl) do (
     del "%%f"
 )
 
+REM === Prepare root directory ===
+echo Preparing root directory...
+set SITE_PACKAGES_DIR=%FULL_VENV_PATH%\Lib\site-packages
+move "%SITE_PACKAGES_DIR%\%CONFIG_FILENAME%" "%SCRIPT_DIR%%CONFIG_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%APP_README_FILENAME%" "%SCRIPT_DIR%%APP_README_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%SECURITY_FILENAME%" "%SCRIPT_DIR%%SECURITY_FILENAME%"
+move "%SITE_PACKAGES_DIR%\%LICENSE_FILENAME%" "%SCRIPT_DIR%%LICENSE_FILENAME%"
+
 REM === Create executable launcher ===
 echo Creating launcher...
 echo @echo off > "%SCRIPT_DIR%%EXE_FILENAME%"
@@ -35,15 +48,13 @@ echo echo Stopping Ollama server... >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo taskkill /f /im ollama.exe >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
 
 REM === Create README ===
-echo CyberQueryAI has been installed successfully. > "%SCRIPT_DIR%%README_FILENAME%"
-echo Run the application using: "%EXE_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo Configure the application by editing: "%CONFIG_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo To view logs: type "%LOG_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo To uninstall, delete the folder: "%SCRIPT_DIR%" >> "%SCRIPT_DIR%%README_FILENAME%"
-
-REM === Display README ===
-type "%SCRIPT_DIR%%README_FILENAME%"
+echo CyberQueryAI has been installed successfully.
+echo Run the application using: "%EXE_FILENAME%"
+echo Configure the application by editing: "%CONFIG_FILENAME%"
+echo To view logs: type "%LOG_FILENAME%"
+echo To uninstall, delete the folder: "%SCRIPT_DIR%"
 
 REM === Self-delete installer ===
 echo Installation complete. Cleaning up installer...
 del /q "%~dp0install*"
+del /q "%SCRIPT_DIR%%INSTALLER_README_FILENAME%"
