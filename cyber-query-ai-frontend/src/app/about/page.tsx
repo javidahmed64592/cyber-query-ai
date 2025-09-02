@@ -120,10 +120,10 @@ export default function About() {
           </div>
         </div>
 
-        {/* Ethical Use Policy Section */}
+        {/* Security Policy Section */}
         <div className="terminal-border border-[var(--neon-red)] rounded-lg p-6 bg-red-950/20">
           <h2 className="text-2xl font-bold text-[var(--neon-red)] mb-4 flex items-center">
-            ⚖️ Ethical Use Policy
+            ⚖️ Security Policy
           </h2>
           <div className="text-[var(--text-secondary)] space-y-4">
             <p>

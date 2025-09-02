@@ -1,8 +1,7 @@
 # Security Policy
 
-## Ethical Use Policy
-
-CyberQueryAI is a tool designed to support ethical cybersecurity research, penetration testing in controlled environments, and educational exploration. It leverages AI to generate commands, scripts, and insights that help users learn and work more efficiently.
+CyberQueryAI is a tool designed to support ethical cybersecurity research, penetration testing in controlled environments, and educational exploration.
+It leverages AI to generate commands, scripts, and insights that help users learn and work more efficiently.
 
 **By using this tool, you agree to the following:**
 
@@ -25,4 +24,6 @@ When using CyberQueryAI:
 
 ## Legal Disclaimer
 
-This tool is provided for educational and authorized testing purposes only. Users are solely responsible for compliance with all applicable laws and regulations. The project maintainers disclaim all liability for misuse of this software.
+This tool is provided for educational and authorized testing purposes only.
+Users are solely responsible for compliance with all applicable laws and regulations.
+The project author disclaims all liability for misuse of this software.

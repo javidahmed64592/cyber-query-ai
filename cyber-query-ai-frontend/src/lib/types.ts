@@ -34,7 +34,7 @@ export interface Exploit {
   title: string;
   link: string;
   severity: string;
-  explanation: string;
+  description: string;
 }
 
 export interface ExploitSearchResponse {
