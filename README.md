@@ -12,32 +12,6 @@ An AI-powered cybersecurity assistant designed for ethical hacking, penetration 
 
 <!-- omit from toc -->
 ## Table of Contents
-- [uv](#uv)
-- [Installing Dependencies](#installing-dependencies)
-- [Testing, Linting, and Type Checking](#testing-linting-and-type-checking)
+- [Test](#test)
 
-## uv
-This repository is managed using the `uv` Python project manager: https://docs.astral.sh/uv/
-
-To install `uv`:
-
-```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh                                    # Linux/Mac
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" # Windows
-```
-
-## Installing Dependencies
-Install the required dependencies using `pip`:
-
-    uv sync
-
-To install with `dev` dependencies:
-
-    uv sync --extra dev
-
-## Testing, Linting, and Type Checking
-
-- **Run tests:** `uv run pytest`
-- **Lint code:** `uv run ruff check .`
-- **Format code:** `uv run ruff format .`
-- **Type check:** `uv run mypy .`
+## Test
