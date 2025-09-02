@@ -22,12 +22,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
-      - name: Validate pyproject.toml
-        run: |
-          uv run validate-pyproject pyproject.toml
       - name: Install dependencies
         run: |
           uv sync --extra dev
+      - name: Validate pyproject.toml
+        run: |
+          uv run validate-pyproject pyproject.toml
   ruff:
     runs-on: ubuntu-latest
     steps:
