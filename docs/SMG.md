@@ -22,6 +22,7 @@ This document outlines how to configure and setup a development environment to w
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=flat-square)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square)](https://github.com/astral-sh/ruff)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Langchain](https://img.shields.io/badge/Langchain-Latest-1C3C3C?style=flat-square&logo=langchain&logoColor=white)](https://python.langchain.com/)
 
 ### Directory Structure
 
