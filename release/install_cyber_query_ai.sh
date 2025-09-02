@@ -23,7 +23,6 @@ LICENSE_FILE="LICENSE"
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
-SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
 
 EXE_PATH="${WD}/${EXE_NAME}"
 LOG_PATH="${WD}/${LOG_FILE}"
@@ -38,14 +37,6 @@ APP_README_PATH="${WD}/${APP_README_FILE}"
 SECURITY_PATH="${WD}/${SECURITY_FILE}"
 LICENSE_PATH="${WD}/${LICENSE_FILE}"
 
-echo "Preparing root directory..."
-mkdir -p "${SERVICE_DIR}"
-mv "${SITE_PACKAGES_DIR}/${CONFIG_FILE}" "${CONFIG_PATH}"
-mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
-mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
-mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
-
-echo ${SEPARATOR}
 echo "Creating virtual environment..."
 uv venv ${VENV_NAME}
 
@@ -54,7 +45,19 @@ WHEEL_FILE=$(find "${WD}" -name "${PACKAGE_NAME}-*-py3-none-any.whl")
 uv pip install "${WHEEL_FILE}"
 rm "${WHEEL_FILE}"
 
-echo "${SEPARATOR}"
+echo "Preparing root directory..."
+mkdir -p "${SERVICE_DIR}"
+
+# Find the actual site-packages directory after installation
+SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
+
+# Move files from site-packages to root directory
+mv "${SITE_PACKAGES_DIR}/${CONFIG_FILE}" "${CONFIG_PATH}"
+mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
+mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
+mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
+
+echo ${SEPARATOR}
 echo "Creating API executable..."
 cat > "${EXE_PATH}" << EOF
 #!/bin/bash
