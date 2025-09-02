@@ -228,10 +228,6 @@ Additional resources:
 - **[Security Policy](SECURITY.md)**: Vulnerability reporting and security guidelines
 - **[Release Notes](release/readme.txt)**: Deployment and installation instructions
 
-## Contributing
-
-We welcome contributions from the cybersecurity community! CyberQueryAI thrives on collective knowledge and diverse perspectives.
-
 ## Security Policy & Ethics
 
 CyberQueryAI is designed exclusively for **ethical cybersecurity research**, **authorized penetration testing**, and **educational purposes**.
