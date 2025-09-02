@@ -225,7 +225,7 @@ describe("API Tests", () => {
           title: "CVE-2021-44228 Log4j RCE",
           link: "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
           severity: "critical",
-          explanation: "Remote code execution vulnerability in Log4j library.",
+          description: "Remote code execution vulnerability in Log4j library.",
         },
       ],
       explanation:
