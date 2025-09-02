@@ -1,0 +1,4 @@
+include config.json
+include README.md
+include SECURITY.md
+include LICENSE
