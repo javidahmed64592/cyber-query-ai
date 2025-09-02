@@ -42,22 +42,13 @@ repository = "https://github.com/javidahmed64592/cyber-query-ai"
 [project.scripts]
 cyber-query-ai = "cyber_query_ai.main:run"
 
-[tool.hatch.build.targets.wheel]
-packages = ["cyber_query_ai"]
-artifacts = [
-    "config.json",
-    "README.md",
-    "SECURITY.md",
-    "LICENSE",
-]
-
-[tool.hatch.build.targets.sdist]
+[tool.hatch.build]
 include = [
-    "/cyber_query_ai",
-    "/config.json",
-    "/README.md",
-    "/SECURITY.md",
-    "/LICENSE",
+  "config.json",
+  "README.md",
+  "SECURITY.md",
+  "LICENSE",
+  "cyber_query_ai/**",
 ]
 
 [tool.pytest.ini_options]

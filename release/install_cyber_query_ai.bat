@@ -7,11 +7,24 @@ set VENV_NAME=.venv
 set EXE_FILENAME=cyber-query-ai.bat
 set CONFIG_FILENAME=config.json
 set LOG_FILENAME=cyber_query_ai.log
-set README_FILENAME=readme.txt
+
+set INSTALLER_README_FILENAME=readme.txt
+set CONFIG_FILENAME=config.json
+set APP_README_FILENAME=README.md
+set SECURITY_FILENAME=SECURITY.md
+set LICENSE_FILENAME=LICENSE
 
 set SCRIPT_DIR=%~dp0
 set FULL_VENV_PATH=%SCRIPT_DIR%%VENV_NAME%
 set BIN_DIR=%FULL_VENV_PATH%\Scripts
+set SITE_PACKAGES_DIR=%FULL_VENV_PATH%\Lib\site-packages
+
+REM === Prepare root directory ===
+echo Preparing root directory...
+move "%SITE_PACKAGES_DIR%%CONFIG_FILENAME%" "%SCRIPT_DIR%%CONFIG_FILENAME%"
+move "%SITE_PACKAGES_DIR%%APP_README_FILENAME%" "%SCRIPT_DIR%%APP_README_FILENAME%"
+move "%SITE_PACKAGES_DIR%%SECURITY_FILENAME%" "%SCRIPT_DIR%%SECURITY_FILENAME%"
+move "%SITE_PACKAGES_DIR%%LICENSE_FILENAME%" "%SCRIPT_DIR%%LICENSE_FILENAME%"
 
 REM === Create virtual environment ===
 echo Creating virtual environment...
@@ -44,4 +57,4 @@ echo To uninstall, delete the folder: "%SCRIPT_DIR%"
 REM === Self-delete installer ===
 echo Installation complete. Cleaning up installer...
 del /q "%~dp0install*"
-del /q "%SCRIPT_DIR%%README_FILENAME%"
+del /q "%SCRIPT_DIR%%INSTALLER_README_FILENAME%"
