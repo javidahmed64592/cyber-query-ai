@@ -144,6 +144,11 @@ jobs:
             exit 1
           fi
 
+          if [ -f "readme.txt" ]; then
+            echo "Installation README file not removed"
+            exit 1
+          fi
+
           if [ ! -d ".venv" ]; then
             echo "Virtual environment not found"
             exit 1

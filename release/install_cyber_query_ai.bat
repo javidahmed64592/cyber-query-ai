@@ -35,15 +35,13 @@ echo echo Stopping Ollama server... >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo taskkill /f /im ollama.exe >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
 
 REM === Create README ===
-echo CyberQueryAI has been installed successfully. > "%SCRIPT_DIR%%README_FILENAME%"
-echo Run the application using: "%EXE_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo Configure the application by editing: "%CONFIG_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo To view logs: type "%LOG_FILENAME%" >> "%SCRIPT_DIR%%README_FILENAME%"
-echo To uninstall, delete the folder: "%SCRIPT_DIR%" >> "%SCRIPT_DIR%%README_FILENAME%"
-
-REM === Display README ===
-type "%SCRIPT_DIR%%README_FILENAME%"
+echo CyberQueryAI has been installed successfully.
+echo Run the application using: "%EXE_FILENAME%"
+echo Configure the application by editing: "%CONFIG_FILENAME%"
+echo To view logs: type "%LOG_FILENAME%"
+echo To uninstall, delete the folder: "%SCRIPT_DIR%"
 
 REM === Self-delete installer ===
 echo Installation complete. Cleaning up installer...
 del /q "%~dp0install*"
+del /q "%SCRIPT_DIR%%README_FILENAME%"

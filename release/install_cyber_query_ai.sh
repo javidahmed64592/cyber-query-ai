@@ -119,21 +119,15 @@ rm -rf *
 EOF
 chmod +x "${UNINSTALL_PATH}"
 
-cat > "${README_PATH}" << EOF
-CyberQueryAI has been installed successfully.
-Run the application using: './${EXE_NAME}'
-Configure the application by editing: ${CONFIG_PATH}
-
-To create a start-up service for the CyberQueryAI, run: './service/${CREATE_SERVICE_FILE}'
-To stop the service, run: './service/${STOP_SERVICE_FILE}'
-
-To view the logs: 'cat ${LOG_FILE}'
-
-To uninstall, run: './${UNINSTALL_FILE}'
-EOF
-
 echo "${SEPARATOR}"
-cat "${README_PATH}"
+echo "CyberQueryAI has been installed successfully."
+echo "Run the application using: './${EXE_NAME}'"
+echo "Configure the application by editing: ${CONFIG_PATH}"
+echo "To create a start-up service for the CyberQueryAI, run: './service/${CREATE_SERVICE_FILE}'"
+echo "To stop the service, run: './service/${STOP_SERVICE_FILE}'"
+echo "To view the logs: 'cat ${LOG_FILE}'"
+echo "To uninstall, run: './${UNINSTALL_FILE}'"
 echo "${SEPARATOR}"
 
 rm -f install*
+rm -f "${README_PATH}"
