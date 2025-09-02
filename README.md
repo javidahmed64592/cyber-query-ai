@@ -11,8 +11,9 @@
 [![License](https://img.shields.io/github/license/javidahmed64592/cyber-query-ai?style=for-the-badge)](https://github.com/javidahmed64592/cyber-query-ai/blob/main/LICENSE)
 
 <!-- omit from toc -->
-# Template Python Repository
-This repository can be used as a template for a Python application.
+# CyberQueryAI
+
+An AI-powered cybersecurity assistant designed for ethical hacking, penetration testing, and security research. CyberQueryAI leverages advanced language models to generate commands, scripts, and insights that help cybersecurity professionals work more efficiently in controlled environments.
 
 <!-- omit from toc -->
 ## Table of Contents
