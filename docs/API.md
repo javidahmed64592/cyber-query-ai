@@ -1,3 +1,4 @@
+<!-- omit from toc -->
 # API
 
 This document summarizes the backend API provided by the CyberQueryAI FastAPI application. All endpoints are mounted under the `/api` prefix.
@@ -5,6 +6,21 @@ This document summarizes the backend API provided by the CyberQueryAI FastAPI ap
 Rate limiting: 5 requests per minute (per client IP) on endpoints that call the LLM.
 
 All LLM-driven endpoints expect JSON requests and return JSON responses. The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
+
+<!-- omit from toc -->
+## Table of Contents
+- [Endpoints](#endpoints)
+  - [GET /api/health](#get-apihealth)
+  - [POST /api/generate-command](#post-apigenerate-command)
+  - [POST /api/generate-script](#post-apigenerate-script)
+  - [POST /api/explain-command](#post-apiexplain-command)
+  - [POST /api/explain-script](#post-apiexplain-script)
+  - [POST /api/search-exploits](#post-apisearch-exploits)
+- [Request and Response Models (Pydantic)](#request-and-response-models-pydantic)
+- [Error handling](#error-handling)
+- [Sanitization and LLM handling](#sanitization-and-llm-handling)
+- [Frontend integration notes](#frontend-integration-notes)
+
 
 ## Endpoints
 

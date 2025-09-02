@@ -1,19 +1,20 @@
+<!-- omit from toc -->
 # Software Maintenance Guide
+
+This document outlines how to configure and setup a development environment to work on the CyberQueryAI application.
 
 <!-- omit from toc -->
 ## Table of Contents
-
-- [Software Maintenance Guide](#software-maintenance-guide)
-  - [Backend (Python)](#backend-python)
-    - [Directory Structure](#directory-structure)
-    - [Installing Dependencies](#installing-dependencies)
-    - [Running the Backend](#running-the-backend)
-    - [Testing, Linting, and Type Checking](#testing-linting-and-type-checking)
-  - [Frontend (TypeScript)](#frontend-typescript)
-    - [Directory Structure](#directory-structure-1)
-    - [Installing Dependencies](#installing-dependencies-1)
-    - [Running the Frontend](#running-the-frontend)
-    - [Testing, Linting, and Type Checking](#testing-linting-and-type-checking-1)
+- [Backend (Python)](#backend-python)
+  - [Directory Structure](#directory-structure)
+  - [Installing Dependencies](#installing-dependencies)
+  - [Running the Backend](#running-the-backend)
+  - [Testing, Linting, and Type Checking](#testing-linting-and-type-checking)
+- [Frontend (TypeScript)](#frontend-typescript)
+  - [Directory Structure](#directory-structure-1)
+  - [Installing Dependencies](#installing-dependencies-1)
+  - [Running the Frontend](#running-the-frontend)
+  - [Testing, Linting, and Type Checking](#testing-linting-and-type-checking-1)
 
 ## Backend (Python)
 
