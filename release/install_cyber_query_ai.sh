@@ -45,19 +45,16 @@ WHEEL_FILE=$(find "${WD}" -name "${PACKAGE_NAME}-*-py3-none-any.whl")
 uv pip install "${WHEEL_FILE}"
 rm "${WHEEL_FILE}"
 
+echo ${SEPARATOR}
 echo "Preparing root directory..."
 mkdir -p "${SERVICE_DIR}"
 
-# Find the actual site-packages directory after installation
 SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
-
-# Move files from site-packages to root directory
 mv "${SITE_PACKAGES_DIR}/${CONFIG_FILE}" "${CONFIG_PATH}"
 mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
 mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
 mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
 
-echo ${SEPARATOR}
 echo "Creating API executable..."
 cat > "${EXE_PATH}" << EOF
 #!/bin/bash
