@@ -39,13 +39,71 @@ class TestChatbot:
     def test_pt_command_generation_property(self, mock_chatbot: Chatbot) -> None:
         """Test the pt_command_generation property."""
         prompt_template = mock_chatbot.pt_command_generation
-        assert prompt_template.input_variables == ["task"]
+        assert prompt_template.input_variables == ["prompt"]
         assert mock_chatbot.profile in prompt_template.template
         assert "RESPONSE SCENARIOS" in prompt_template.template
-        assert "Task: {task}" in prompt_template.template
+        assert "Task: `{prompt}`" in prompt_template.template
+
+    def test_pt_script_generation_property(self, mock_chatbot: Chatbot) -> None:
+        """Test the pt_script_generation property."""
+        prompt_template = mock_chatbot.pt_script_generation
+        assert prompt_template.input_variables == ["language", "prompt"]
+        assert mock_chatbot.profile in prompt_template.template
+        assert "Write a script in {language}" in prompt_template.template
+        assert "Task: `{prompt}`" in prompt_template.template
+
+    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot) -> None:
+        """Test the pt_command_explanation property."""
+        prompt_template = mock_chatbot.pt_command_explanation
+        assert prompt_template.input_variables == ["prompt"]
+        assert mock_chatbot.profile in prompt_template.template
+        assert "Explain the following CLI command" in prompt_template.template
+        assert "Command: `{prompt}`" in prompt_template.template
+
+    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot) -> None:
+        """Test the pt_script_explanation property."""
+        prompt_template = mock_chatbot.pt_script_explanation
+        assert prompt_template.input_variables == ["language", "prompt"]
+        assert mock_chatbot.profile in prompt_template.template
+        assert "Explain the following {language} script" in prompt_template.template
+        assert "Script:\n```\n{prompt}\n```\n" in prompt_template.template
+
+    def test_pt_exploit_search_property(self, mock_chatbot: Chatbot) -> None:
+        """Test the pt_exploit_search property."""
+        prompt_template = mock_chatbot.pt_exploit_search
+        assert prompt_template.input_variables == ["prompt"]
+        assert mock_chatbot.profile in prompt_template.template
+        assert "suggest known exploits" in prompt_template.template
+        assert "Target: `{prompt}`" in prompt_template.template
 
     def test_prompt_command_generation_method(self, mock_chatbot: Chatbot) -> None:
         """Test the prompt_command_generation method."""
-        task = "example task"
-        prompt = mock_chatbot.prompt_command_generation(task)
-        assert prompt == mock_chatbot.pt_command_generation.format(task=task)
+        prompt = "example task"
+        result = mock_chatbot.prompt_command_generation(prompt)
+        assert result == mock_chatbot.pt_command_generation.format(prompt=prompt)
+
+    def test_prompt_script_generation_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_script_generation method."""
+        language = "python"
+        prompt = "example task"
+        result = mock_chatbot.prompt_script_generation(language, prompt)
+        assert result == mock_chatbot.pt_script_generation.format(language=language, prompt=prompt)
+
+    def test_prompt_command_explanation_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_command_explanation method."""
+        prompt = "nmap -p- 192.168.1.1"
+        result = mock_chatbot.prompt_command_explanation(prompt)
+        assert result == mock_chatbot.pt_command_explanation.format(prompt=prompt)
+
+    def test_prompt_script_explanation_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_script_explanation method."""
+        language = "python"
+        prompt = "import os\nos.system('ls')"
+        result = mock_chatbot.prompt_script_explanation(language, prompt)
+        assert result == mock_chatbot.pt_script_explanation.format(language=language, prompt=prompt)
+
+    def test_prompt_exploit_search_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_exploit_search method."""
+        prompt = "Apache server on port 80"
+        result = mock_chatbot.prompt_exploit_search(prompt)
+        assert result == mock_chatbot.pt_exploit_search.format(prompt=prompt)

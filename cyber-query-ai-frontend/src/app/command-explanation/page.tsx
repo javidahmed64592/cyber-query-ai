@@ -2,29 +2,26 @@
 
 import { useState } from "react";
 
-import CommandBox from "@/components/CommandBox";
 import ExplanationBox from "@/components/ExplanationBox";
 import TextInput from "@/components/TextInput";
-import { generateCommand } from "@/lib/api";
+import { explainCommand } from "@/lib/api";
 import { sanitizeInput } from "@/lib/sanitization";
-import { CommandGenerationResponse } from "@/lib/types";
+import { ExplanationResponse } from "@/lib/types";
 
-export default function CommandGeneration() {
-  const [prompt, setPrompt] = useState("");
+export default function CommandExplanation() {
+  const [command, setCommand] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<CommandGenerationResponse | null>(
-    null
-  );
+  const [response, setResponse] = useState<ExplanationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!prompt.trim()) return;
+    if (!command.trim()) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await generateCommand(sanitizeInput(prompt));
+      const result = await explainCommand(sanitizeInput(command));
       setResponse(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -39,26 +36,27 @@ export default function CommandGeneration() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
-          Command Generation
+          Command Explanation
         </h1>
         <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-          Describe your cybersecurity task and get precise CLI commands for
-          ethical penetration testing and security research. AI can make
-          mistakes - please verify the generated commands before use.
+          Get detailed explanations of cybersecurity CLI commands. Understand
+          what each parameter does and learn how to use tools effectively for
+          ethical penetration testing.
         </p>
       </div>
 
       {/* Input Section */}
       <div className="max-w-4xl mx-auto">
         <TextInput
-          label="🧠 Prompt:"
-          value={prompt}
-          onChange={setPrompt}
+          label="🔍 Command Input:"
+          value={command}
+          onChange={setCommand}
           onSubmit={handleSubmit}
-          placeholder="Describe the task you want to perform... (Ctrl+Enter to submit)"
-          buttonText="🚀 Generate Command"
+          placeholder="Enter the CLI command you want to understand... (Ctrl+Enter to submit)"
+          buttonText="🚀 Explain Command"
           isLoading={isLoading}
-          loadingText="Generating..."
+          loadingText="Analyzing..."
+          multiline={false}
         />
       </div>
 
@@ -76,12 +74,6 @@ export default function CommandGeneration() {
             </div>
           )}
 
-          {/* Command Output */}
-          <CommandBox
-            commands={response?.commands || []}
-            isLoading={isLoading}
-          />
-
           {/* Explanation */}
           <ExplanationBox
             explanation={response?.explanation || ""}
@@ -94,15 +86,14 @@ export default function CommandGeneration() {
       {!isLoading && !response && !error && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <div className="text-[var(--text-muted)] text-lg">
-            Welcome to CyberQueryAI! 🚀
+            Understand any cybersecurity command! 🔍
           </div>
           <div className="text-sm text-[var(--text-muted)] space-y-2">
-            <p>Try asking for commands like:</p>
+            <p>Try explaining commands like:</p>
             <ul className="space-y-1 text-left list-disc list-inside">
-              <li>&quot;Scan a network for open ports&quot;</li>
-              <li>&quot;Crack an MD5 hash using a dictionary attack&quot;</li>
-              <li>&quot;Perform a basic web vulnerability scan&quot;</li>
-              <li>&quot;Extract metadata from an image file&quot;</li>
+              <li>&quot;nmap -sS -O 192.168.1.0/24&quot;</li>
+              <li>&quot;john --wordlist=rockyou.txt hashes.txt&quot;</li>
+              <li>&quot;hydra -l admin -P passwords.txt ssh://target&quot;</li>
             </ul>
           </div>
         </div>

@@ -1,6 +1,13 @@
 import axios from "axios";
 
-import { PromptRequest, CommandGenerationResponse } from "./types";
+import {
+  PromptRequest,
+  PromptWithLanguageRequest,
+  CommandGenerationResponse,
+  ScriptGenerationResponse,
+  ExplanationResponse,
+  ExploitSearchResponse,
+} from "./types";
 
 // Determine the base URL based on environment
 const getBaseURL = () => {
@@ -64,6 +71,180 @@ export const generateCommand = async (
         );
       } else {
         // Something else happened
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+// Generate script based on prompt and language
+export const generateScript = async (
+  prompt: string,
+  language: string
+): Promise<ScriptGenerationResponse> => {
+  const request: PromptWithLanguageRequest = { prompt, language };
+
+  try {
+    const response = await api.post<ScriptGenerationResponse>(
+      "/generate-script",
+      request
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running on localhost:8000"
+        );
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+// Explain a command
+export const explainCommand = async (
+  command: string
+): Promise<ExplanationResponse> => {
+  const request: PromptRequest = { prompt: command };
+
+  try {
+    const response = await api.post<ExplanationResponse>(
+      "/explain-command",
+      request
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running on localhost:8000"
+        );
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+// Explain a script
+export const explainScript = async (
+  script: string,
+  language: string
+): Promise<ExplanationResponse> => {
+  const request: PromptWithLanguageRequest = { prompt: script, language };
+
+  try {
+    const response = await api.post<ExplanationResponse>(
+      "/explain-script",
+      request
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running on localhost:8000"
+        );
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
+// Search for exploits
+export const searchExploits = async (
+  targetDescription: string
+): Promise<ExploitSearchResponse> => {
+  const request: PromptRequest = { prompt: targetDescription };
+
+  try {
+    const response = await api.post<ExploitSearchResponse>(
+      "/search-exploits",
+      request
+    );
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running on localhost:8000"
+        );
+      } else {
         throw new Error(`Request failed: ${error.message}`);
       }
     }

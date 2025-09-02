@@ -7,7 +7,13 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.responses import FileResponse
 
-from cyber_query_ai.helpers import clean_json_response, get_static_dir, get_static_files, sanitize_text
+from cyber_query_ai.helpers import (
+    clean_json_response,
+    get_static_dir,
+    get_static_files,
+    sanitize_dictionary,
+    sanitize_text,
+)
 
 
 class TestStaticFiles:
@@ -131,6 +137,24 @@ class TestCleanJsonResponse:
                 '{"commands": ["ls"], "explanation": "test"}',
                 "leaves valid JSON unchanged except for whitespace",
             ),
+            # Test simple single quotes to double quotes conversion
+            (
+                "{'script': 'print(hello)', 'explanation': 'prints hello'}",
+                '{"script": "print(hello)", "explanation": "prints hello"}',
+                "converts simple single quotes to double quotes",
+            ),
+            # Test mixed single and double quotes
+            (
+                "{'key1': 'value1', \"key2\": \"value2\"}",
+                '{"key1": "value1", "key2": "value2"}',
+                "handles mixed single and double quotes",
+            ),
+            # Test single quotes in arrays
+            (
+                "{'commands': ['cmd1', 'cmd2'], 'explanation': 'test'}",
+                '{"commands": ["cmd1", "cmd2"], "explanation": "test"}',
+                "converts single quotes in arrays",
+            ),
         ],
     )
     def test_clean_json_response(self, input_json: str, expected: str, test_description: str) -> None:
@@ -205,3 +229,16 @@ class TestSanitizeText:
         """Test that sanitize_text function handles various input scenarios."""
         result = sanitize_text(input_text)
         assert result == expected, f"Failed to {test_description}"
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("  value1  ", "value1"),
+            (["  value2  ", "  value3  "], ["value2", "value3"]),
+            (123, 123),
+        ],
+    )
+    def test_sanitize_dictionary(self, value: str | int | list, expected: str | int | list) -> None:
+        """Test that sanitize_dictionary function handles various input scenarios."""
+        result = sanitize_dictionary({"key": value})
+        assert result == {"key": expected}, "Failed to sanitize dictionary"
