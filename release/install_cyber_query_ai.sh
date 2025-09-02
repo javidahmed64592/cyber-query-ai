@@ -115,6 +115,7 @@ cat > "${UNINSTALL_PATH}" << EOF
 #!/bin/bash
 set -eu
 cd "${WD}"
+rm -rf ${VENV_NAME}
 rm -rf *
 EOF
 chmod +x "${UNINSTALL_PATH}"
