@@ -41,28 +41,33 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
    - Installs the package using `uv pip install`.
    - Removes the wheel file after installation to clean up.
 
-4. **Create API Executable**:
+4. **Extract Application Files**:
+   - Locates the site-packages directory within the virtual environment.
+   - Moves configuration and documentation files (`config.json`, `README.md`, `SECURITY.md`, `LICENSE`) from the installed package to the root installation directory.
+   - This makes these files easily accessible for configuration and reference.
+
+5. **Create API Executable**:
    - Generates a bash script named `cyber-query-ai` that sets the `CYBER_QUERY_AI_ROOT_DIR` environment variable and runs the main application.
    - Makes the script executable with `chmod +x`.
 
-5. **Create Systemd Service**:
+6. **Create Systemd Service**:
    - Creates a systemd service file (`cyber_query_ai.service`) in the `service` directory.
    - Configures the service to run the application as a background service, with automatic restarts on failure.
    - Sets up logging to `cyber_query_ai.log`.
 
-6. **Create Service Management Scripts**:
+7. **Create Service Management Scripts**:
    - `start_service.sh`: Copies the service file to `/etc/systemd/system`, enables and starts the service.
    - `stop_service.sh`: Stops the service and optionally disables/removes it.
    - Makes both scripts executable.
 
-7. **Create Uninstall Script**:
+8. **Create Uninstall Script**:
    - Generates `uninstall_cyber_query_ai.sh` which removes all files in the current directory.
    - Makes the script executable.
 
-8. **Cleanup**:
+9. **Cleanup**:
    - Removes the installer scripts (`install_cyber_query_ai.sh` and `install_cyber_query_ai.bat`) and the original `README.txt` file.
 
-9. **Display Success Message**:
+10. **Display Success Message**:
    - Prints instructions on how to run the application, configure it, manage the service, view logs, and uninstall.
 
 Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
@@ -81,7 +86,12 @@ Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
    - Installs the package using `uv pip install`.
    - Deletes the wheel file after installation to clean up.
 
-4. **Create Executable Launcher**:
+4. **Extract Application Files**:
+   - Locates the site-packages directory within the virtual environment.
+   - Moves configuration and documentation files (`config.json`, `README.md`, `SECURITY.md`, `LICENSE`) from the installed package to the root installation directory.
+   - This makes these files easily accessible for configuration and reference.
+
+5. **Create Executable Launcher**:
    - Generates a batch script named `cyber-query-ai.bat` that:
      - Sets the `CYBER_QUERY_AI_ROOT_DIR` environment variable.
      - Starts Ollama server in the background.
@@ -89,10 +99,10 @@ Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
      - Stops the Ollama server after the application exits.
    - This launcher ensures Ollama is running when the application starts.
 
-5. **Display Success Message**:
+6. **Display Success Message**:
    - Prints instructions on how to run the application, configure it, view logs, and uninstall.
 
-6. **Cleanup**:
+7. **Cleanup**:
    - Deletes the installer scripts (`install_cyber_query_ai.bat` and `install_cyber_query_ai.sh`) and the original `README.txt` file.
 
 Post-Installation Instructions
