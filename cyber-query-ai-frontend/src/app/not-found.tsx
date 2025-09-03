@@ -48,12 +48,6 @@ export default function NotFound() {
           </p>
         </div>
       </div>
-
-      {/* Terminal-style footer */}
-      <div className="mt-12 text-[var(--text-muted)] text-sm font-mono">
-        <span className="text-[var(--neon-green)]">cyber@query:~$</span>
-        <span className="ml-2">navigate --help</span>
-      </div>
     </div>
   );
 }

@@ -5,8 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import { version } from "../lib/version";
-
 import HealthIndicator from "./HealthIndicator";
 
 const Navigation = () => {
@@ -72,9 +70,6 @@ const Navigation = () => {
               <div className="flex flex-col">
                 <div className="text-xl sm:text-xl font-bold neon-glow text-[var(--text-primary)] nav-logo-text">
                   CyberQueryAI
-                </div>
-                <div className="text-xs text-[var(--text-muted)] hidden sm:block nav-version">
-                  v{version}
                 </div>
               </div>
             </Link>
