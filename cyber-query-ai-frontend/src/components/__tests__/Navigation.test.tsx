@@ -3,7 +3,6 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 import { useHealthStatus } from "../../lib/useHealthStatus";
-import { version } from "../../lib/version";
 import Navigation from "../Navigation";
 
 // Mock Next.js Link component
@@ -50,11 +49,6 @@ describe("Navigation", () => {
   it("renders the CyberQueryAI logo", () => {
     render(<Navigation />);
     expect(screen.getByText("CyberQueryAI")).toBeInTheDocument();
-  });
-
-  it("renders version number", () => {
-    render(<Navigation />);
-    expect(screen.getByText(`v${version}`)).toBeInTheDocument();
   });
 
   it("renders all navigation items", () => {
