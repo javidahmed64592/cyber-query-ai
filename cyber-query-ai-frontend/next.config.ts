@@ -6,8 +6,22 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true, // Required for static export
   },
-  // Remove rewrites for production static build
   ...(process.env.NODE_ENV === "development" && {
+    headers: async () => [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+        ],
+      },
+    ],
     async rewrites() {
       return [
         {
