@@ -150,3 +150,26 @@ body {
   font-weight: bold;
   flex-shrink: 0;
 }
+
+/* Mobile Navigation Styles */
+@media (max-width: 1023px) {
+  .mobile-nav-item {
+    display: block;
+    width: 100%;
+  }
+
+  .mobile-nav-item:hover {
+    background-color: var(--background-tertiary);
+  }
+}
+
+/* Ensure proper spacing for mobile */
+@media (max-width: 640px) {
+  .nav-logo-text {
+    font-size: 1.125rem; /* text-lg */
+  }
+
+  .nav-version {
+    display: none;
+  }
+}
