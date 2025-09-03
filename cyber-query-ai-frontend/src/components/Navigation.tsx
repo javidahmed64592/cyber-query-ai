@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -49,12 +50,22 @@ const Navigation = () => {
         <div className="flex items-center h-16 w-full justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="text-2xl font-bold neon-glow text-[var(--text-primary)]">
-                CyberQueryAI
-              </div>
-              <div className="text-xs text-[var(--text-muted)] hidden sm:block">
-                v{version}
+            <Link href="/" className="flex items-center space-x-3">
+              <Image
+                src="/logo.svg"
+                alt="CyberQueryAI Logo"
+                width={32}
+                height={32}
+                className="neon-glow"
+                priority
+              />
+              <div className="flex flex-col">
+                <div className="text-xl font-bold neon-glow text-[var(--text-primary)]">
+                  CyberQueryAI
+                </div>
+                <div className="text-xs text-[var(--text-muted)] hidden sm:block">
+                  v{version}
+                </div>
               </div>
             </Link>
             <HealthIndicator />
