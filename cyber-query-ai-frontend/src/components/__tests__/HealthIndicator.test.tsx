@@ -23,10 +23,11 @@ describe("HealthIndicator", () => {
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("🟢");
-    expect(icon).toBeInTheDocument();
-    expect(icon).toHaveClass("text-green-400");
-    expect(icon).toHaveAttribute("title", "Server: ONLINE");
+    const indicator = screen.getByTitle("Server: ONLINE");
+    expect(indicator).toBeInTheDocument();
+    expect(indicator).toHaveClass("bg-[var(--neon-green)]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--neon-green)]");
+    expect(indicator).toHaveAttribute("title", "Server: ONLINE");
   });
 
   it("renders offline status correctly", () => {
@@ -34,10 +35,11 @@ describe("HealthIndicator", () => {
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("🔴");
-    expect(icon).toBeInTheDocument();
-    expect(icon).toHaveClass("text-red-400");
-    expect(icon).toHaveAttribute("title", "Server: OFFLINE");
+    const indicator = screen.getByTitle("Server: OFFLINE");
+    expect(indicator).toBeInTheDocument();
+    expect(indicator).toHaveClass("bg-[var(--neon-red)]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--neon-red)]");
+    expect(indicator).toHaveAttribute("title", "Server: OFFLINE");
   });
 
   it("renders checking status correctly", () => {
@@ -45,10 +47,12 @@ describe("HealthIndicator", () => {
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("🟡");
-    expect(icon).toBeInTheDocument();
-    expect(icon).toHaveClass("text-yellow-400");
-    expect(icon).toHaveAttribute("title", "Server: CHECKING");
+    const indicator = screen.getByTitle("Server: CHECKING");
+    expect(indicator).toBeInTheDocument();
+    expect(indicator).toHaveClass("bg-yellow-400");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_yellow]");
+    expect(indicator).toHaveClass("animate-pulse-neon");
+    expect(indicator).toHaveAttribute("title", "Server: CHECKING");
   });
 
   it("applies correct CSS classes for container", () => {
@@ -65,17 +69,17 @@ describe("HealthIndicator", () => {
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("🟢");
-    expect(icon).toHaveClass("cursor-help");
+    const indicator = screen.getByTitle("Server: ONLINE");
+    expect(indicator).toHaveClass("cursor-help");
   });
 
-  it("renders with correct text size", () => {
+  it("renders with correct shape and size", () => {
     mockUseHealthStatus.mockReturnValue("online");
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("🟢");
-    expect(icon).toHaveClass("text-sm");
+    const indicator = screen.getByTitle("Server: ONLINE");
+    expect(indicator).toHaveClass("w-3", "h-3", "rounded-full");
   });
 
   it("handles unknown status gracefully", () => {
@@ -84,10 +88,11 @@ describe("HealthIndicator", () => {
 
     render(<HealthIndicator />);
 
-    const icon = screen.getByText("⚪");
-    expect(icon).toBeInTheDocument();
-    expect(icon).toHaveClass("text-gray-400");
-    expect(icon).toHaveAttribute("title", "Server: UNKNOWN");
+    const indicator = screen.getByTitle("Server: UNKNOWN");
+    expect(indicator).toBeInTheDocument();
+    expect(indicator).toHaveClass("bg-[var(--text-muted)]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--text-muted)]");
+    expect(indicator).toHaveAttribute("title", "Server: UNKNOWN");
   });
 
   it("calls useHealthStatus hook", () => {
@@ -98,13 +103,22 @@ describe("HealthIndicator", () => {
     expect(mockUseHealthStatus).toHaveBeenCalledTimes(1);
   });
 
-  it("renders only the icon without additional text", () => {
+  it("renders only the indicator shape without additional text", () => {
     mockUseHealthStatus.mockReturnValue("online");
 
     render(<HealthIndicator />);
 
-    expect(screen.getByText("🟢")).toBeInTheDocument();
+    expect(screen.getByTitle("Server: ONLINE")).toBeInTheDocument();
     expect(screen.queryByText("Server:")).not.toBeInTheDocument();
     expect(screen.queryByText("ONLINE")).not.toBeInTheDocument();
+  });
+
+  it("has transition animation classes", () => {
+    mockUseHealthStatus.mockReturnValue("online");
+
+    render(<HealthIndicator />);
+
+    const indicator = screen.getByTitle("Server: ONLINE");
+    expect(indicator).toHaveClass("transition-all", "duration-200");
   });
 });

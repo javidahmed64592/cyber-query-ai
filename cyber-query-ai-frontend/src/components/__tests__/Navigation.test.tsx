@@ -233,38 +233,42 @@ describe("Navigation", () => {
 
       render(<Navigation />);
 
-      // The HealthIndicator should render an icon
-      expect(screen.getByText("🟢")).toBeInTheDocument();
+      // The HealthIndicator should render a circular indicator
+      const indicators = screen
+        .getByRole("navigation")
+        .querySelectorAll('[title*="Server:"]');
+      expect(indicators).toHaveLength(1);
     });
 
-    it("displays online status icon when server is online", () => {
+    it("displays online status indicator when server is online", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
       render(<Navigation />);
 
-      expect(screen.getByText("🟢")).toBeInTheDocument();
-      expect(screen.queryByText("🔴")).not.toBeInTheDocument();
-      expect(screen.queryByText("🟡")).not.toBeInTheDocument();
+      const indicator = screen.getByTitle("Server: ONLINE");
+      expect(indicator).toBeInTheDocument();
+      expect(indicator).toHaveClass("bg-[var(--neon-green)]");
     });
 
-    it("displays offline status icon when server is offline", () => {
+    it("displays offline status indicator when server is offline", () => {
       mockUseHealthStatus.mockReturnValue("offline");
 
       render(<Navigation />);
 
-      expect(screen.getByText("🔴")).toBeInTheDocument();
-      expect(screen.queryByText("🟢")).not.toBeInTheDocument();
-      expect(screen.queryByText("🟡")).not.toBeInTheDocument();
+      const indicator = screen.getByTitle("Server: OFFLINE");
+      expect(indicator).toBeInTheDocument();
+      expect(indicator).toHaveClass("bg-[var(--neon-red)]");
     });
 
-    it("displays checking status icon when status is being checked", () => {
+    it("displays checking status indicator when status is being checked", () => {
       mockUseHealthStatus.mockReturnValue("checking");
 
       render(<Navigation />);
 
-      expect(screen.getByText("🟡")).toBeInTheDocument();
-      expect(screen.queryByText("🟢")).not.toBeInTheDocument();
-      expect(screen.queryByText("🔴")).not.toBeInTheDocument();
+      const indicator = screen.getByTitle("Server: CHECKING");
+      expect(indicator).toBeInTheDocument();
+      expect(indicator).toHaveClass("bg-yellow-400");
+      expect(indicator).toHaveClass("animate-pulse-neon");
     });
 
     it("positions HealthIndicator next to the logo", () => {
@@ -274,12 +278,12 @@ describe("Navigation", () => {
 
       // Check that both the logo and health indicator are present
       expect(screen.getByText("CyberQueryAI")).toBeInTheDocument();
-      expect(screen.getByText("🟢")).toBeInTheDocument();
+      expect(screen.getByTitle("Server: ONLINE")).toBeInTheDocument();
 
       // Check that they are both in the navigation
       const nav = screen.getByRole("navigation");
       expect(nav).toContainElement(screen.getByText("CyberQueryAI"));
-      expect(nav).toContainElement(screen.getByText("🟢"));
+      expect(nav).toContainElement(screen.getByTitle("Server: ONLINE"));
     });
 
     it("includes tooltip with status information", () => {
@@ -287,8 +291,8 @@ describe("Navigation", () => {
 
       render(<Navigation />);
 
-      const healthIcon = screen.getByText("🟢");
-      expect(healthIcon).toHaveAttribute("title", "Server: ONLINE");
+      const healthIndicator = screen.getByTitle("Server: ONLINE");
+      expect(healthIndicator).toHaveAttribute("title", "Server: ONLINE");
     });
 
     it("calls useHealthStatus hook when Navigation is rendered", () => {

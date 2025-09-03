@@ -3,29 +3,16 @@ import { useHealthStatus, type HealthStatus } from "@/lib/useHealthStatus";
 function HealthIndicator() {
   const status = useHealthStatus();
 
-  const getStatusColor = (status: HealthStatus): string => {
+  const getStatusStyles = (status: HealthStatus): string => {
     switch (status) {
       case "online":
-        return "text-green-400";
+        return "bg-[var(--neon-green)] shadow-[0_0_4px_var(--neon-green)]";
       case "offline":
-        return "text-red-400";
+        return "bg-[var(--neon-red)] shadow-[0_0_4px_var(--neon-red)]";
       case "checking":
-        return "text-yellow-400";
+        return "bg-yellow-400 shadow-[0_0_4px_yellow] animate-pulse-neon";
       default:
-        return "text-gray-400";
-    }
-  };
-
-  const getStatusIcon = (status: HealthStatus): string => {
-    switch (status) {
-      case "online":
-        return "🟢";
-      case "offline":
-        return "🔴";
-      case "checking":
-        return "🟡";
-      default:
-        return "⚪";
+        return "bg-[var(--text-muted)] shadow-[0_0_4px_var(--text-muted)]";
     }
   };
 
@@ -36,11 +23,9 @@ function HealthIndicator() {
   return (
     <div className="relative group">
       <div
-        className={`text-sm cursor-help ${getStatusColor(status)}`}
+        className={`w-3 h-3 rounded-full cursor-help transition-all duration-200 ${getStatusStyles(status)}`}
         title={getStatusText(status)}
-      >
-        {getStatusIcon(status)}
-      </div>
+      />
     </div>
   );
 }
