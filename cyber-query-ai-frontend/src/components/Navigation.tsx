@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { version } from "../lib/version";
 
@@ -10,6 +11,7 @@ import HealthIndicator from "./HealthIndicator";
 
 const Navigation = () => {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -44,6 +46,14 @@ const Navigation = () => {
     },
   ];
 
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <nav className="bg-[var(--background-secondary)] border-b border-[var(--terminal-border)] sticky top-0 z-50 w-full">
       <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -60,10 +70,10 @@ const Navigation = () => {
                 priority
               />
               <div className="flex flex-col">
-                <div className="text-xl font-bold neon-glow text-[var(--text-primary)]">
+                <div className="text-xl sm:text-xl font-bold neon-glow text-[var(--text-primary)] nav-logo-text">
                   CyberQueryAI
                 </div>
-                <div className="text-xs text-[var(--text-muted)] hidden sm:block">
+                <div className="text-xs text-[var(--text-muted)] hidden sm:block nav-version">
                   v{version}
                 </div>
               </div>
@@ -71,8 +81,8 @@ const Navigation = () => {
             <HealthIndicator />
           </div>
 
-          {/* Navigation Links */}
-          <div className="flex flex-1 justify-end space-x-1">
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex flex-1 justify-end space-x-1">
             {navItems.map(item => {
               const normalized = (pathname || "").replace(/\/$/, "") || "/";
               const isActive =
@@ -88,6 +98,79 @@ const Navigation = () => {
                     ${
                       isActive
                         ? "text-[var(--border-accent)] font-bold neon-glow"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
+                    }
+                  `}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--border-accent)]"
+              aria-expanded="false"
+            >
+              <span className="sr-only">Open main menu</span>
+              {/* Hamburger icon */}
+              <svg
+                className={`${isMenuOpen ? "hidden" : "block"} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              {/* Close icon */}
+              <svg
+                className={`${isMenuOpen ? "block" : "hidden"} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        <div className={`lg:hidden ${isMenuOpen ? "block" : "hidden"}`}>
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-[var(--terminal-border)] mt-2">
+            {navItems.map(item => {
+              const normalized = (pathname || "").replace(/\/$/, "") || "/";
+              const isActive =
+                normalized === item.href ||
+                (item.href === "/command-generation" && normalized === "/");
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={closeMenu}
+                  className={`
+                    block px-3 py-2 rounded-md text-base font-medium transition-all duration-200
+                    ${
+                      isActive
+                        ? "text-[var(--border-accent)] font-bold neon-glow bg-[var(--background-tertiary)]"
                         : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--background-tertiary)]"
                     }
                   `}
