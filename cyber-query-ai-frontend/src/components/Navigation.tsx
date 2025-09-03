@@ -15,12 +15,12 @@ const Navigation = () => {
 
   const navItems = [
     {
-      name: "Command Gen",
+      name: "Command Generation",
       href: "/command-generation",
       active: pathname === "/command-generation/",
     },
     {
-      name: "Script Gen",
+      name: "Script Generation",
       href: "/script-generation",
       active: pathname === "/script-generation/",
     },

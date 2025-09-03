@@ -50,8 +50,8 @@ describe("Navigation", () => {
 
   it("renders all navigation items", () => {
     render(<Navigation />);
-    expect(screen.getByText("Command Gen")).toBeInTheDocument();
-    expect(screen.getByText("Script Gen")).toBeInTheDocument();
+    expect(screen.getByText("Command Generation")).toBeInTheDocument();
+    expect(screen.getByText("Script Generation")).toBeInTheDocument();
     expect(screen.getByText("Command Explain")).toBeInTheDocument();
     expect(screen.getByText("Script Explain")).toBeInTheDocument();
     expect(screen.getByText("Exploit Search")).toBeInTheDocument();
@@ -60,14 +60,12 @@ describe("Navigation", () => {
 
   it("renders navigation links with correct hrefs", () => {
     render(<Navigation />);
-    expect(screen.getByRole("link", { name: /Command Gen/ })).toHaveAttribute(
-      "href",
-      "/command-generation"
-    );
-    expect(screen.getByRole("link", { name: /Script Gen/ })).toHaveAttribute(
-      "href",
-      "/script-generation"
-    );
+    expect(
+      screen.getByRole("link", { name: /Command Generation/ })
+    ).toHaveAttribute("href", "/command-generation");
+    expect(
+      screen.getByRole("link", { name: /Script Generation/ })
+    ).toHaveAttribute("href", "/script-generation");
     expect(
       screen.getByRole("link", { name: /Command Explain/ })
     ).toHaveAttribute("href", "/command-explanation");
@@ -90,7 +88,9 @@ describe("Navigation", () => {
     }));
 
     render(<Navigation />);
-    const commandGenLink = screen.getByRole("link", { name: /Command Gen/ });
+    const commandGenLink = screen.getByRole("link", {
+      name: /Command Generation/,
+    });
     expect(commandGenLink).toHaveClass("neon-glow");
   });
 
