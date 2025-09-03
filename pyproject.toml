@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "cyber-query-ai"
 version = "1.0.0"
-description = "Ollama-powered web application for Cybersecurity assistance."
+description = "AI-powered cybersecurity assistant for ethical penetration testing and security research."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { file = "LICENSE" }
