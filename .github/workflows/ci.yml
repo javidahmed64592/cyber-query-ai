@@ -52,7 +52,7 @@ jobs:
       - name: Check with mypy
         run: |
           uv run -m mypy .
-  test:
+  pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
