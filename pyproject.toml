@@ -22,6 +22,8 @@ dependencies = [
     "fastapi[standard]",
     "langchain",
     "langchain-ollama",
+    "langchain-community",
+    "langchain-text-splitters",
     "slowapi>=0.1.9",
 ]
 
