@@ -3,14 +3,17 @@
 from langchain.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
+from cyber_query_ai.rag import RAGSystem
+
 
 class Chatbot:
-    """Chatbot class for LLM queries."""
+    """Chatbot class for LLM queries with RAG support."""
 
     def __init__(self, model: str) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = OllamaLLM(model=self.model)
+        self.rag_system = RAGSystem(model=self.model)
 
     @property
     def profile(self) -> str:
@@ -29,7 +32,7 @@ class Chatbot:
     @property
     def pt_command_generation(self) -> PromptTemplate:
         """Prompt template for command generation."""
-        template = (
+        base_template = (
             f"{self.profile}"
             "RESPONSE SCENARIOS:\n"
             "1. NO APPROPRIATE TOOL: If no cybersecurity tool can accomplish the task, "
@@ -42,6 +45,10 @@ class Chatbot:
             "return 'commands': ['step1', 'step2', ...] and explain the workflow in 'explanation'.\n\n"
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
+        )
+        enhanced_template = self.rag_system.enhance_template(base_template, "command")
+        template = (
+            f"{enhanced_template}"
             "Task: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -58,9 +65,10 @@ class Chatbot:
     @property
     def pt_script_generation(self) -> PromptTemplate:
         """Prompt template for script generation."""
+        base_template = f"{self.profile}Write a script in {{language}} that performs the following task:\n\n"
+        enhanced_template = self.rag_system.enhance_template(base_template, "script")
         template = (
-            f"{self.profile}"
-            "Write a script in {language} that performs the following task:\n\n"
+            f"{enhanced_template}"
             "Task: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -80,9 +88,10 @@ class Chatbot:
     @property
     def pt_command_explanation(self) -> PromptTemplate:
         """Prompt template for command explanation."""
+        base_template = f"{self.profile}Explain the following CLI command step-by-step:\n\n"
+        enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
         template = (
-            f"{self.profile}"
-            "Explain the following CLI command step-by-step:\n\n"
+            f"{enhanced_template}"
             "Command: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -99,10 +108,14 @@ class Chatbot:
     @property
     def pt_script_explanation(self) -> PromptTemplate:
         """Prompt template for script explanation."""
-        template = (
+        base_template = (
             f"{self.profile}"
             "Explain the following {language} script step-by-step. "
             "Describe what each line does and highlight any risks or important behaviors.\n\n"
+        )
+        enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
+        template = (
+            f"{enhanced_template}"
             "Script:\n```\n{prompt}\n```\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -120,9 +133,10 @@ class Chatbot:
     @property
     def pt_exploit_search(self) -> PromptTemplate:
         """Prompt template for exploit search."""
+        base_template = f"{self.profile}Based on the following target description, suggest known exploits.\n\n"
+        enhanced_template = self.rag_system.enhance_template(base_template, "exploit")
         template = (
-            f"{self.profile}"
-            "Based on the following target description, suggest known exploits.\n\n"
+            f"{enhanced_template}"
             "Target: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
