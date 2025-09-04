@@ -17,9 +17,14 @@ class Config(BaseModel):
     port: int
 
 
+def get_root_dir() -> Path:
+    """Get the root directory for the CyberQueryAI application."""
+    return Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", "."))
+
+
 def get_config_path() -> Path:
     """Get the absolute path to the configuration file."""
-    return Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".")) / CONFIG_FILENAME
+    return get_root_dir() / CONFIG_FILENAME
 
 
 def load_config() -> Config:
