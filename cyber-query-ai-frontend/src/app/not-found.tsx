@@ -10,7 +10,7 @@ export default function NotFound() {
           alt="CyberQueryAI Logo"
           width={64}
           height={64}
-          className="neon-glow animate-pulse-neon"
+          className="neon-glow"
           priority
         />
         <div className="text-2xl font-bold neon-glow text-[var(--text-primary)]">
