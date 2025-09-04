@@ -1,0 +1,92 @@
+tool: gobuster
+category: reconnaissance
+type: help
+source: local
+retrieved: 2025-09-04
+gobuster(1)                                        Directory/file & DNS busting tool written in Go                                        gobuster(1)
+
+NAME
+       gobuster - Directory/file & DNS busting tool written in Go
+
+SYNOPSIS
+       Modes: dir - the classic directory brute-forcing mode
+              dns - DNS subdomain brute-forcing mode
+              s3 - Enumerate open S3 buckets and look for existence and bucket listings
+              gcs - Enumerate open google cloud buckets
+              vhost - virtual host brute-forcing mode - not the same as DNS
+              fuzz - some basic fuzzing, replaces the FUZZ keyword
+              tftp - bruteforce tftp files
+
+       Usage: gobuster help
+              gobuster help <mode>
+              gobuster dir <flags>
+              gobuster dns <flags>
+              gobuster s3 <flags>
+              gobuster gcs <flags>
+              gobuster vhost <flags>
+              gobuster fuzz <flags>
+              gobuster tftp <flags>
+
+DESCRIPTION
+       Gobuster  is a tool used to brute-force: URIs (directories and files) in web sites, DNS subdomains (with wildcard support), Virtual Host names
+       on target web servers, Open Amazon S3 buckets, Open Google Cloud buckets and TFTP servers.
+
+       Gobuster is useful for pentesters, ethical hackers and forensics experts.  It also can be used for security tests.
+
+OPTIONS
+       Global Flags:
+
+              --delay duration
+                     Time each thread waits between requests (e.g. 1500ms)
+
+              --no-color
+                     Disable color output
+
+              --no-error
+                     Don't display errors
+
+       -z, --no-progress
+              Don't display progress
+
+       -o, --output string
+              Output file to write results to (defaults to stdout)
+
+       -p, --pattern string
+              File containing replacement patterns
+
+       -q, --quiet
+              Don't print the banner and other noise
+
+       -t, --threads int
+              Number of concurrent threads (default 10)
+
+       -v, --verbose
+              Verbose output (errors)
+
+       -w, --wordlist string
+              Path to the wordlist
+
+EXAMPLES
+       gobuster dir -u https://mysite.com/path/to/folder -c 'session=123456' -t 50 -w common-files.txt -x .php,.html
+
+       gobuster dns -d mysite.com -t 50 -w common-names.txt
+
+       gobuster s3 -w bucket-names.txt
+
+       gobuster gcs -w bucket-names.txt
+
+       gobuster vhost -u https://mysite.com -w common-vhosts.txt
+
+       gobuster fuzz -u https://example.com?FUZZ=test -w parameter-names.txt
+
+       gobuster tftp -s tftp.example.com B-w common-filenames.txt
+
+BUGS
+       Open an issue at https://github.com/OJ/gobuster/issues/new.  Alternatively, if you are a Debian user you can open a bug using reportbug tool.
+
+AUTHOR
+       Gobuster was written by OJ Reeves (@TheColonial) <oj@buffered.io> and Christian Mehlmauer (@firefart) <firefart@firefart.at>.
+
+       This manual page was written by Thiago Andrade Marques <andrade@debian.org> for the Debian project (but may be used by others).
+
+gobuster-3.6.0                                                    21 September 2023                                                       gobuster(1)
