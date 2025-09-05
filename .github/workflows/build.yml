@@ -29,7 +29,7 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: cyber_query_ai
+          name: cyber_query_ai_wheel
           path: dist/cyber_query_ai-*-py3-none-any.whl
 
   build_frontend:
@@ -53,7 +53,7 @@ jobs:
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
-          name: frontend_build
+          name: cyber_query_ai_frontend
           path: cyber-query-ai-frontend/out
 
   create_installer:
@@ -73,11 +73,11 @@ jobs:
       - name: Download backend artifact
         uses: actions/download-artifact@v4
         with:
-          name: cyber_query_ai
+          name: cyber_query_ai_wheel
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
-          name: frontend_build
+          name: cyber_query_ai_frontend
           path: static
       - name: Prepare release directory
         run: |
