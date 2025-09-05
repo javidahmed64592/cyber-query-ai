@@ -11,7 +11,6 @@ from cyber_query_ai.helpers import (
     clean_json_response,
     get_static_dir,
     get_static_files,
-    sanitize_dictionary,
     sanitize_text,
 )
 
@@ -229,16 +228,3 @@ class TestSanitizeText:
         """Test that sanitize_text function handles various input scenarios."""
         result = sanitize_text(input_text)
         assert result == expected, f"Failed to {test_description}"
-
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            ("  value1  ", "value1"),
-            (["  value2  ", "  value3  "], ["value2", "value3"]),
-            (123, 123),
-        ],
-    )
-    def test_sanitize_dictionary(self, value: str | int | list, expected: str | int | list) -> None:
-        """Test that sanitize_dictionary function handles various input scenarios."""
-        result = sanitize_dictionary({"key": value})
-        assert result == {"key": expected}, "Failed to sanitize dictionary"

@@ -97,16 +97,3 @@ def sanitize_text(prompt: str) -> str:
     """Sanitize user input and LLM output for security."""
     prompt = re.sub(r"<script[^>]*>.*?</script>", "", prompt, flags=re.IGNORECASE | re.DOTALL)
     return str(bleach.clean(prompt, tags=[], strip=True)).strip()
-
-
-def sanitize_dictionary(response_dict: dict) -> dict:
-    """Sanitize the response dictionary."""
-    sanitized: dict = {}
-    for key, value in response_dict.items():
-        if isinstance(value, str):
-            sanitized[key] = sanitize_text(value)
-        elif isinstance(value, list):
-            sanitized[key] = [sanitize_text(item) if isinstance(item, str) else item for item in value]
-        else:
-            sanitized[key] = value
-    return sanitized

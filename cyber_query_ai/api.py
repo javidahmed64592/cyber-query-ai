@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from slowapi import Limiter
 
-from cyber_query_ai.helpers import clean_json_response, sanitize_dictionary, sanitize_text
+from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import (
     CommandGenerationResponse,
     ExplanationResponse,
@@ -68,7 +68,7 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return CommandGenerationResponse(commands=[], explanation=msg)
 
-        return CommandGenerationResponse(**sanitize_dictionary(parsed))
+        return CommandGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         msg = "Invalid JSON response from LLM"
         raise get_server_error(msg, e, response_text) from e
@@ -93,7 +93,7 @@ async def generate_script(request: Request, prompt: PromptWithLanguageRequest) -
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return ScriptGenerationResponse(script="", explanation=msg)
 
-        return ScriptGenerationResponse(**sanitize_dictionary(parsed))
+        return ScriptGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         msg = "Invalid JSON response from LLM"
         raise get_server_error(msg, e, response_text) from e
@@ -118,7 +118,7 @@ async def explain_command(request: Request, prompt: PromptRequest) -> Explanatio
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return ExplanationResponse(explanation=msg)
 
-        return ExplanationResponse(**sanitize_dictionary(parsed))
+        return ExplanationResponse(**parsed)
     except json.JSONDecodeError as e:
         msg = "Invalid JSON response from LLM"
         raise get_server_error(msg, e, response_text) from e
@@ -143,7 +143,7 @@ async def explain_script(request: Request, prompt: PromptWithLanguageRequest) ->
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return ExplanationResponse(explanation=msg)
 
-        return ExplanationResponse(**sanitize_dictionary(parsed))
+        return ExplanationResponse(**parsed)
     except json.JSONDecodeError as e:
         msg = "Invalid JSON response from LLM"
         raise get_server_error(msg, e, response_text) from e
@@ -168,7 +168,7 @@ async def search_exploits(request: Request, prompt: PromptRequest) -> ExploitSea
             msg = f"Missing required keys in LLM response: {missing_keys}"
             return ExploitSearchResponse(exploits=[], explanation=msg)
 
-        return ExploitSearchResponse(**sanitize_dictionary(parsed))
+        return ExploitSearchResponse(**parsed)
     except json.JSONDecodeError as e:
         msg = "Invalid JSON response from LLM"
         raise get_server_error(msg, e, response_text) from e
