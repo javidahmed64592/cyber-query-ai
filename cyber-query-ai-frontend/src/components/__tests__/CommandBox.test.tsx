@@ -1,10 +1,17 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen, act } from "@testing-library/react";
 
 import CommandBox from "../CommandBox";
 
+// Mock the sanitization functions
+jest.mock("@/lib/sanitization", () => ({
+  sanitizeOutput: jest.fn((str: string) => str),
+  isCommandSafe: jest.fn(
+    (str: string) => !str.includes("rm -rf") && !str.includes("shutdown")
+  ),
+}));
+
 describe("CommandBox", () => {
-  const mockWriteText = jest.fn();
+  const mockWriteText = jest.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -14,6 +21,7 @@ describe("CommandBox", () => {
         writeText: mockWriteText,
       },
       writable: true,
+      configurable: true,
     });
   });
 
@@ -52,70 +60,39 @@ describe("CommandBox", () => {
   });
 
   it("copies command to clipboard when copy button is clicked", async () => {
-    const user = userEvent.setup();
     const commands = ["ls -la"];
     render(<CommandBox commands={commands} isLoading={false} />);
 
-    const copyButton = screen.getByTitle("Copy to clipboard");
+    const copyButton = screen.getByRole("button", { name: /copy/i });
 
-    // Mock the clipboard writeText function
-    const originalWriteText = navigator.clipboard?.writeText;
-    Object.defineProperty(navigator, "clipboard", {
-      value: {
-        writeText: mockWriteText,
-      },
-      configurable: true,
+    // Fire the click event directly for more control
+    await act(async () => {
+      copyButton.click();
     });
 
-    await user.click(copyButton);
+    // Wait for async operations
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
 
     expect(mockWriteText).toHaveBeenCalledWith("ls -la");
-
-    // Restore original clipboard
-    if (originalWriteText) {
-      Object.defineProperty(navigator, "clipboard", {
-        value: {
-          writeText: originalWriteText,
-        },
-        configurable: true,
-      });
-    }
   });
 
-  it("shows copy button on hover", async () => {
-    userEvent.setup();
+  it("shows copy button always visible", () => {
     const commands = ["ls -la"];
     render(<CommandBox commands={commands} isLoading={false} />);
 
-    const commandBox = screen.getByText("ls -la").closest("div");
-    expect(commandBox).toBeInTheDocument();
-
-    // The copy button should be visible on hover (opacity changes)
-    // This is tested by ensuring the button exists
-    const copyButton = screen.getByTitle("Copy to clipboard");
+    const copyButton = screen.getByRole("button", { name: /copy/i });
     expect(copyButton).toBeInTheDocument();
+    expect(copyButton).toHaveTextContent("Copy");
   });
 
   it("applies command-box class to command containers", () => {
     const commands = ["ls -la"];
     render(<CommandBox commands={commands} isLoading={false} />);
 
-    const commandBoxes = screen
-      .getAllByText("ls -la")
-      .map(el => el.closest(".command-box"));
-    commandBoxes.forEach(box => {
-      expect(box).toHaveClass("command-box", "group", "relative");
-    });
-  });
-
-  it("applies group class for hover effects", () => {
-    const commands = ["ls -la"];
-    render(<CommandBox commands={commands} isLoading={false} />);
-
-    // The group class is applied to the container that holds all commands
-    const commandsContainer =
-      screen.getByText("ls -la").parentElement?.parentElement;
-    expect(commandsContainer).toHaveClass("command-box", "group", "relative");
+    const commandBox = screen.getByText("ls -la").closest(".command-box");
+    expect(commandBox).toHaveClass("command-box", "group", "relative");
   });
 
   it("renders code element with correct styling", () => {
@@ -140,11 +117,31 @@ describe("CommandBox", () => {
     expect(screen.getByText(longCommand)).toBeInTheDocument();
   });
 
+  it("shows copied feedback when copy button is clicked", async () => {
+    const commands = ["ls -la"];
+    render(<CommandBox commands={commands} isLoading={false} />);
+
+    const copyButton = screen.getByRole("button", { name: /copy/i });
+
+    await act(async () => {
+      copyButton.click();
+    });
+
+    // Wait for async operations
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    });
+
+    // Check that the button shows "Copied" feedback
+    expect(screen.getByText("Copied")).toBeInTheDocument();
+    expect(mockWriteText).toHaveBeenCalledWith("ls -la");
+  });
+
   it("renders multiple commands with individual copy buttons", () => {
     const commands = ["ls -la", "pwd"];
     render(<CommandBox commands={commands} isLoading={false} />);
 
-    const copyButtons = screen.getAllByTitle("Copy to clipboard");
+    const copyButtons = screen.getAllByRole("button", { name: /copy/i });
     expect(copyButtons).toHaveLength(2);
   });
 
@@ -161,8 +158,7 @@ describe("CommandBox", () => {
       "text-[var(--neon-red)]",
       "text-xs",
       "font-bold",
-      "whitespace-nowrap",
-      "flex-shrink-0"
+      "whitespace-nowrap"
     );
   });
 

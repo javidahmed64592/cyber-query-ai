@@ -1,6 +1,11 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 
 import ScriptBox from "../ScriptBox";
+
+// Mock the sanitization functions
+jest.mock("@/lib/sanitization", () => ({
+  sanitizeOutput: jest.fn((str: string) => str),
+}));
 
 // Mock the clipboard API
 Object.assign(navigator, {
@@ -40,13 +45,13 @@ describe("ScriptBox", () => {
     expect(screen.getByText(script)).toBeInTheDocument();
   });
 
-  it("shows copy button on hover", () => {
+  it("shows copy button always visible", () => {
     const script = "print('Hello, World!')";
     render(<ScriptBox script={script} language="python" isLoading={false} />);
 
-    const copyButton = screen.getByTitle("Copy to clipboard");
+    const copyButton = screen.getByRole("button", { name: /copy script/i });
     expect(copyButton).toBeInTheDocument();
-    expect(copyButton).toHaveTextContent("📋");
+    expect(copyButton).toHaveTextContent("Copy Script");
   });
 
   it("copies script to clipboard when copy button is clicked", async () => {
@@ -56,9 +61,30 @@ describe("ScriptBox", () => {
 
     render(<ScriptBox script={script} language="python" isLoading={false} />);
 
-    const copyButton = screen.getByTitle("Copy to clipboard");
-    fireEvent.click(copyButton);
+    const copyButton = screen.getByRole("button", { name: /copy script/i });
 
+    await act(async () => {
+      fireEvent.click(copyButton);
+    });
+
+    expect(mockWriteText).toHaveBeenCalledWith(script);
+  });
+
+  it("shows copied feedback when copy button is clicked", async () => {
+    const script = "print('Hello, World!')";
+    const mockWriteText = jest.fn();
+    navigator.clipboard.writeText = mockWriteText;
+
+    render(<ScriptBox script={script} language="python" isLoading={false} />);
+
+    const copyButton = screen.getByRole("button", { name: /copy script/i });
+
+    await act(async () => {
+      fireEvent.click(copyButton);
+    });
+
+    // Check that the button shows "Copied" feedback
+    expect(screen.getByText("Copied")).toBeInTheDocument();
     expect(mockWriteText).toHaveBeenCalledWith(script);
   });
 
@@ -113,7 +139,7 @@ if __name__ == "__main__":
       <ScriptBox script={longScript} language="python" isLoading={false} />
     );
 
-    // Instead of searching for the full long text, find a subset and check the container
+    // Check that the script container has scrollable styling
     const container = screen
       .getByText(/print\('line'\)/)
       .closest(".command-box");
