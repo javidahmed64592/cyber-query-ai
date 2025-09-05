@@ -1,6 +1,7 @@
 """Unit tests for the cyber_query_ai.config module."""
 
 from collections.abc import Generator
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -26,16 +27,25 @@ def mock_rag_system() -> Generator[MagicMock, None, None]:
 @pytest.fixture
 def mock_chatbot() -> Chatbot:
     """Fixture to create a Chatbot instance with mocked OllamaLLM."""
-    return Chatbot(model="test-model", embedding_model="test-embedding-model")
+    return Chatbot(
+        model="test-model", embedding_model="test-embedding-model", tools_json_filepath=Path("test-tools.json")
+    )
 
 
 class TestChatbot:
     """Unit tests for the Chatbot class."""
 
-    def test_initialization(self, mock_chatbot: Chatbot, mock_ollama_llm: MagicMock) -> None:
+    def test_initialization(
+        self, mock_chatbot: Chatbot, mock_ollama_llm: MagicMock, mock_rag_system: MagicMock
+    ) -> None:
         """Test the initialization of the Chatbot."""
         mock_ollama_llm.assert_called_once_with(model=mock_chatbot.model)
         assert mock_chatbot.llm == mock_ollama_llm.return_value
+        mock_rag_system.assert_called_once_with(
+            model=mock_chatbot.model,
+            embedding_model="test-embedding-model",
+            tools_json_filepath=Path("test-tools.json"),
+        )
 
     def test_profile_property(self, mock_chatbot: Chatbot) -> None:
         """Test the profile property."""

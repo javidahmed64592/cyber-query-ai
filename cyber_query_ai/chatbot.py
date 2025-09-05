@@ -1,5 +1,7 @@
 """Chatbot logic for the CyberQueryAI application."""
 
+from pathlib import Path
+
 from langchain.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
@@ -15,11 +17,13 @@ JSON_FORMATTING_RULES = (
 class Chatbot:
     """Chatbot class for LLM queries with RAG support."""
 
-    def __init__(self, model: str, embedding_model: str) -> None:
+    def __init__(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = OllamaLLM(model=self.model)
-        self.rag_system = RAGSystem.create(model=self.model, embedding_model=embedding_model)
+        self.rag_system = RAGSystem.create(
+            model=self.model, embedding_model=embedding_model, tools_json_filepath=tools_json_filepath
+        )
 
     @property
     def profile(self) -> str:
