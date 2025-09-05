@@ -58,4 +58,4 @@ echo To uninstall, delete the folder: "%SCRIPT_DIR%"
 REM === Self-delete installer ===
 echo Installation complete. Cleaning up installer...
 del /q "%SCRIPT_DIR%%INSTALLER_README_FILENAME%"
-del /q "%~f0"
+del /q "%SCRIPT_DIR%install*"
