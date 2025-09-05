@@ -12,12 +12,6 @@ from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from pydantic import BaseModel
 
-from cyber_query_ai.config import get_root_dir
-
-RAG_DATA_DIR = get_root_dir() / "rag_data"
-TOOLS_FILENAME = "tools.json"
-TOOLS_FILEPATH = RAG_DATA_DIR / TOOLS_FILENAME
-
 
 class ToolsMetadata(BaseModel):
     """Metadata for a cybersecurity tool."""
@@ -80,9 +74,9 @@ class RAGSystem:
         )
 
     @classmethod
-    def create(cls, model: str, embedding_model: str) -> RAGSystem:
+    def create(cls, model: str, embedding_model: str, tools_json_filepath: Path) -> RAGSystem:
         """Create and initialize the RAG system."""
-        rag_system = cls(model=model, embedding_model=embedding_model, tools_json_filepath=TOOLS_FILEPATH)
+        rag_system = cls(model=model, embedding_model=embedding_model, tools_json_filepath=tools_json_filepath)
         rag_system.create_vector_store()
         return rag_system
 

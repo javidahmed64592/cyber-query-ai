@@ -183,10 +183,11 @@ class TestRAGSystem:
     def test_create_class_method(self, mock_ollama_embeddings: MagicMock) -> None:
         """Test RAGSystem.create class method."""
         with patch.object(RAGSystem, "create_vector_store") as mock_create_vs:
-            rag_system = RAGSystem.create("test_model", "test_embedding")
+            rag_system = RAGSystem.create("test_model", "test_embedding", Path("test_tools.json"))
 
         assert rag_system.model == "test_model"
         assert rag_system.embedding_model == "test_embedding"
+        assert rag_system.tools_json_filepath == Path("test_tools.json")
         mock_create_vs.assert_called_once()
 
     def test_load_documents_with_existing_tools_file(self, rag_system: RAGSystem, mock_text_loader: MagicMock) -> None:
