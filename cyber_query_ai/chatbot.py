@@ -3,7 +3,7 @@
 from langchain.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
-from cyber_query_ai.rag import RAGSystem
+from cyber_query_ai.rag import create_rag_system
 
 JSON_FORMATTING_RULES = (
     "CRITICAL JSON FORMATTING RULES:\n"
@@ -19,7 +19,7 @@ class Chatbot:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = OllamaLLM(model=self.model)
-        self.rag_system = RAGSystem(model=self.model)
+        self.rag_system = create_rag_system(model=self.model)
 
     @property
     def profile(self) -> str:

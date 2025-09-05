@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from langchain_community.document_loaders import TextLoader
 from langchain_core.documents import Document
@@ -16,13 +17,14 @@ from cyber_query_ai.config import get_root_dir
 RAG_DATA_DIR = get_root_dir() / "rag_data"
 TOOLS_FILENAME = "tools.json"
 TOOLS_FILEPATH = RAG_DATA_DIR / TOOLS_FILENAME
+EMBEDDING_MODEL = "nomic-embed-text"
 
 
 class ToolsMetadata(BaseModel):
     """Metadata for a cybersecurity tool."""
 
-    name: str
     file: str
+    name: str
     type: str
     category: str
     subcategory: str
@@ -66,10 +68,12 @@ class ToolSuite(BaseModel):
 class RAGSystem:
     """RAG (Retrieval-Augmented Generation) system for cybersecurity documentation."""
 
-    def __init__(self, model: str, embedding_model: str = "nomic-embed-text") -> None:
+    def __init__(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
         """Initialize the RAG system."""
         self.model = model
         self.embedding_model = embedding_model
+        self.tools_json_filepath = tools_json_filepath
+
         self.embeddings = OllamaEmbeddings(model=embedding_model)
         self.vector_store: InMemoryVectorStore | None = None
         self.text_splitter = RecursiveCharacterTextSplitter(
@@ -82,13 +86,13 @@ class RAGSystem:
         """Load all text documents from the rag_data directory with JSON metadata."""
         documents = []
 
-        if not RAG_DATA_DIR.exists():
+        if not self.tools_json_filepath.exists():
             return documents
 
-        tool_suite = ToolSuite.from_json(str(TOOLS_FILEPATH))
+        tool_suite = ToolSuite.from_json(str(self.tools_json_filepath))
 
         # Load all .txt files from rag_data directory
-        for txt_file in RAG_DATA_DIR.glob("*.txt"):
+        for txt_file in self.tools_json_filepath.parent.glob("*.txt"):
             loader = TextLoader(str(txt_file), encoding="utf-8")
             docs = loader.load()
 
@@ -103,40 +107,18 @@ class RAGSystem:
 
         return documents
 
-    def split_documents(self, documents: list[Document]) -> list[Document]:
-        """Split documents into smaller chunks for better retrieval."""
-        if not documents:
-            return []
-
-        return self.text_splitter.split_documents(documents)
-
-    def create_vector_store(self) -> InMemoryVectorStore:
+    def create_vector_store(self) -> None:
         """Create or return existing vector store."""
         if self.vector_store is not None:
-            return self.vector_store
+            return
 
-        # Load and split documents
-        documents = self.load_documents()
-        if not documents:
-            self.vector_store = InMemoryVectorStore(self.embeddings)
-            return self.vector_store
-
-        splits = self.split_documents(documents)
-
-        # Create vector store and add documents
+        # Create vector store
         self.vector_store = InMemoryVectorStore(self.embeddings)
 
-        if splits:
-            self.vector_store.add_documents(splits)
-
-        return self.vector_store
-
-    def get_relevant_context(self, query: str, k: int = 4) -> list[Document]:
-        """Retrieve relevant documents for a given query."""
-        try:
-            return self.vector_store.similarity_search(query, k=k)
-        except Exception:
-            return []
+        # Load and split documents
+        if documents := self.load_documents():
+            if splits := self.text_splitter.split_documents(documents):
+                self.vector_store.add_documents(splits)
 
     def format_context(self, documents: list[Document]) -> str:
         """Format retrieved documents into a context string with rich metadata."""
@@ -147,41 +129,32 @@ class RAGSystem:
         for doc in documents:
             tool = doc.metadata.get("tool", "unknown")
             source = doc.metadata.get("source", "unknown")
-            category = doc.metadata.get("category", "")
-            description = doc.metadata.get("description", "")
-            tags = doc.metadata.get("tags", [])
             content = doc.page_content.strip()
 
             # Build header with metadata
             header_parts = [f"Tool: {tool}"]
-            if category:
+            if category := doc.metadata.get("category", ""):
                 header_parts.append(f"Category: {category}")
-            if description:
+            if subcategory := doc.metadata.get("subcategory", ""):
+                header_parts.append(f"Subcategory: {subcategory}")
+            if description := doc.metadata.get("description", ""):
                 header_parts.append(f"Description: {description}")
-            if tags:
+            if tags := doc.metadata.get("tags", []):
                 header_parts.append(f"Tags: {', '.join(tags)}")
+            if use_cases := doc.metadata.get("use_cases", []):
+                header_parts.append(f"Use Cases: {', '.join(use_cases)}")
 
             header = " | ".join(header_parts)
             context_parts.append(f"[{header}]\nSource: {source}\n\n{content}")
 
         return "\n\n" + "=" * 80 + "\n\n".join(context_parts)
 
-    def is_available(self) -> bool:
-        """Check if the RAG system is available and ready to use."""
-        try:
-            if self.vector_store is None:
-                self.create_vector_store()
-        except Exception:
-            return False
-        else:
-            return self.vector_store is not None
-
     def get_context_for_template(self, query: str) -> str:
         """Get RAG context for a specific query."""
-        if not self.is_available():
+        if not self.vector_store:
             return ""
 
-        if relevant_docs := self.vector_store.similarity_search(query):
+        if relevant_docs := self.vector_store.similarity_search(query, k=3):
             return self.format_context(relevant_docs)
 
         return ""
@@ -199,8 +172,8 @@ class RAGSystem:
         return ""
 
 
-def create_rag_system(model: str = "llama3.2") -> RAGSystem:
+def create_rag_system(model: str) -> RAGSystem:
     """Create and initialize the RAG system."""
-    rag_system = RAGSystem(model=model)
+    rag_system = RAGSystem(model=model, embedding_model=EMBEDDING_MODEL, tools_json_filepath=TOOLS_FILEPATH)
     rag_system.create_vector_store()
     return rag_system

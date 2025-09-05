@@ -18,7 +18,7 @@ def mock_ollama_llm() -> Generator[MagicMock, None, None]:
 @pytest.fixture(autouse=True)
 def mock_rag_system() -> Generator[MagicMock, None, None]:
     """Fixture to mock the RAGSystem."""
-    with patch("cyber_query_ai.chatbot.RAGSystem", autospec=True) as mock:
+    with patch("cyber_query_ai.chatbot.create_rag_system", autospec=True) as mock:
         mock.return_value.generate_rag_content.return_value = "rag content"
         yield mock
 
