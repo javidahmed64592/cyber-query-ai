@@ -1,11 +1,10 @@
 {
   "dirb": {
-    "file": "dirb_man.txt",
+    "file": "dirb_help.txt",
     "name": "dirb",
     "category": "reconnaissance",
     "subcategory": "web_enumeration",
     "description": "Web Content Scanner that performs dictionary-based attacks against web servers",
-    "type": "manual",
     "tags": ["web", "enumeration", "directory", "brute-force"],
     "use_cases": [
       "directory enumeration",
@@ -19,7 +18,6 @@
     "category": "reconnaissance",
     "subcategory": "web_enumeration",
     "description": "Java application designed to brute force directories and file names on web/application servers",
-    "type": "help",
     "tags": ["web", "enumeration", "directory", "gui"],
     "use_cases": [
       "directory enumeration",
@@ -28,12 +26,11 @@
     ]
   },
   "ffuf": {
-    "file": "ffuf_man.txt",
+    "file": "ffuf_help.txt",
     "name": "ffuf",
     "category": "reconnaissance",
     "subcategory": "web_enumeration",
     "description": "Fast web fuzzer written in Go",
-    "type": "manual",
     "tags": ["web", "fuzzing", "enumeration", "fast"],
     "use_cases": [
       "directory fuzzing",
@@ -42,12 +39,11 @@
     ]
   },
   "gobuster": {
-    "file": "gobuster_man.txt",
+    "file": "gobuster_help.txt",
     "name": "gobuster",
     "category": "reconnaissance",
     "subcategory": "web_enumeration",
     "description": "Directory/File, DNS and VHost busting tool written in Go",
-    "type": "manual",
     "tags": ["web", "enumeration", "dns", "vhost"],
     "use_cases": [
       "directory enumeration",
@@ -56,32 +52,29 @@
     ]
   },
   "hashcat": {
-    "file": "hashcat_man.txt",
+    "file": "hashcat_help.txt",
     "name": "hashcat",
     "category": "password_attacks",
     "subcategory": "hash_cracking",
     "description": "Advanced password recovery utility",
-    "type": "manual",
     "tags": ["password", "hash", "cracking", "gpu"],
     "use_cases": ["password cracking", "hash analysis", "security testing"]
   },
   "hashid": {
-    "file": "hashid_man.txt",
+    "file": "hashid_help.txt",
     "name": "hashid",
     "category": "password_attacks",
     "subcategory": "hash_identification",
     "description": "Tool to identify different hash types",
-    "type": "manual",
     "tags": ["hash", "identification", "analysis"],
     "use_cases": ["hash type identification", "forensics", "password analysis"]
   },
   "hydra": {
-    "file": "hydra_man.txt",
+    "file": "hydra_help.txt",
     "name": "hydra",
     "category": "password_attacks",
     "subcategory": "brute_force",
     "description": "Very fast network logon cracker which supports many different services",
-    "type": "manual",
     "tags": ["brute-force", "network", "login", "multi-protocol"],
     "use_cases": [
       "password brute forcing",
@@ -90,22 +83,20 @@
     ]
   },
   "john": {
-    "file": "john_man.txt",
+    "file": "john_help.txt",
     "name": "john",
     "category": "password_attacks",
     "subcategory": "password_cracking",
     "description": "John the Ripper password cracker",
-    "type": "manual",
     "tags": ["password", "cracking", "dictionary"],
     "use_cases": ["password cracking", "security auditing", "forensics"]
   },
   "medusa": {
-    "file": "medusa_man.txt",
+    "file": "medusa_help.txt",
     "name": "medusa",
     "category": "password_attacks",
     "subcategory": "brute_force",
     "description": "Speedy, parallel, and modular, login brute-forcer",
-    "type": "manual",
     "tags": ["brute-force", "parallel", "network", "modular"],
     "use_cases": [
       "network brute forcing",
@@ -114,22 +105,20 @@
     ]
   },
   "msfvenom": {
-    "file": "msfvenom_man.txt",
+    "file": "msfvenom_help.txt",
     "name": "msfvenom",
     "category": "exploitation",
     "subcategory": "payload_generation",
     "description": "Metasploit payload generator and encoder",
-    "type": "manual",
     "tags": ["metasploit", "payload", "exploitation", "encoding"],
     "use_cases": ["payload generation", "exploitation", "penetration testing"]
   },
   "ncrack": {
-    "file": "ncrack_man.txt",
+    "file": "ncrack_help.txt",
     "name": "ncrack",
     "category": "password_attacks",
     "subcategory": "network_brute_force",
     "description": "High-speed network authentication cracking tool",
-    "type": "manual",
     "tags": ["network", "brute-force", "authentication", "fast"],
     "use_cases": [
       "network password cracking",
@@ -138,12 +127,11 @@
     ]
   },
   "netcat": {
-    "file": "netcat_man.txt",
+    "file": "netcat_help.txt",
     "name": "netcat",
     "category": "networking",
     "subcategory": "network_utility",
     "description": "The network Swiss Army knife",
-    "type": "manual",
     "tags": ["network", "tcp", "udp", "utility"],
     "use_cases": [
       "port scanning",
@@ -153,12 +141,11 @@
     ]
   },
   "nikto": {
-    "file": "nikto_man.txt",
+    "file": "nikto_help.txt",
     "name": "nikto",
     "category": "reconnaissance",
     "subcategory": "web_vulnerability_scanning",
     "description": "Web server scanner which performs comprehensive tests",
-    "type": "manual",
     "tags": ["web", "vulnerability", "scanning", "comprehensive"],
     "use_cases": [
       "web vulnerability scanning",
@@ -167,12 +154,11 @@
     ]
   },
   "nmap": {
-    "file": "nmap_man.txt",
+    "file": "nmap_help.txt",
     "name": "nmap",
     "category": "reconnaissance",
     "subcategory": "network_scanning",
     "description": "Network exploration tool and security/port scanner",
-    "type": "manual",
     "tags": ["network", "port", "scanning", "enumeration"],
     "use_cases": [
       "port scanning",
@@ -182,22 +168,20 @@
     ]
   },
   "recon-ng": {
-    "file": "recon-ng_man.txt",
+    "file": "recon-ng_help.txt",
     "name": "recon-ng",
     "category": "reconnaissance",
     "subcategory": "osint",
     "description": "Full-featured reconnaissance framework",
-    "type": "manual",
     "tags": ["reconnaissance", "osint", "framework", "modular"],
     "use_cases": ["OSINT gathering", "reconnaissance", "information collection"]
   },
   "sqlmap": {
-    "file": "sqlmap_man.txt",
+    "file": "sqlmap_help.txt",
     "name": "sqlmap",
     "category": "exploitation",
     "subcategory": "sql_injection",
     "description": "Automatic SQL injection and database takeover tool",
-    "type": "manual",
     "tags": ["sql", "injection", "database", "automatic"],
     "use_cases": [
       "SQL injection testing",
@@ -206,12 +190,11 @@
     ]
   },
   "unicornscan": {
-    "file": "unicornscan_man.txt",
+    "file": "unicornscan_help.txt",
     "name": "unicornscan",
     "category": "reconnaissance",
     "subcategory": "network_scanning",
     "description": "Asynchronous network stimulus delivery/response framework",
-    "type": "manual",
     "tags": ["network", "scanning", "asynchronous", "fast"],
     "use_cases": [
       "fast port scanning",
@@ -220,12 +203,11 @@
     ]
   },
   "wfuzz": {
-    "file": "wfuzz_man.txt",
+    "file": "wfuzz_help.txt",
     "name": "wfuzz",
     "category": "reconnaissance",
     "subcategory": "web_fuzzing",
     "description": "Web application fuzzer",
-    "type": "manual",
     "tags": ["web", "fuzzing", "application", "testing"],
     "use_cases": [
       "web application fuzzing",
@@ -234,12 +216,11 @@
     ]
   },
   "whatweb": {
-    "file": "whatweb_man.txt",
+    "file": "whatweb_help.txt",
     "name": "whatweb",
     "category": "reconnaissance",
     "subcategory": "web_fingerprinting",
     "description": "Web scanner that identifies technologies used by websites",
-    "type": "manual",
     "tags": ["web", "fingerprinting", "technology", "identification"],
     "use_cases": [
       "technology identification",
@@ -248,12 +229,11 @@
     ]
   },
   "zenmap": {
-    "file": "zenmap_man.txt",
+    "file": "zenmap_help.txt",
     "name": "zenmap",
     "category": "reconnaissance",
     "subcategory": "network_scanning",
     "description": "Official Nmap Security Scanner GUI",
-    "type": "manual",
     "tags": ["nmap", "gui", "network", "scanning"],
     "use_cases": [
       "graphical network scanning",

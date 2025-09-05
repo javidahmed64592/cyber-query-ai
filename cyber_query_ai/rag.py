@@ -24,7 +24,6 @@ class ToolsMetadata(BaseModel):
 
     file: str
     name: str
-    type: str
     category: str
     subcategory: str
     description: str
@@ -37,7 +36,6 @@ class ToolsMetadata(BaseModel):
         return {
             "source": self.file,
             "tool": self.name,
-            "type": self.type,
             "category": self.category,
             "subcategory": self.subcategory,
             "description": self.description,
