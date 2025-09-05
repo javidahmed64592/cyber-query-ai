@@ -1,5 +1,6 @@
 {
   "model": "mistral",
+  "embedding_model": "bge-m3",
   "host": "localhost",
   "port": 8000
 }

@@ -17,7 +17,6 @@ from cyber_query_ai.config import get_root_dir
 RAG_DATA_DIR = get_root_dir() / "rag_data"
 TOOLS_FILENAME = "tools.json"
 TOOLS_FILEPATH = RAG_DATA_DIR / TOOLS_FILENAME
-EMBEDDING_MODEL = "bge-m3"
 
 
 class ToolsMetadata(BaseModel):
@@ -172,8 +171,8 @@ class RAGSystem:
         return ""
 
 
-def create_rag_system(model: str) -> RAGSystem:
+def create_rag_system(model: str, embedding_model: str) -> RAGSystem:
     """Create and initialize the RAG system."""
-    rag_system = RAGSystem(model=model, embedding_model=EMBEDDING_MODEL, tools_json_filepath=TOOLS_FILEPATH)
+    rag_system = RAGSystem(model=model, embedding_model=embedding_model, tools_json_filepath=TOOLS_FILEPATH)
     rag_system.create_vector_store()
     return rag_system

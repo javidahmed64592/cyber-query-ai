@@ -28,7 +28,7 @@ def create_app(config: Config, api_router: APIRouter, limiter: Limiter) -> FastA
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
-    app.state.chatbot = Chatbot(model=config.model)
+    app.state.chatbot = Chatbot(model=config.model, embedding_model=config.embedding_model)
     app.include_router(api_router)
 
     # Rate limiter setup

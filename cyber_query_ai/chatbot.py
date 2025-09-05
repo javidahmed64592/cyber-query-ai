@@ -15,11 +15,11 @@ JSON_FORMATTING_RULES = (
 class Chatbot:
     """Chatbot class for LLM queries with RAG support."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, embedding_model: str) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = OllamaLLM(model=self.model)
-        self.rag_system = create_rag_system(model=self.model)
+        self.rag_system = create_rag_system(model=self.model, embedding_model=embedding_model)
 
     @property
     def profile(self) -> str:
@@ -51,6 +51,7 @@ class Chatbot:
             "4. SEQUENTIAL WORKFLOW: If multiple commands must be run in order, "
             "return 'commands': ['step1', 'step2', ...] and explain the workflow in 'explanation'.\n\n"
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
+            "If the user requests a specific tool, ENSURE you include it if appropriate."
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
         )
         rag_content = self.rag_system.generate_rag_content(base_template)

@@ -13,6 +13,7 @@ class Config(BaseModel):
     """Configuration settings for the CyberQueryAI application."""
 
     model: str
+    embedding_model: str
     host: str
     port: int
 
