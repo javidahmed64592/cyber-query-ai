@@ -9,12 +9,58 @@ from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from pydantic import BaseModel
 
 from cyber_query_ai.config import get_root_dir
 
 RAG_DATA_DIR = get_root_dir() / "rag_data"
 TOOLS_FILENAME = "tools.json"
 TOOLS_FILEPATH = RAG_DATA_DIR / TOOLS_FILENAME
+
+
+class ToolsMetadata(BaseModel):
+    """Metadata for a cybersecurity tool."""
+
+    name: str
+    file: str
+    type: str
+    category: str
+    subcategory: str
+    description: str
+    tags: list[str]
+    use_cases: list[str]
+
+    @property
+    def metadata_dict(self) -> dict:
+        """Return metadata as a dictionary."""
+        return {
+            "source": self.file,
+            "tool": self.name,
+            "type": self.type,
+            "category": self.category,
+            "subcategory": self.subcategory,
+            "description": self.description,
+            "tags": self.tags,
+            "use_cases": self.use_cases,
+        }
+
+
+class ToolSuite(BaseModel):
+    """Suite of cybersecurity tools."""
+
+    tools: dict[str, ToolsMetadata]
+
+    @classmethod
+    def from_json(cls, filepath: str) -> ToolSuite:
+        """Load tools metadata from a JSON file."""
+        try:
+            with open(filepath, encoding="utf-8") as f:
+                data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return cls(tools={})
+
+        tools = {name: ToolsMetadata(**info) for name, info in data.items()}
+        return cls(tools=tools)
 
 
 class RAGSystem:
@@ -39,67 +85,23 @@ class RAGSystem:
         if not RAG_DATA_DIR.exists():
             return documents
 
-        tools_metadata = self._load_tools_metadata()
+        tool_suite = ToolSuite.from_json(str(TOOLS_FILEPATH))
 
         # Load all .txt files from rag_data directory
         for txt_file in RAG_DATA_DIR.glob("*.txt"):
-            try:
-                loader = TextLoader(str(txt_file), encoding="utf-8")
-                docs = loader.load()
+            loader = TextLoader(str(txt_file), encoding="utf-8")
+            docs = loader.load()
 
-                # Find metadata for this file
-                file_metadata = self._get_file_metadata(txt_file.name, tools_metadata)
+            # Find metadata for this file
+            for tool in tool_suite.tools.values():
+                if tool.file == txt_file.name:
+                    # Add metadata to each document
+                    for doc in docs:
+                        doc.metadata.update(tool.metadata_dict)
 
-                # Add metadata to each document
-                for doc in docs:
-                    doc.metadata.update(file_metadata)
-
-                documents.extend(docs)
-            except Exception as e:
-                # Skip files that can't be loaded, but log the issue
-                print(f"Warning: Could not load {txt_file.name}: {e}")
-                continue
+            documents.extend(docs)
 
         return documents
-
-    def _load_tools_metadata(self) -> dict:
-        """Load tools metadata from JSON file."""
-        if TOOLS_FILEPATH.exists():
-            with TOOLS_FILEPATH.open(encoding="utf-8") as f:
-                return json.load(f)
-        return {}
-
-    def _get_file_metadata(self, filename: str, tools_metadata: dict) -> dict:
-        """Get metadata for a file based on tools.json."""
-        # Default metadata
-        metadata = {
-            "source": filename,
-            "tool": "unknown",
-            "type": "manual",
-            "category": "unknown",
-            "subcategory": "unknown",
-            "description": "",
-            "tags": [],
-            "use_cases": [],
-        }
-
-        # Find matching tool in metadata
-        for tool_name, tool_info in tools_metadata.items():
-            if tool_info.get("file") == filename:
-                metadata.update(
-                    {
-                        "tool": tool_info.get("name", tool_name),
-                        "type": tool_info.get("type", "manual"),
-                        "category": tool_info.get("category", "unknown"),
-                        "subcategory": tool_info.get("subcategory", "unknown"),
-                        "description": tool_info.get("description", ""),
-                        "tags": tool_info.get("tags", []),
-                        "use_cases": tool_info.get("use_cases", []),
-                    }
-                )
-                break
-
-        return metadata
 
     def split_documents(self, documents: list[Document]) -> list[Document]:
         """Split documents into smaller chunks for better retrieval."""
