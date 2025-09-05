@@ -39,7 +39,6 @@ class RAGSystem:
         if not RAG_DATA_DIR.exists():
             return documents
 
-        # Load tools metadata from JSON
         tools_metadata = self._load_tools_metadata()
 
         # Load all .txt files from rag_data directory
@@ -65,13 +64,9 @@ class RAGSystem:
 
     def _load_tools_metadata(self) -> dict:
         """Load tools metadata from JSON file."""
-        try:
-            if TOOLS_FILEPATH.exists():
-                with open(TOOLS_FILEPATH, encoding="utf-8") as f:
-                    return json.load(f)
-        except Exception as e:
-            print(f"Warning: Could not load tools metadata: {e}")
-
+        if TOOLS_FILEPATH.exists():
+            with TOOLS_FILEPATH.open(encoding="utf-8") as f:
+                return json.load(f)
         return {}
 
     def _get_file_metadata(self, filename: str, tools_metadata: dict) -> dict:
