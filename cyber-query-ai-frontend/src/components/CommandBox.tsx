@@ -65,7 +65,10 @@ const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
 
           return (
             <div key={index} className="command-box group relative">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between w-full">
+                <span className="text-[var(--text-primary)] font-bold mr-2 flex-shrink-0">
+                  $
+                </span>
                 <code className="text-[var(--text-secondary)] break-all flex-1 mr-2">
                   {sanitizedCommand}
                 </code>
