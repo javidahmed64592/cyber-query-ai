@@ -137,8 +137,8 @@ class Chatbot:
     def pt_exploit_search(self) -> PromptTemplate:
         """Prompt template for exploit search."""
         base_template = (
-            f"{self.profile}Based on the following target description, suggest known exploits.\n\n",
-            "Target: `{prompt}`\n\n",
+            f"{self.profile}Based on the following target description, suggest known exploits.\n\n"
+            "Target: `{prompt}`\n\n"
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
         template = (

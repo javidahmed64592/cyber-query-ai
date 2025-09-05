@@ -88,7 +88,7 @@ class RAGSystem:
 
     def load_documents(self) -> list[Document]:
         """Load all text documents from the rag_data directory with JSON metadata."""
-        documents = []
+        documents: list[Document] = []
 
         if not self.tools_json_filepath.exists():
             return documents
