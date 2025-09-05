@@ -82,7 +82,7 @@ class Chatbot:
         template = (
             f"{base_template}"
             f"{JSON_FORMATTING_RULES}"
-            "- Do NOT include markdown code blocks (```python, ```) in the script content\n"
+            "- ENSURE you DO NOT include markdown code blocks (```python, ```) in the script content\n"
             "- The script should be plain text code without formatting\n"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within strings\n"

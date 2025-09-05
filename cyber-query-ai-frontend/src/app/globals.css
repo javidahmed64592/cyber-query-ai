@@ -139,16 +139,6 @@ body {
   color: var(--text-secondary);
   position: relative;
   overflow-x: auto;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-.command-box:before {
-  content: "$";
-  color: var(--text-primary);
-  font-weight: bold;
-  flex-shrink: 0;
 }
 
 /* Mobile Navigation Styles */

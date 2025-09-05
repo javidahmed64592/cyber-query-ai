@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { sanitizeOutput, isCommandSafe } from "@/lib/sanitization";
 
 interface CommandBoxProps {
@@ -8,6 +10,18 @@ interface CommandBoxProps {
 }
 
 const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  const handleCopy = async (command: string, index: number) => {
+    try {
+      await navigator.clipboard?.writeText(command);
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    } catch {
+      // Failed to copy to clipboard
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -47,27 +61,36 @@ const CommandBox = ({ commands, isLoading }: CommandBoxProps) => {
         {commands.map((command, index) => {
           const sanitizedCommand = sanitizeOutput(command);
           const safe = isCommandSafe(sanitizedCommand);
+          const isCopied = copiedIndex === index;
 
           return (
             <div key={index} className="command-box group relative">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between w-full">
+                <span className="text-[var(--text-primary)] font-bold mr-2 flex-shrink-0">
+                  $
+                </span>
                 <code className="text-[var(--text-secondary)] break-all flex-1 mr-2">
                   {sanitizedCommand}
                 </code>
-                {!safe && (
-                  <div className="text-[var(--neon-red)] text-xs font-bold whitespace-nowrap flex-shrink-0">
-                    ⚠️ POTENTIALLY UNSAFE
-                  </div>
-                )}
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {!safe && (
+                    <div className="text-[var(--neon-red)] text-xs font-bold whitespace-nowrap">
+                      ⚠️ POTENTIALLY UNSAFE
+                    </div>
+                  )}
+                  <button
+                    onClick={() => handleCopy(sanitizedCommand, index)}
+                    className="px-2 py-1 bg-[var(--surface-elevated)] hover:bg-[var(--surface-hover)]
+                               border border-[var(--border-color)] rounded text-xs
+                               text-[var(--text-muted)] hover:text-[var(--text-primary)]
+                               transition-all duration-200 flex items-center gap-1"
+                    title={isCopied ? "Copied!" : "Copy to clipboard"}
+                  >
+                    {isCopied ? "✓" : "📋"}
+                    <span>{isCopied ? "Copied" : "Copy"}</span>
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => navigator.clipboard?.writeText(sanitizedCommand)}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity
-                           text-[var(--text-muted)] hover:text-[var(--text-primary)] text-sm"
-                title="Copy to clipboard"
-              >
-                📋
-              </button>
             </div>
           );
         })}
