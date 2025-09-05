@@ -1,0 +1,244 @@
+{
+  "dirb": {
+    "file": "dirb_help.txt",
+    "name": "dirb",
+    "category": "reconnaissance",
+    "subcategory": "web_enumeration",
+    "description": "Web Content Scanner that performs dictionary-based attacks against web servers",
+    "tags": ["web", "enumeration", "directory", "brute-force"],
+    "use_cases": [
+      "directory enumeration",
+      "hidden file discovery",
+      "web reconnaissance"
+    ]
+  },
+  "dirbuster": {
+    "file": "dirbuster_help.txt",
+    "name": "dirbuster",
+    "category": "reconnaissance",
+    "subcategory": "web_enumeration",
+    "description": "Java application designed to brute force directories and file names on web/application servers",
+    "tags": ["web", "enumeration", "directory", "gui"],
+    "use_cases": [
+      "directory enumeration",
+      "file discovery",
+      "web security testing"
+    ]
+  },
+  "ffuf": {
+    "file": "ffuf_help.txt",
+    "name": "ffuf",
+    "category": "reconnaissance",
+    "subcategory": "web_enumeration",
+    "description": "Fast web fuzzer written in Go",
+    "tags": ["web", "fuzzing", "enumeration", "fast"],
+    "use_cases": [
+      "directory fuzzing",
+      "parameter fuzzing",
+      "virtual host discovery"
+    ]
+  },
+  "gobuster": {
+    "file": "gobuster_help.txt",
+    "name": "gobuster",
+    "category": "reconnaissance",
+    "subcategory": "web_enumeration",
+    "description": "Directory/File, DNS and VHost busting tool written in Go",
+    "tags": ["web", "enumeration", "dns", "vhost"],
+    "use_cases": [
+      "directory enumeration",
+      "DNS enumeration",
+      "virtual host discovery"
+    ]
+  },
+  "hashcat": {
+    "file": "hashcat_help.txt",
+    "name": "hashcat",
+    "category": "password_attacks",
+    "subcategory": "hash_cracking",
+    "description": "Advanced password recovery utility",
+    "tags": ["password", "hash", "cracking", "gpu"],
+    "use_cases": ["password cracking", "hash analysis", "security testing"]
+  },
+  "hashid": {
+    "file": "hashid_help.txt",
+    "name": "hashid",
+    "category": "password_attacks",
+    "subcategory": "hash_identification",
+    "description": "Tool to identify different hash types",
+    "tags": ["hash", "identification", "analysis"],
+    "use_cases": ["hash type identification", "forensics", "password analysis"]
+  },
+  "hydra": {
+    "file": "hydra_help.txt",
+    "name": "hydra",
+    "category": "password_attacks",
+    "subcategory": "brute_force",
+    "description": "Very fast network logon cracker which supports many different services",
+    "tags": ["brute-force", "network", "login", "multi-protocol"],
+    "use_cases": [
+      "password brute forcing",
+      "network service testing",
+      "authentication testing"
+    ]
+  },
+  "john": {
+    "file": "john_help.txt",
+    "name": "john",
+    "category": "password_attacks",
+    "subcategory": "password_cracking",
+    "description": "John the Ripper password cracker",
+    "tags": ["password", "cracking", "dictionary"],
+    "use_cases": ["password cracking", "security auditing", "forensics"]
+  },
+  "medusa": {
+    "file": "medusa_help.txt",
+    "name": "medusa",
+    "category": "password_attacks",
+    "subcategory": "brute_force",
+    "description": "Speedy, parallel, and modular, login brute-forcer",
+    "tags": ["brute-force", "parallel", "network", "modular"],
+    "use_cases": [
+      "network brute forcing",
+      "service authentication testing",
+      "security assessment"
+    ]
+  },
+  "msfvenom": {
+    "file": "msfvenom_help.txt",
+    "name": "msfvenom",
+    "category": "exploitation",
+    "subcategory": "payload_generation",
+    "description": "Metasploit payload generator and encoder",
+    "tags": ["metasploit", "payload", "exploitation", "encoding"],
+    "use_cases": ["payload generation", "exploitation", "penetration testing"]
+  },
+  "ncrack": {
+    "file": "ncrack_help.txt",
+    "name": "ncrack",
+    "category": "password_attacks",
+    "subcategory": "network_brute_force",
+    "description": "High-speed network authentication cracking tool",
+    "tags": ["network", "brute-force", "authentication", "fast"],
+    "use_cases": [
+      "network password cracking",
+      "service authentication testing",
+      "security auditing"
+    ]
+  },
+  "netcat": {
+    "file": "netcat_help.txt",
+    "name": "netcat",
+    "category": "networking",
+    "subcategory": "network_utility",
+    "description": "The network Swiss Army knife",
+    "tags": ["network", "tcp", "udp", "utility"],
+    "use_cases": [
+      "port scanning",
+      "file transfer",
+      "reverse shells",
+      "network debugging"
+    ]
+  },
+  "nikto": {
+    "file": "nikto_help.txt",
+    "name": "nikto",
+    "category": "reconnaissance",
+    "subcategory": "web_vulnerability_scanning",
+    "description": "Web server scanner which performs comprehensive tests",
+    "tags": ["web", "vulnerability", "scanning", "comprehensive"],
+    "use_cases": [
+      "web vulnerability scanning",
+      "server enumeration",
+      "security assessment"
+    ]
+  },
+  "nmap": {
+    "file": "nmap_help.txt",
+    "name": "nmap",
+    "category": "reconnaissance",
+    "subcategory": "network_scanning",
+    "description": "Network exploration tool and security/port scanner",
+    "tags": ["network", "port", "scanning", "enumeration"],
+    "use_cases": [
+      "port scanning",
+      "network discovery",
+      "service enumeration",
+      "OS detection"
+    ]
+  },
+  "recon-ng": {
+    "file": "recon-ng_help.txt",
+    "name": "recon-ng",
+    "category": "reconnaissance",
+    "subcategory": "osint",
+    "description": "Full-featured reconnaissance framework",
+    "tags": ["reconnaissance", "osint", "framework", "modular"],
+    "use_cases": ["OSINT gathering", "reconnaissance", "information collection"]
+  },
+  "sqlmap": {
+    "file": "sqlmap_help.txt",
+    "name": "sqlmap",
+    "category": "exploitation",
+    "subcategory": "sql_injection",
+    "description": "Automatic SQL injection and database takeover tool",
+    "tags": ["sql", "injection", "database", "automatic"],
+    "use_cases": [
+      "SQL injection testing",
+      "database exploitation",
+      "web application security"
+    ]
+  },
+  "unicornscan": {
+    "file": "unicornscan_help.txt",
+    "name": "unicornscan",
+    "category": "reconnaissance",
+    "subcategory": "network_scanning",
+    "description": "Asynchronous network stimulus delivery/response framework",
+    "tags": ["network", "scanning", "asynchronous", "fast"],
+    "use_cases": [
+      "fast port scanning",
+      "network reconnaissance",
+      "service discovery"
+    ]
+  },
+  "wfuzz": {
+    "file": "wfuzz_help.txt",
+    "name": "wfuzz",
+    "category": "reconnaissance",
+    "subcategory": "web_fuzzing",
+    "description": "Web application fuzzer",
+    "tags": ["web", "fuzzing", "application", "testing"],
+    "use_cases": [
+      "web application fuzzing",
+      "parameter testing",
+      "directory enumeration"
+    ]
+  },
+  "whatweb": {
+    "file": "whatweb_help.txt",
+    "name": "whatweb",
+    "category": "reconnaissance",
+    "subcategory": "web_fingerprinting",
+    "description": "Web scanner that identifies technologies used by websites",
+    "tags": ["web", "fingerprinting", "technology", "identification"],
+    "use_cases": [
+      "technology identification",
+      "web reconnaissance",
+      "fingerprinting"
+    ]
+  },
+  "zenmap": {
+    "file": "zenmap_help.txt",
+    "name": "zenmap",
+    "category": "reconnaissance",
+    "subcategory": "network_scanning",
+    "description": "Official Nmap Security Scanner GUI",
+    "tags": ["nmap", "gui", "network", "scanning"],
+    "use_cases": [
+      "graphical network scanning",
+      "nmap visualization",
+      "scan management"
+    ]
+  }
+}

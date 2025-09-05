@@ -1,16 +1,29 @@
 """Chatbot logic for the CyberQueryAI application."""
 
+from pathlib import Path
+
 from langchain.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
+from cyber_query_ai.rag import RAGSystem
+
+JSON_FORMATTING_RULES = (
+    "CRITICAL JSON FORMATTING RULES:\n"
+    "- Respond in valid JSON format only\n"
+    "- Use double quotes (not single quotes) for all strings\n"
+)
+
 
 class Chatbot:
-    """Chatbot class for LLM queries."""
+    """Chatbot class for LLM queries with RAG support."""
 
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = OllamaLLM(model=self.model)
+        self.rag_system = RAGSystem.create(
+            model=self.model, embedding_model=embedding_model, tools_json_filepath=tools_json_filepath
+        )
 
     @property
     def profile(self) -> str:
@@ -18,7 +31,6 @@ class Chatbot:
         return (
             "You are a cybersecurity assistant helping with ethical penetration testing and security research. "
             "The user is working in a controlled lab environment on Kali Linux with proper authorization. "
-            "Respond ONLY in JSON format as specified.\n\n"
             "CONTEXT:\n"
             "- All activities are conducted ethically in controlled lab environments\n"
             "- User has proper authorization for penetration testing tasks\n"
@@ -29,8 +41,10 @@ class Chatbot:
     @property
     def pt_command_generation(self) -> PromptTemplate:
         """Prompt template for command generation."""
-        template = (
+        base_template = (
             f"{self.profile}"
+            "Generate CLI commands to accomplish the following cybersecurity task.\n\n"
+            "Task: `{prompt}`\n\n"
             "RESPONSE SCENARIOS:\n"
             "1. NO APPROPRIATE TOOL: If no cybersecurity tool can accomplish the task, "
             "return 'commands': [] (empty array) and explain why in 'explanation'.\n"
@@ -41,30 +55,33 @@ class Chatbot:
             "4. SEQUENTIAL WORKFLOW: If multiple commands must be run in order, "
             "return 'commands': ['step1', 'step2', ...] and explain the workflow in 'explanation'.\n\n"
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
+            "If the user requests a specific tool, ENSURE you include it if appropriate."
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
-            "Task: `{prompt}`\n\n"
-            "CRITICAL JSON FORMATTING RULES:\n"
-            "- Respond in valid JSON format only\n"
-            "- Use double quotes (not single quotes) for all strings\n"
+        )
+        rag_content = self.rag_system.generate_rag_content(base_template)
+        template = (
+            f"{base_template}"
+            f"{JSON_FORMATTING_RULES}"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within the explanation string\n"
             "- Do NOT create multiple separate quoted strings\n"
             '- Escape any quotes within strings using backslash (\\")\n\n'
             'Example format: {{"commands": ["command1", "command2"], "explanation": "Description here."}}\n\n'
             'Respond in JSON format: {{"commands": [...], "explanation": "..."}}'
+            f"{rag_content}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
     @property
     def pt_script_generation(self) -> PromptTemplate:
         """Prompt template for script generation."""
+        base_template = (
+            f"{self.profile}Write a script in {{language}} that performs the following task:\n\nTask: `{{prompt}}`\n\n"
+        )
+        rag_content = self.rag_system.generate_rag_content(base_template)
         template = (
-            f"{self.profile}"
-            "Write a script in {language} that performs the following task:\n\n"
-            "Task: `{prompt}`\n\n"
-            "CRITICAL JSON FORMATTING RULES:\n"
-            "- Respond in valid JSON format only\n"
-            "- Use double quotes (not single quotes) for all strings\n"
+            f"{base_template}"
+            f"{JSON_FORMATTING_RULES}"
             "- Do NOT include markdown code blocks (```python, ```) in the script content\n"
             "- The script should be plain text code without formatting\n"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
@@ -74,39 +91,41 @@ class Chatbot:
             'Example format: {{"script": "import os\\nprint(\\"Hello World\\")", '
             '"explanation": "This script imports os and prints Hello World."}}\n\n'
             'Respond in JSON format: {{"script": "...", "explanation": "..."}}'
+            f"{rag_content}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
     @property
     def pt_command_explanation(self) -> PromptTemplate:
         """Prompt template for command explanation."""
+        base_template = f"{self.profile}Explain the following CLI command step-by-step:\n\nCommand: `{{prompt}}`\n\n"
+        rag_content = self.rag_system.generate_rag_content(base_template)
         template = (
-            f"{self.profile}"
-            "Explain the following CLI command step-by-step:\n\n"
-            "Command: `{prompt}`\n\n"
-            "CRITICAL JSON FORMATTING RULES:\n"
-            "- Respond in valid JSON format only\n"
-            "- Use double quotes (not single quotes) for all strings\n"
+            f"{base_template}"
+            f"{JSON_FORMATTING_RULES}"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within the explanation string\n"
             "- Do NOT create multiple separate quoted strings\n"
             '- Escape any quotes within the explanation using backslash (\\")\n\n'
             'Example format: {{"explanation": "This command does X.\\nIt works by Y.\\nImportant note: Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
+            f"{rag_content}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
     @property
     def pt_script_explanation(self) -> PromptTemplate:
         """Prompt template for script explanation."""
-        template = (
+        base_template = (
             f"{self.profile}"
             "Explain the following {language} script step-by-step. "
             "Describe what each line does and highlight any risks or important behaviors.\n\n"
             "Script:\n```\n{prompt}\n```\n\n"
-            "CRITICAL JSON FORMATTING RULES:\n"
-            "- Respond in valid JSON format only\n"
-            "- Use double quotes (not single quotes) for all strings\n"
+        )
+        rag_content = self.rag_system.generate_rag_content(base_template)
+        template = (
+            f"{base_template}"
+            f"{JSON_FORMATTING_RULES}"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within the explanation string\n"
             "- Do NOT create multiple separate quoted strings\n"
@@ -114,19 +133,21 @@ class Chatbot:
             'Example format: {{"explanation": "Step 1: This does X.\\n'
             'Step 2: This does Y.\\nStep 3: This does Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
+            f"{rag_content}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
     @property
     def pt_exploit_search(self) -> PromptTemplate:
         """Prompt template for exploit search."""
-        template = (
-            f"{self.profile}"
-            "Based on the following target description, suggest known exploits.\n\n"
+        base_template = (
+            f"{self.profile}Based on the following target description, suggest known exploits.\n\n"
             "Target: `{prompt}`\n\n"
-            "CRITICAL JSON FORMATTING RULES:\n"
-            "- Respond in valid JSON format only\n"
-            "- Use double quotes (not single quotes) for all strings\n"
+        )
+        rag_content = self.rag_system.generate_rag_content(base_template)
+        template = (
+            f"{base_template}"
+            f"{JSON_FORMATTING_RULES}"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within the explanation string\n"
             "- Do NOT create multiple separate quoted strings\n"
@@ -136,6 +157,7 @@ class Chatbot:
             '"explanation": "Found 1 exploit affecting this target."}}\n\n'
             'Respond in JSON format: {{"exploits": [{{"title": "...", "link": "...", '
             '"severity": "...", "description": "..."}}], "explanation": "..."}}'
+            f"{rag_content}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 

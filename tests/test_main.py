@@ -1,6 +1,7 @@
 """Unit tests for the cyber_query_ai.main module."""
 
 from collections.abc import Generator
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,7 +20,7 @@ HTTP_INTERNAL_SERVER_ERROR = 500
 @pytest.fixture
 def mock_config() -> Config:
     """Fixture for a mock configuration."""
-    return Config(model="test-model", host="localhost", port=8000)
+    return Config(model="test-model", embedding_model="test-embedding-model", host="localhost", port=8000)
 
 
 @pytest.fixture
@@ -79,7 +80,11 @@ class TestCreateApp:
 
     def test_create_app_configuration(self, mock_app: FastAPI, mock_config: Config, mock_chatbot: MagicMock) -> None:
         """Test that create_app properly configures the FastAPI application."""
-        mock_chatbot.assert_called_once_with(model=mock_config.model)
+        mock_chatbot.assert_called_once_with(
+            model=mock_config.model,
+            embedding_model=mock_config.embedding_model,
+            tools_json_filepath=Path("rag_data") / "tools.json",
+        )
         assert mock_app.state.chatbot == mock_chatbot.return_value
         assert mock_app.state.limiter == limiter
 

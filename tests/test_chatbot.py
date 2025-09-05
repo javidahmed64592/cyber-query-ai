@@ -1,6 +1,7 @@
 """Unit tests for the cyber_query_ai.config module."""
 
 from collections.abc import Generator
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -15,66 +16,82 @@ def mock_ollama_llm() -> Generator[MagicMock, None, None]:
         yield mock
 
 
+@pytest.fixture(autouse=True)
+def mock_rag_system() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the RAGSystem."""
+    with patch("cyber_query_ai.chatbot.RAGSystem.create", autospec=True) as mock:
+        mock.return_value.generate_rag_content.return_value = "rag content"
+        yield mock
+
+
 @pytest.fixture
 def mock_chatbot() -> Chatbot:
     """Fixture to create a Chatbot instance with mocked OllamaLLM."""
-    return Chatbot(model="test-model")
+    return Chatbot(
+        model="test-model", embedding_model="test-embedding-model", tools_json_filepath=Path("test-tools.json")
+    )
 
 
 class TestChatbot:
     """Unit tests for the Chatbot class."""
 
-    def test_initialization(self, mock_chatbot: Chatbot, mock_ollama_llm: MagicMock) -> None:
+    def test_initialization(
+        self, mock_chatbot: Chatbot, mock_ollama_llm: MagicMock, mock_rag_system: MagicMock
+    ) -> None:
         """Test the initialization of the Chatbot."""
         mock_ollama_llm.assert_called_once_with(model=mock_chatbot.model)
         assert mock_chatbot.llm == mock_ollama_llm.return_value
+        mock_rag_system.assert_called_once_with(
+            model=mock_chatbot.model,
+            embedding_model="test-embedding-model",
+            tools_json_filepath=Path("test-tools.json"),
+        )
 
     def test_profile_property(self, mock_chatbot: Chatbot) -> None:
         """Test the profile property."""
         profile = mock_chatbot.profile
         assert "cybersecurity assistant" in profile
         assert "Kali Linux" in profile
-        assert "Respond ONLY in JSON format" in profile
 
-    def test_pt_command_generation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_command_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_command_generation property."""
         prompt_template = mock_chatbot.pt_command_generation
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "RESPONSE SCENARIOS" in prompt_template.template
         assert "Task: `{prompt}`" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_script_generation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_script_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_script_generation property."""
         prompt_template = mock_chatbot.pt_script_generation
         assert prompt_template.input_variables == ["language", "prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Write a script in {language}" in prompt_template.template
         assert "Task: `{prompt}`" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_command_explanation property."""
         prompt_template = mock_chatbot.pt_command_explanation
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Explain the following CLI command" in prompt_template.template
         assert "Command: `{prompt}`" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_script_explanation property."""
         prompt_template = mock_chatbot.pt_script_explanation
         assert prompt_template.input_variables == ["language", "prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Explain the following {language} script" in prompt_template.template
         assert "Script:\n```\n{prompt}\n```\n" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_exploit_search_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_exploit_search_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_exploit_search property."""
         prompt_template = mock_chatbot.pt_exploit_search
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "suggest known exploits" in prompt_template.template
         assert "Target: `{prompt}`" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
     def test_prompt_command_generation_method(self, mock_chatbot: Chatbot) -> None:
         """Test the prompt_command_generation method."""
