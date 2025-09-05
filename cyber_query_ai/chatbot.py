@@ -48,7 +48,7 @@ class Chatbot:
         )
         enhanced_template = self.rag_system.enhance_template(base_template, "command")
         template = (
-            f"{enhanced_template}"
+            f"{base_template}"
             "Task: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -59,6 +59,7 @@ class Chatbot:
             '- Escape any quotes within strings using backslash (\\")\n\n'
             'Example format: {{"commands": ["command1", "command2"], "explanation": "Description here."}}\n\n'
             'Respond in JSON format: {{"commands": [...], "explanation": "..."}}'
+            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -68,7 +69,7 @@ class Chatbot:
         base_template = f"{self.profile}Write a script in {{language}} that performs the following task:\n\n"
         enhanced_template = self.rag_system.enhance_template(base_template, "script")
         template = (
-            f"{enhanced_template}"
+            f"{base_template}"
             "Task: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -82,6 +83,7 @@ class Chatbot:
             'Example format: {{"script": "import os\\nprint(\\"Hello World\\")", '
             '"explanation": "This script imports os and prints Hello World."}}\n\n'
             'Respond in JSON format: {{"script": "...", "explanation": "..."}}'
+            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -91,7 +93,7 @@ class Chatbot:
         base_template = f"{self.profile}Explain the following CLI command step-by-step:\n\n"
         enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
         template = (
-            f"{enhanced_template}"
+            f"{base_template}"
             "Command: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -102,6 +104,7 @@ class Chatbot:
             '- Escape any quotes within the explanation using backslash (\\")\n\n'
             'Example format: {{"explanation": "This command does X.\\nIt works by Y.\\nImportant note: Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
+            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -115,7 +118,7 @@ class Chatbot:
         )
         enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
         template = (
-            f"{enhanced_template}"
+            f"{base_template}"
             "Script:\n```\n{prompt}\n```\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -127,6 +130,7 @@ class Chatbot:
             'Example format: {{"explanation": "Step 1: This does X.\\n'
             'Step 2: This does Y.\\nStep 3: This does Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
+            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -136,7 +140,7 @@ class Chatbot:
         base_template = f"{self.profile}Based on the following target description, suggest known exploits.\n\n"
         enhanced_template = self.rag_system.enhance_template(base_template, "exploit")
         template = (
-            f"{enhanced_template}"
+            f"{base_template}"
             "Target: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
@@ -150,6 +154,7 @@ class Chatbot:
             '"explanation": "Found 1 exploit affecting this target."}}\n\n'
             'Respond in JSON format: {{"exploits": [{{"title": "...", "link": "...", '
             '"severity": "...", "description": "..."}}], "explanation": "..."}}'
+            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 

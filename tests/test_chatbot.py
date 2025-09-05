@@ -15,6 +15,13 @@ def mock_ollama_llm() -> Generator[MagicMock, None, None]:
         yield mock
 
 
+@pytest.fixture(autouse=True)
+def mock_rag_system() -> Generator[MagicMock, None, None]:
+    """Fixture to mock the RAGSystem."""
+    with patch("cyber_query_ai.chatbot.RAGSystem", autospec=True) as mock:
+        yield mock
+
+
 @pytest.fixture
 def mock_chatbot() -> Chatbot:
     """Fixture to create a Chatbot instance with mocked OllamaLLM."""
@@ -36,45 +43,50 @@ class TestChatbot:
         assert "Kali Linux" in profile
         assert "Respond ONLY in JSON format" in profile
 
-    def test_pt_command_generation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_command_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_command_generation property."""
+        mock_rag_system.return_value.enhance_template.return_value = "enhanced_template"
         prompt_template = mock_chatbot.pt_command_generation
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "RESPONSE SCENARIOS" in prompt_template.template
         assert "Task: `{prompt}`" in prompt_template.template
+        assert "enhanced_template" in prompt_template.template
 
-    def test_pt_script_generation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_script_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_script_generation property."""
+        mock_rag_system.return_value.enhance_template.return_value = "enhanced_template"
         prompt_template = mock_chatbot.pt_script_generation
         assert prompt_template.input_variables == ["language", "prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Write a script in {language}" in prompt_template.template
         assert "Task: `{prompt}`" in prompt_template.template
+        assert "enhanced_template" in prompt_template.template
 
-    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_command_explanation property."""
+        mock_rag_system.return_value.enhance_template.return_value = "enhanced_template"
         prompt_template = mock_chatbot.pt_command_explanation
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Explain the following CLI command" in prompt_template.template
         assert "Command: `{prompt}`" in prompt_template.template
+        assert "enhanced_template" in prompt_template.template
 
-    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_script_explanation property."""
+        mock_rag_system.return_value.enhance_template.return_value = "enhanced_template"
         prompt_template = mock_chatbot.pt_script_explanation
         assert prompt_template.input_variables == ["language", "prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "Explain the following {language} script" in prompt_template.template
         assert "Script:\n```\n{prompt}\n```\n" in prompt_template.template
+        assert "enhanced_template" in prompt_template.template
 
-    def test_pt_exploit_search_property(self, mock_chatbot: Chatbot) -> None:
+    def test_pt_exploit_search_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_exploit_search property."""
+        mock_rag_system.return_value.enhance_template.return_value = "enhanced_template"
         prompt_template = mock_chatbot.pt_exploit_search
         assert prompt_template.input_variables == ["prompt"]
-        assert mock_chatbot.profile in prompt_template.template
         assert "suggest known exploits" in prompt_template.template
         assert "Target: `{prompt}`" in prompt_template.template
+        assert "enhanced_template" in prompt_template.template
 
     def test_prompt_command_generation_method(self, mock_chatbot: Chatbot) -> None:
         """Test the prompt_command_generation method."""
