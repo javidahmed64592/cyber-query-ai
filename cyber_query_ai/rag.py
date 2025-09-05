@@ -17,7 +17,7 @@ from cyber_query_ai.config import get_root_dir
 RAG_DATA_DIR = get_root_dir() / "rag_data"
 TOOLS_FILENAME = "tools.json"
 TOOLS_FILEPATH = RAG_DATA_DIR / TOOLS_FILENAME
-EMBEDDING_MODEL = "nomic-embed-text"
+EMBEDDING_MODEL = "bge-m3"
 
 
 class ToolsMetadata(BaseModel):
