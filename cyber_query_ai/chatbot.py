@@ -34,6 +34,8 @@ class Chatbot:
         """Prompt template for command generation."""
         base_template = (
             f"{self.profile}"
+            "Generate CLI commands to accomplish the following cybersecurity task.\n\n"
+            "Task: `{prompt}`\n\n"
             "RESPONSE SCENARIOS:\n"
             "1. NO APPROPRIATE TOOL: If no cybersecurity tool can accomplish the task, "
             "return 'commands': [] (empty array) and explain why in 'explanation'.\n"
@@ -46,10 +48,8 @@ class Chatbot:
             "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
             "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
         )
-        enhanced_template = self.rag_system.enhance_template(base_template, "command")
         template = (
             f"{base_template}"
-            "Task: `{prompt}`\n\n"
             "CRITICAL JSON FORMATTING RULES:\n"
             "- Respond in valid JSON format only\n"
             "- Use double quotes (not single quotes) for all strings\n"
@@ -59,7 +59,6 @@ class Chatbot:
             '- Escape any quotes within strings using backslash (\\")\n\n'
             'Example format: {{"commands": ["command1", "command2"], "explanation": "Description here."}}\n\n'
             'Respond in JSON format: {{"commands": [...], "explanation": "..."}}'
-            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -67,7 +66,6 @@ class Chatbot:
     def pt_script_generation(self) -> PromptTemplate:
         """Prompt template for script generation."""
         base_template = f"{self.profile}Write a script in {{language}} that performs the following task:\n\n"
-        enhanced_template = self.rag_system.enhance_template(base_template, "script")
         template = (
             f"{base_template}"
             "Task: `{prompt}`\n\n"
@@ -83,7 +81,6 @@ class Chatbot:
             'Example format: {{"script": "import os\\nprint(\\"Hello World\\")", '
             '"explanation": "This script imports os and prints Hello World."}}\n\n'
             'Respond in JSON format: {{"script": "...", "explanation": "..."}}'
-            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -91,7 +88,6 @@ class Chatbot:
     def pt_command_explanation(self) -> PromptTemplate:
         """Prompt template for command explanation."""
         base_template = f"{self.profile}Explain the following CLI command step-by-step:\n\n"
-        enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
         template = (
             f"{base_template}"
             "Command: `{prompt}`\n\n"
@@ -104,7 +100,6 @@ class Chatbot:
             '- Escape any quotes within the explanation using backslash (\\")\n\n'
             'Example format: {{"explanation": "This command does X.\\nIt works by Y.\\nImportant note: Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
-            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
@@ -116,7 +111,6 @@ class Chatbot:
             "Explain the following {language} script step-by-step. "
             "Describe what each line does and highlight any risks or important behaviors.\n\n"
         )
-        enhanced_template = self.rag_system.enhance_template(base_template, "explanation")
         template = (
             f"{base_template}"
             "Script:\n```\n{prompt}\n```\n\n"
@@ -130,7 +124,6 @@ class Chatbot:
             'Example format: {{"explanation": "Step 1: This does X.\\n'
             'Step 2: This does Y.\\nStep 3: This does Z."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
-            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["language", "prompt"], template=template)
 
@@ -138,7 +131,6 @@ class Chatbot:
     def pt_exploit_search(self) -> PromptTemplate:
         """Prompt template for exploit search."""
         base_template = f"{self.profile}Based on the following target description, suggest known exploits.\n\n"
-        enhanced_template = self.rag_system.enhance_template(base_template, "exploit")
         template = (
             f"{base_template}"
             "Target: `{prompt}`\n\n"
@@ -154,26 +146,35 @@ class Chatbot:
             '"explanation": "Found 1 exploit affecting this target."}}\n\n'
             'Respond in JSON format: {{"exploits": [{{"title": "...", "link": "...", '
             '"severity": "...", "description": "..."}}], "explanation": "..."}}'
-            f"{enhanced_template}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
     def prompt_command_generation(self, prompt: str) -> str:
         """Generate the prompt template for command generation."""
-        return self.pt_command_generation.format(prompt=prompt)
+        formatted_template = self.pt_command_generation.format(prompt=prompt)
+        rag_content = self.rag_system.generate_rag_content("command")
+        return f"{formatted_template}{rag_content}"
 
     def prompt_script_generation(self, language: str, prompt: str) -> str:
         """Generate the prompt template for script generation."""
-        return self.pt_script_generation.format(language=language, prompt=prompt)
+        formatted_template = self.pt_script_generation.format(language=language, prompt=prompt)
+        rag_content = self.rag_system.generate_rag_content("script")
+        return f"{formatted_template}{rag_content}"
 
     def prompt_command_explanation(self, prompt: str) -> str:
         """Generate the prompt template for command explanation."""
-        return self.pt_command_explanation.format(prompt=prompt)
+        formatted_template = self.pt_command_explanation.format(prompt=prompt)
+        rag_content = self.rag_system.generate_rag_content("explanation")
+        return f"{formatted_template}{rag_content}"
 
     def prompt_script_explanation(self, language: str, prompt: str) -> str:
         """Generate the prompt template for script explanation."""
-        return self.pt_script_explanation.format(language=language, prompt=prompt)
+        formatted_template = self.pt_script_explanation.format(language=language, prompt=prompt)
+        rag_content = self.rag_system.generate_rag_content("explanation")
+        return f"{formatted_template}{rag_content}"
 
     def prompt_exploit_search(self, prompt: str) -> str:
         """Generate the prompt template for exploit search."""
-        return self.pt_exploit_search.format(prompt=prompt)
+        formatted_template = self.pt_exploit_search.format(prompt=prompt)
+        rag_content = self.rag_system.generate_rag_content("exploit")
+        return f"{formatted_template}{rag_content}"
