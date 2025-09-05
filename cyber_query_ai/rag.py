@@ -79,6 +79,13 @@ class RAGSystem:
             add_start_index=True,
         )
 
+    @classmethod
+    def create(cls, model: str, embedding_model: str) -> RAGSystem:
+        """Create and initialize the RAG system."""
+        rag_system = cls(model=model, embedding_model=embedding_model, tools_json_filepath=TOOLS_FILEPATH)
+        rag_system.create_vector_store()
+        return rag_system
+
     def load_documents(self) -> list[Document]:
         """Load all text documents from the rag_data directory with JSON metadata."""
         documents = []
@@ -106,9 +113,6 @@ class RAGSystem:
 
     def create_vector_store(self) -> None:
         """Create or return existing vector store."""
-        if self.vector_store is not None:
-            return
-
         # Create vector store
         self.vector_store = InMemoryVectorStore(self.embeddings)
 
@@ -167,10 +171,3 @@ class RAGSystem:
             )
 
         return ""
-
-
-def create_rag_system(model: str, embedding_model: str) -> RAGSystem:
-    """Create and initialize the RAG system."""
-    rag_system = RAGSystem(model=model, embedding_model=embedding_model, tools_json_filepath=TOOLS_FILEPATH)
-    rag_system.create_vector_store()
-    return rag_system

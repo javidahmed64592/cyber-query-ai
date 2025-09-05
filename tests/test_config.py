@@ -10,6 +10,7 @@ import pytest
 from cyber_query_ai.config import Config, get_config_path, get_root_dir, load_config
 
 TEST_MODEL = "model"
+TEST_EMBEDDING_MODEL = "embedding-model"
 TEST_HOST = "localhost"
 TEST_PORT = 1234
 
@@ -17,7 +18,7 @@ TEST_PORT = 1234
 @pytest.fixture
 def mock_config() -> Config:
     """Fixture for a mock configuration."""
-    return Config(model=TEST_MODEL, host=TEST_HOST, port=TEST_PORT)
+    return Config(model=TEST_MODEL, embedding_model=TEST_EMBEDDING_MODEL, host=TEST_HOST, port=TEST_PORT)
 
 
 @pytest.fixture
@@ -34,6 +35,7 @@ class TestConfig:
         """Test the model_dump method."""
         expected = {
             "model": mock_config.model,
+            "embedding_model": mock_config.embedding_model,
             "host": mock_config.host,
             "port": mock_config.port,
         }
@@ -81,6 +83,7 @@ class TestConfigUtils:
         config = load_config()
 
         assert config.model == mock_config.model
+        assert config.embedding_model == mock_config.embedding_model
         assert config.host == mock_config.host
         assert config.port == mock_config.port
 
