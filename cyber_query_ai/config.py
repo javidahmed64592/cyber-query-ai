@@ -7,6 +7,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 CONFIG_FILENAME = "config.json"
+TOOLS_FILENAME = "tools.json"
 
 
 class Config(BaseModel):
@@ -26,6 +27,11 @@ def get_root_dir() -> Path:
 def get_config_path() -> Path:
     """Get the absolute path to the configuration file."""
     return get_root_dir() / CONFIG_FILENAME
+
+
+def get_tools_filepath() -> Path:
+    """Get the absolute path to the tools JSON file."""
+    return get_root_dir() / "rag_data" / TOOLS_FILENAME
 
 
 def load_config() -> Config:

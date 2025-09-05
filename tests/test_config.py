@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from cyber_query_ai.config import Config, get_config_path, get_root_dir, load_config
+from cyber_query_ai.config import Config, get_config_path, get_root_dir, get_tools_filepath, load_config
 
 TEST_MODEL = "model"
 TEST_EMBEDDING_MODEL = "embedding-model"
@@ -72,6 +72,14 @@ class TestConfigUtils:
     def test_get_config_path_without_root_dir_env_var(self) -> None:
         """Test get_config_path using the mock fixture."""
         assert get_config_path() == get_root_dir() / "config.json"
+
+    def test_get_tools_filepath_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None, None, None]) -> None:
+        """Test get_tools_filepath using the mock fixture."""
+        assert get_tools_filepath() == get_root_dir() / "rag_data" / "tools.json"
+
+    def test_get_tools_filepath_without_root_dir_env_var(self) -> None:
+        """Test get_tools_filepath without the environment variable."""
+        assert get_tools_filepath() == get_root_dir() / "rag_data" / "tools.json"
 
     def test_load_config_with_mock_file(
         self, mock_config: Config, mock_config_file: MagicMock, mock_get_config_path: MagicMock
