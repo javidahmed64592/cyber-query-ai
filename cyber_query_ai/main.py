@@ -14,7 +14,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from cyber_query_ai.api import get_api_router, get_limiter
 from cyber_query_ai.chatbot import Chatbot
-from cyber_query_ai.config import Config, load_config
+from cyber_query_ai.config import Config, get_tools_filepath, load_config
 from cyber_query_ai.helpers import get_static_dir, get_static_files
 
 
@@ -28,7 +28,9 @@ def create_app(config: Config, api_router: APIRouter, limiter: Limiter) -> FastA
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
-    app.state.chatbot = Chatbot(model=config.model, embedding_model=config.embedding_model)
+    app.state.chatbot = Chatbot(
+        model=config.model, embedding_model=config.embedding_model, tools_json_filepath=get_tools_filepath()
+    )
     app.include_router(api_router)
 
     # Rate limiter setup
