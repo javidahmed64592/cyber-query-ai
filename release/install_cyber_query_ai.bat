@@ -41,8 +41,7 @@ REM === Create executable launcher ===
 echo Creating launcher...
 echo @echo off > "%SCRIPT_DIR%%EXE_FILENAME%"
 echo set "CYBER_QUERY_AI_ROOT_DIR=%SCRIPT_DIR%" >> "%SCRIPT_DIR%%EXE_FILENAME%"
-echo start "" /min cmd /c "ollama serve" >> "%SCRIPT_DIR%%EXE_FILENAME%"
-echo echo Ollama server started... >> "%SCRIPT_DIR%%EXE_FILENAME%"
+echo start /b ollama serve >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo "%BIN_DIR%\cyber-query-ai.exe" %%* >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo echo Stopping Ollama server... >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo taskkill /f /im ollama.exe >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
@@ -56,5 +55,5 @@ echo To uninstall, delete the folder: "%SCRIPT_DIR%"
 
 REM === Self-delete installer ===
 echo Installation complete. Cleaning up installer...
-del /q "%~dp0install*"
 del /q "%SCRIPT_DIR%%INSTALLER_README_FILENAME%"
+del /q "%SCRIPT_DIR%install*"
