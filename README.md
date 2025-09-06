@@ -15,6 +15,17 @@ CyberQueryAI transforms natural language into precise cybersecurity commands, sc
 **Important: Ollama must be running locally on your system for this application to function.**
 
 <!-- omit from toc -->
+## Screenshots
+
+**See CyberQueryAI in action!** These screenshots showcase the intuitive interface and powerful capabilities that make cybersecurity tasks faster and more accessible. Experience natural language command generation, comprehensive tool explanations, and seamless workflow integration - all designed to accelerate your security research and testing.
+
+**Command Generation Page:**
+![Command Generation Interface - Shows the main interface for converting natural language to cybersecurity commands](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Command Generation Interface")
+
+**About Page:**
+![About Page - Displays comprehensive information about CyberQueryAI features and usage](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/about.png "About Page")
+
+<!-- omit from toc -->
 ## Table of Contents
 - [Why CyberQueryAI?](#why-cyberqueryai)
 - [Key Features](#key-features)
@@ -41,7 +52,6 @@ CyberQueryAI transforms natural language into precise cybersecurity commands, sc
   - [Frontend (TypeScript/React)](#frontend-typescriptreact)
   - [Development \& Operations](#development--operations)
 - [Documentation](#documentation)
-- [Contributing](#contributing)
 - [Security Policy \& Ethics](#security-policy--ethics)
   - [Core Principles](#core-principles)
   - [Prohibited Uses](#prohibited-uses)
@@ -96,6 +106,7 @@ CyberQueryAI's intuitive web interface provides specialized tools for different 
 
 ### **Command Generation** (`/command-generation`)
 The primary interface for converting natural language into executable security commands:
+
 - **Example**: "Scan a network for open ports" → `nmap -sS -O 192.168.1.0/24`
 
 ### **Script Generation** (`/script-generation`)
