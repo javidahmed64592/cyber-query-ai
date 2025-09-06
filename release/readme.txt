@@ -20,6 +20,16 @@ Prerequisites
 - Sufficient disk space for the virtual environment and application files.
 - Administrative privileges may be required for service creation on Linux/macOS.
 
+Ollama
+------
+By default, CyberQueryAI uses the `mistral` and `bge-m3` LLMs.
+You'll need to ensure you `pull` whichever models you plan to use:
+
+```
+ollama pull mistral
+ollama pull bge-m3
+```
+
 Which Script to Run?
 --------------------
 - If you are on Linux or macOS, run `./install_cyber_query_ai.sh`
@@ -65,7 +75,7 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
    - Makes the script executable.
 
 9. **Cleanup**:
-   - Removes the installer scripts (`install_cyber_query_ai.sh` and `install_cyber_query_ai.bat`) and the original `README.txt` file.
+   - Removes the installer scripts (`install_cyber_query_ai.sh` and `install_cyber_query_ai.bat`) and this file.
 
 10. **Display Success Message**:
    - Prints instructions on how to run the application, configure it, manage the service, view logs, and uninstall.
@@ -103,7 +113,7 @@ Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
    - Prints instructions on how to run the application, configure it, view logs, and uninstall.
 
 7. **Cleanup**:
-   - Deletes the installer scripts (`install_cyber_query_ai.bat` and `install_cyber_query_ai.sh`) and the original `README.txt` file.
+   - Deletes the installer scripts (`install_cyber_query_ai.bat` and `install_cyber_query_ai.sh`) and this file.
 
 Post-Installation Instructions
 ------------------------------

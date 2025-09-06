@@ -10,7 +10,8 @@
 
 **Your AI-powered cybersecurity assistant for ethical hacking, penetration testing, and security research.**
 
-CyberQueryAI transforms natural language into precise cybersecurity commands, scripts, and insights using advanced AI language models. Designed specifically for cybersecurity professionals, ethical hackers, and security researchers, this tool dramatically increases productivity while fostering learning and growth within the cybersecurity community.
+CyberQueryAI transforms natural language into precise cybersecurity commands, scripts, and insights using advanced AI language models.
+Designed specifically for cybersecurity professionals, ethical hackers, and security researchers, this tool dramatically increases productivity while fostering learning and growth within the cybersecurity community.
 
 **Important: Ollama must be running locally on your system for this application to function.**
 
@@ -150,6 +151,8 @@ Comprehensive information about the application, including:
 2. **Python 3.12+**: Required for the backend application
 3. **AI Model**: Pull a compatible model using Ollama (e.g., `ollama pull mistral`)
 
+**Note:** You can configure the LLMs used in the application by editing the `config.json` file.
+
 ### Installation
 
 #### Option 1: Using Pre-built Release (Recommended)
@@ -188,6 +191,7 @@ npm run dev
    ```json
    {
      "model": "mistral",
+     "embedding_model": "bge-m3",
      "host": "localhost",
      "port": 8000
    }
