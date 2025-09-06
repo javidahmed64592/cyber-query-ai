@@ -42,8 +42,6 @@ echo Creating launcher...
 echo @echo off > "%SCRIPT_DIR%%EXE_FILENAME%"
 echo set "CYBER_QUERY_AI_ROOT_DIR=%SCRIPT_DIR%" >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo start /b ollama serve >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
-echo timeout /t 3 /nobreak >nul >> "%SCRIPT_DIR%%EXE_FILENAME%"
-echo echo Ollama server started... >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo "%BIN_DIR%\cyber-query-ai.exe" %%* >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo echo Stopping Ollama server... >> "%SCRIPT_DIR%%EXE_FILENAME%"
 echo taskkill /f /im ollama.exe >nul 2>&1 >> "%SCRIPT_DIR%%EXE_FILENAME%"
