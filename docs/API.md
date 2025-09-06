@@ -5,7 +5,8 @@ This document summarizes the backend API provided by the CyberQueryAI FastAPI ap
 
 Rate limiting: 5 requests per minute (per client IP) on endpoints that call the LLM.
 
-All LLM-driven endpoints expect JSON requests and return JSON responses. The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
+All LLM-driven endpoints expect JSON requests and return JSON responses.
+The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
 
 <!-- omit from toc -->
 ## Table of Contents

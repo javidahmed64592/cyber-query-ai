@@ -10,7 +10,8 @@
 
 **Your AI-powered cybersecurity assistant for ethical hacking, penetration testing, and security research.**
 
-CyberQueryAI transforms natural language into precise cybersecurity commands, scripts, and insights using advanced AI language models. Designed specifically for cybersecurity professionals, ethical hackers, and security researchers, this tool dramatically increases productivity while fostering learning and growth within the cybersecurity community.
+CyberQueryAI transforms natural language into precise cybersecurity commands, scripts, and insights using advanced AI language models.
+Designed specifically for cybersecurity professionals, ethical hackers, and security researchers, this tool dramatically increases productivity while fostering learning and growth within the cybersecurity community.
 
 **Important: Ollama must be running locally on your system for this application to function.**
 

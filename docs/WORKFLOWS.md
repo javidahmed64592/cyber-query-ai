@@ -4,7 +4,8 @@ This document details the CI/CD workflows to build and release the CyberQueryAI 
 
 ## CI Workflow
 
-The CI workflow runs on pushes and pull requests to the `main` branch, consisting of the following jobs:
+The CI workflow runs on pushes and pull requests to the `main` branch.
+It consists of the following jobs:
 
 ### ruff
 - **Runner**: Ubuntu Latest
