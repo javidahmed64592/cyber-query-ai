@@ -1,3 +1,5 @@
+import { renderHook } from "@testing-library/react";
+
 import {
   generateCommand,
   generateScript,
@@ -5,6 +7,9 @@ import {
   explainScript,
   searchExploits,
   getConfig,
+  getHealth,
+  useHealthStatus,
+  type HealthStatus,
 } from "../api";
 import {
   CommandGenerationResponse,
@@ -12,17 +17,22 @@ import {
   ExplanationResponse,
   ExploitSearchResponse,
   ConfigResponse,
+  HealthResponse,
 } from "../types";
 
-// Mock the api module
-jest.mock("../api", () => ({
-  generateCommand: jest.fn(),
-  generateScript: jest.fn(),
-  explainCommand: jest.fn(),
-  explainScript: jest.fn(),
-  searchExploits: jest.fn(),
-  getConfig: jest.fn(),
-}));
+jest.mock("../api", () => {
+  const actual = jest.requireActual("../api");
+  return {
+    ...actual,
+    getHealth: jest.fn(),
+    getConfig: jest.fn(),
+    generateCommand: jest.fn(),
+    generateScript: jest.fn(),
+    explainCommand: jest.fn(),
+    explainScript: jest.fn(),
+    searchExploits: jest.fn(),
+  };
+});
 
 // Mock fetch for config endpoint
 global.fetch = jest.fn();
@@ -43,10 +53,43 @@ const mockSearchExploits = searchExploits as jest.MockedFunction<
   typeof searchExploits
 >;
 const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
+const mockGetHealth = getHealth as jest.MockedFunction<typeof getHealth>;
 
 describe("API Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("health", () => {
+    it("should fetch health status successfully", async () => {
+      const mockHealth: HealthResponse = {
+        status: "healthy",
+        timestamp: "2023-01-01T00:00:00Z",
+      };
+
+      mockGetHealth.mockResolvedValue(mockHealth);
+
+      const health = await getHealth();
+
+      expect(mockGetHealth).toHaveBeenCalled();
+      expect(health).toEqual(mockHealth);
+      expect(health.status).toBe("healthy");
+    });
+
+    it("should handle health check error", async () => {
+      const errorMessage = "Service unavailable";
+      mockGetHealth.mockRejectedValue(new Error(errorMessage));
+
+      await expect(getHealth()).rejects.toThrow(errorMessage);
+    });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockGetHealth.mockRejectedValue(new Error(errorMessage));
+
+      await expect(getHealth()).rejects.toThrow(errorMessage);
+    });
   });
 
   describe("config", () => {
@@ -347,6 +390,19 @@ describe("API Tests", () => {
       await expect(searchExploits("Apache server")).rejects.toThrow(
         errorMessage
       );
+    });
+  });
+
+  describe("useHealthStatus", () => {
+    it("should initialize with 'checking' status", () => {
+      const { result } = renderHook(() => useHealthStatus());
+      expect(result.current).toBe("checking");
+    });
+
+    it("should return correct HealthStatus type", () => {
+      const { result } = renderHook(() => useHealthStatus());
+      const status: HealthStatus = result.current;
+      expect(["checking", "online", "offline"]).toContain(status);
     });
   });
 });

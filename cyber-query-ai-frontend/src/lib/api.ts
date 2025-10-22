@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useEffect, useState } from "react";
 
 import {
   PromptRequest,
@@ -8,6 +9,7 @@ import {
   ExplanationResponse,
   ExploitSearchResponse,
   ConfigResponse,
+  HealthResponse,
 } from "./types";
 
 // Determine the base URL based on environment
@@ -32,7 +34,45 @@ const api = axios.create({
   },
 });
 
+// Health status type
+export type HealthStatus = "online" | "offline" | "checking";
+
 // API functions
+export const getHealth = async (): Promise<HealthResponse> => {
+  try {
+    const response = await api.get<HealthResponse>("/health");
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running."
+        );
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
 export const getConfig = async (): Promise<ConfigResponse> => {
   try {
     const response = await api.get<ConfigResponse>("/config");
@@ -287,5 +327,31 @@ export const searchExploits = async (
     throw new Error("An unexpected error occurred");
   }
 };
+
+// Health status hook
+export function useHealthStatus(): HealthStatus {
+  const [status, setStatus] = useState<HealthStatus>("checking");
+
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const data = await getHealth();
+        if (data.status === "healthy") {
+          setStatus("online");
+        } else {
+          setStatus("offline");
+        }
+      } catch {
+        setStatus("offline");
+      }
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 30000); // every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  return status;
+}
 
 export default api;
