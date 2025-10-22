@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-import {
+import type {
   PromptRequest,
   PromptWithLanguageRequest,
   CommandGenerationResponse,
@@ -10,7 +10,7 @@ import {
   ExploitSearchResponse,
   ConfigResponse,
   HealthResponse,
-} from "./types";
+} from "@/lib/types";
 
 // Determine the base URL based on environment
 const getBaseURL = () => {

@@ -10,15 +10,15 @@ import {
   getHealth,
   useHealthStatus,
   type HealthStatus,
-} from "../api";
-import {
+} from "@/lib/api";
+import type {
   CommandGenerationResponse,
   ScriptGenerationResponse,
   ExplanationResponse,
   ExploitSearchResponse,
   ConfigResponse,
   HealthResponse,
-} from "../types";
+} from "@/lib/types";
 
 jest.mock("../api", () => {
   const actual = jest.requireActual("../api");
