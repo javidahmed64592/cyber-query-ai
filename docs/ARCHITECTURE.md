@@ -28,12 +28,14 @@ This document summarizes the code architecture and technology stack for the Cybe
 - `main.py`
     - Application factory `create_app(config, api_router, limiter)`.
     - Registers `Chatbot` instance on `app.state.chatbot`.
+    - Stores configuration on `app.state.config` for app-wide access.
     - Configures CORS, rate limiter (SlowAPI), static file mounting, and an SPA fallback route.
     - `run()` reads `config.json` (via `config.load_config`) and runs Uvicorn.
 
 - `api.py`
     - Defines API router (`/api`) and endpoints:
         - `GET /api/health`
+        - `GET /api/config`
         - `POST /api/generate-command`
         - `POST /api/generate-script`
         - `POST /api/explain-command`
@@ -52,10 +54,11 @@ This document summarizes the code architecture and technology stack for the Cybe
     - Static serving helpers to support SPA fallback.
 
 - `models.py`
-    - Pydantic request/response models used across the API (e.g., `PromptRequest`, `CommandGenerationResponse`, `ExploitSearchResponse`).
+    - Pydantic request/response models used across the API (e.g., `PromptRequest`, `CommandGenerationResponse`, `ExploitSearchResponse`, `ConfigResponse`).
 
 - `config.py`
-    - Loads `config.json` into a `Config` Pydantic model containing `model`, `host`, and `port`.
+    - Loads `config.json` into a `ConfigResponse` Pydantic model containing `model`, `embedding_model`, `host`, and `port`.
+    - The `ConfigResponse` model is defined in `models.py` and shared across the application.
 
 ## Frontend Structure: `cyber-query-ai-frontend`
 
@@ -67,14 +70,20 @@ This document summarizes the code architecture and technology stack for the Cybe
     - `Navigation.tsx`, `LanguageSelector.tsx`, `HealthIndicator.tsx` - lightweight app chrome and utilities.
 - `src/lib/api.ts`
   - Single place to handle backend requests, error mapping, and timeouts (30s per request).
+  - Includes `getConfig()` function to retrieve server configuration.
   - Keep business logic out of components by using these helpers.
 - `src/lib/types.ts`
   - Shared TypeScript interfaces mirroring backend Pydantic models; keep these in sync with backend models.
+  - `ConfigResponse` interface matches backend configuration model.
 - `src/lib/sanitization.ts`
   - Client-side sanitization utilities for safe rendering
   - DOMPurify wrapper used in components that render LLM-provided HTML/code.
 - `src/lib/useHealthStatus.ts`
   - Health-check hook used by `HealthIndicator` to show online/offline state.
+- `next.config.ts`
+  - Reads `config.json` at build time to configure the development proxy.
+  - Uses `ConfigResponse` type for type safety when parsing configuration.
+  - Provides seamless proxying to backend during development.
 
 ## Operational notes
 
