@@ -333,22 +333,31 @@ export function useHealthStatus(): HealthStatus {
   const [status, setStatus] = useState<HealthStatus>("checking");
 
   useEffect(() => {
+    let isMounted = true;
+
     const checkHealth = async () => {
       try {
         const data = await getHealth();
-        if (data.status === "healthy") {
-          setStatus("online");
-        } else {
-          setStatus("offline");
+        if (isMounted) {
+          if (data.status === "healthy") {
+            setStatus("online");
+          } else {
+            setStatus("offline");
+          }
         }
       } catch {
-        setStatus("offline");
+        if (isMounted) {
+          setStatus("offline");
+        }
       }
     };
 
     checkHealth();
     const interval = setInterval(checkHealth, 30000); // every 30s
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   return status;

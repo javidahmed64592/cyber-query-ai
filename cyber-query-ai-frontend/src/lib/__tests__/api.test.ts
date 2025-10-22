@@ -395,14 +395,16 @@ describe("API Tests", () => {
 
   describe("useHealthStatus", () => {
     it("should initialize with 'checking' status", () => {
-      const { result } = renderHook(() => useHealthStatus());
+      const { result, unmount } = renderHook(() => useHealthStatus());
       expect(result.current).toBe("checking");
+      unmount();
     });
 
     it("should return correct HealthStatus type", () => {
-      const { result } = renderHook(() => useHealthStatus());
+      const { result, unmount } = renderHook(() => useHealthStatus());
       const status: HealthStatus = result.current;
       expect(["checking", "online", "offline"]).toContain(status);
+      unmount();
     });
   });
 });

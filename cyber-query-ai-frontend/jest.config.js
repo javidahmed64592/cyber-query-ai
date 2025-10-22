@@ -14,6 +14,10 @@ const customJestConfig = {
   },
   testEnvironment: "jest-environment-jsdom",
 
+  // Prevent false positives from JSDOM XMLHttpRequest not cleaning up properly
+  testTimeout: 10000,
+  forceExit: true,
+
   // Coverage configuration
   collectCoverage: false,
   collectCoverageFrom: [
