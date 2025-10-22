@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 
-import LanguageSelector from "../LanguageSelector";
+import LanguageSelector from "@/components/LanguageSelector";
 
 describe("LanguageSelector", () => {
   const defaultProps = {

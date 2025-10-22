@@ -1,4 +1,4 @@
-import { version } from "../version";
+import { version } from "@/lib/version";
 
 describe("version", () => {
   it("should return the correct version from package.json", () => {

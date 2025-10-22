@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 
-import ExplanationBox from "../ExplanationBox";
+import ExplanationBox from "@/components/ExplanationBox";
 
 describe("ExplanationBox", () => {
   it("does not render when explanation is empty and not loading", () => {

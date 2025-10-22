@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
-import { getConfig } from "../../lib/api";
-import { version } from "../../lib/version";
-import Footer from "../Footer";
+import Footer from "@/components/Footer";
+import { getConfig } from "@/lib/api";
+import { version } from "@/lib/version";
 
 // Mock the API
 jest.mock("../../lib/api", () => ({

@@ -1,6 +1,6 @@
 import { render, screen, act } from "@testing-library/react";
 
-import CommandBox from "../CommandBox";
+import CommandBox from "@/components/CommandBox";
 
 // Mock the sanitization functions
 jest.mock("@/lib/sanitization", () => ({
