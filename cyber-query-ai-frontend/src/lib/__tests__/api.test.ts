@@ -10,6 +10,7 @@ import {
   ScriptGenerationResponse,
   ExplanationResponse,
   ExploitSearchResponse,
+  ConfigResponse,
 } from "../types";
 
 // Mock the api module
@@ -20,6 +21,9 @@ jest.mock("../api", () => ({
   explainScript: jest.fn(),
   searchExploits: jest.fn(),
 }));
+
+// Mock fetch for config endpoint
+global.fetch = jest.fn();
 
 const mockGenerateCommand = generateCommand as jest.MockedFunction<
   typeof generateCommand
@@ -40,6 +44,39 @@ const mockSearchExploits = searchExploits as jest.MockedFunction<
 describe("API Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("Config Endpoint", () => {
+    it("should fetch config successfully", async () => {
+      const mockConfig: ConfigResponse = {
+        model: "mistral",
+        embedding_model: "bge-m3",
+        host: "localhost",
+        port: 8000,
+      };
+
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockConfig,
+      });
+
+      const response = await fetch("/api/config");
+      const config = await response.json();
+
+      expect(config).toEqual(mockConfig);
+      expect(config.model).toBe("mistral");
+      expect(config.embedding_model).toBe("bge-m3");
+      expect(config.host).toBe("localhost");
+      expect(config.port).toBe(8000);
+    });
+
+    it("should handle config fetch error", async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error("Network error")
+      );
+
+      await expect(fetch("/api/config")).rejects.toThrow("Network error");
+    });
   });
 
   describe("generateCommand", () => {

@@ -9,6 +9,26 @@ import {
   ExploitSearchResponse,
 } from "./types";
 
+// Store backend URL for error messages
+let backendURL: string;
+
+// Fetch backend config on startup
+const initBackendURL = async () => {
+  try {
+    const response = await fetch("/api/config");
+    const config = await response.json();
+    backendURL = `http://${config.host}:${config.port}`;
+  } catch {
+    // Keep default if config fetch fails
+    backendURL = "http://localhost:8000";
+  }
+};
+
+// Initialize in browser environment
+if (typeof window !== "undefined") {
+  initBackendURL();
+}
+
 // Determine the base URL based on environment
 const getBaseURL = () => {
   if (typeof window === "undefined") return "";
@@ -67,7 +87,7 @@ export const generateCommand = async (
       } else if (error.request) {
         // Request was made but no response received
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          `No response from server. Please check if the backend is running on ${backendURL.replace("http://", "")}`
         );
       } else {
         // Something else happened
@@ -112,7 +132,7 @@ export const generateScript = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          `No response from server. Please check if the backend is running on ${backendURL.replace("http://", "")}`
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -155,7 +175,7 @@ export const explainCommand = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          `No response from server. Please check if the backend is running on ${backendURL.replace("http://", "")}`
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -199,7 +219,7 @@ export const explainScript = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          `No response from server. Please check if the backend is running on ${backendURL.replace("http://", "")}`
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -242,7 +262,7 @@ export const searchExploits = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          `No response from server. Please check if the backend is running on ${backendURL.replace("http://", "")}`
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
