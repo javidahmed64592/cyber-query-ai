@@ -33,7 +33,6 @@ const api = axios.create({
 });
 
 // API functions
-// Get configuration
 export const getConfig = async (): Promise<ConfigResponse> => {
   try {
     const response = await api.get<ConfigResponse>("/config");
