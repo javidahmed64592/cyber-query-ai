@@ -10,6 +10,7 @@ from slowapi import Limiter
 from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import (
     CommandGenerationResponse,
+    ConfigResponse,
     ExplanationResponse,
     ExploitSearchResponse,
     HealthResponse,
@@ -50,6 +51,13 @@ def get_server_error(error: str, exception: Exception, response_text: str | None
 async def health_check() -> HealthResponse:
     """Check the health of the server."""
     return HealthResponse(status="healthy", timestamp=datetime.now().isoformat() + "Z")
+
+
+@api_router.get("/config", response_model=ConfigResponse)
+async def get_config(request: Request) -> ConfigResponse:
+    """Get the server configuration."""
+    config: ConfigResponse = request.app.state.config
+    return config
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)

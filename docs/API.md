@@ -12,6 +12,7 @@ The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSO
 ## Table of Contents
 - [Endpoints](#endpoints)
   - [GET /api/health](#get-apihealth)
+  - [GET /api/config](#get-apiconfig)
   - [POST /api/generate-command](#post-apigenerate-command)
   - [POST /api/generate-script](#post-apigenerate-script)
   - [POST /api/explain-command](#post-apiexplain-command)
@@ -37,6 +38,24 @@ Example response:
 {
     "status": "healthy",
     "timestamp": "2025-09-02T12:00:00Z"
+}
+
+### GET /api/config
+
+- Purpose: Retrieve the current server configuration.
+- Request: none
+- Response model: `ConfigResponse`
+    - model: string (LLM model name, e.g., "mistral")
+    - embedding_model: string (RAG embedding model, e.g., "bge-m3")
+    - host: string (server host, e.g., "localhost")
+    - port: number (server port, e.g., 8000)
+
+Example response:
+{
+    "model": "mistral",
+    "embedding_model": "bge-m3",
+    "host": "localhost",
+    "port": 8000
 }
 
 ### POST /api/generate-command
@@ -160,6 +179,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - PromptRequest: { prompt: str }
 - PromptWithLanguageRequest: { prompt: str, language: str }
 - HealthResponse: { status: str, timestamp: str }
+- ConfigResponse: { model: str, embedding_model: str, host: str, port: int }
 - CommandGenerationResponse: { commands: list[str], explanation: str }
 - ScriptGenerationResponse: { script: str, explanation: str }
 - ExplanationResponse: { explanation: str }
@@ -181,4 +201,6 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 ## Frontend integration notes
 
 - The Next.js frontend uses `src/lib/api.ts` and expects the backend API under `/api` (same-origin in production, proxied in development).
-- Client helper functions: `generateCommand`, `generateScript`, `explainCommand`, `explainScript`, `searchExploits` map directly to the endpoints above and expect the response shapes listed.
+- In development mode, `next.config.ts` reads `config.json` at build time to configure the proxy URL for API requests.
+- Client helper functions: `generateCommand`, `generateScript`, `explainCommand`, `explainScript`, `searchExploits`, `getConfig` map directly to the endpoints above and expect the response shapes listed.
+- The `config.json` file is the single source of truth for host and port configuration, used by both the backend server and the Next.js development proxy.

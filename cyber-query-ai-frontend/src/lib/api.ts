@@ -7,6 +7,7 @@ import {
   ScriptGenerationResponse,
   ExplanationResponse,
   ExploitSearchResponse,
+  ConfigResponse,
 } from "./types";
 
 // Determine the base URL based on environment
@@ -32,6 +33,41 @@ const api = axios.create({
 });
 
 // API functions
+export const getConfig = async (): Promise<ConfigResponse> => {
+  try {
+    const response = await api.get<ConfigResponse>("/config");
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        const errorData = error.response.data;
+        if (typeof errorData === "string") {
+          throw new Error(errorData);
+        } else if (errorData?.detail) {
+          throw new Error(
+            typeof errorData.detail === "string"
+              ? errorData.detail
+              : JSON.stringify(errorData.detail)
+          );
+        } else if (errorData?.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error(
+            `Server error: ${error.response.status} ${error.response.statusText}`
+          );
+        }
+      } else if (error.request) {
+        throw new Error(
+          "No response from server. Please check if the backend is running."
+        );
+      } else {
+        throw new Error(`Request failed: ${error.message}`);
+      }
+    }
+    throw new Error("An unexpected error occurred");
+  }
+};
+
 export const generateCommand = async (
   prompt: string
 ): Promise<CommandGenerationResponse> => {
@@ -67,7 +103,7 @@ export const generateCommand = async (
       } else if (error.request) {
         // Request was made but no response received
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          "No response from server. Please check if the backend is running."
         );
       } else {
         // Something else happened
@@ -112,7 +148,7 @@ export const generateScript = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          "No response from server. Please check if the backend is running."
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -155,7 +191,7 @@ export const explainCommand = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          "No response from server. Please check if the backend is running."
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -199,7 +235,7 @@ export const explainScript = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          "No response from server. Please check if the backend is running."
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);
@@ -242,7 +278,7 @@ export const searchExploits = async (
         }
       } else if (error.request) {
         throw new Error(
-          "No response from server. Please check if the backend is running on localhost:8000"
+          "No response from server. Please check if the backend is running."
         );
       } else {
         throw new Error(`Request failed: ${error.message}`);

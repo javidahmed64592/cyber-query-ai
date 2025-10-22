@@ -4,12 +4,14 @@ import {
   explainCommand,
   explainScript,
   searchExploits,
+  getConfig,
 } from "../api";
 import {
   CommandGenerationResponse,
   ScriptGenerationResponse,
   ExplanationResponse,
   ExploitSearchResponse,
+  ConfigResponse,
 } from "../types";
 
 // Mock the api module
@@ -19,7 +21,11 @@ jest.mock("../api", () => ({
   explainCommand: jest.fn(),
   explainScript: jest.fn(),
   searchExploits: jest.fn(),
+  getConfig: jest.fn(),
 }));
+
+// Mock fetch for config endpoint
+global.fetch = jest.fn();
 
 const mockGenerateCommand = generateCommand as jest.MockedFunction<
   typeof generateCommand
@@ -36,10 +42,48 @@ const mockExplainScript = explainScript as jest.MockedFunction<
 const mockSearchExploits = searchExploits as jest.MockedFunction<
   typeof searchExploits
 >;
+const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
 
 describe("API Tests", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe("config", () => {
+    it("should fetch config successfully", async () => {
+      const mockConfig: ConfigResponse = {
+        model: "mistral",
+        embedding_model: "bge-m3",
+        host: "localhost",
+        port: 8000,
+      };
+
+      mockGetConfig.mockResolvedValue(mockConfig);
+
+      const config = await getConfig();
+
+      expect(mockGetConfig).toHaveBeenCalledTimes(1);
+      expect(config).toEqual(mockConfig);
+      expect(config.model).toBe("mistral");
+      expect(config.embedding_model).toBe("bge-m3");
+      expect(config.host).toBe("localhost");
+      expect(config.port).toBe(8000);
+    });
+
+    it("should handle config fetch error", async () => {
+      const errorMessage = "Failed to fetch config";
+      mockGetConfig.mockRejectedValue(new Error(errorMessage));
+
+      await expect(getConfig()).rejects.toThrow(errorMessage);
+    });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockGetConfig.mockRejectedValue(new Error(errorMessage));
+
+      await expect(getConfig()).rejects.toThrow(errorMessage);
+    });
   });
 
   describe("generateCommand", () => {
@@ -100,7 +144,7 @@ describe("API Tests", () => {
 
     it("should handle network error (no response)", async () => {
       const errorMessage =
-        "No response from server. Please check if the backend is running on localhost:8000";
+        "No response from server. Please check if the backend is running.";
       mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
 
       await expect(generateCommand("test prompt")).rejects.toThrow(
@@ -163,6 +207,16 @@ describe("API Tests", () => {
         generateScript("Create a script", "invalid-lang")
       ).rejects.toThrow(errorMessage);
     });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockGenerateScript.mockRejectedValue(new Error(errorMessage));
+
+      await expect(generateScript("Create a script", "python")).rejects.toThrow(
+        errorMessage
+      );
+    });
   });
 
   describe("explainCommand", () => {
@@ -190,6 +244,16 @@ describe("API Tests", () => {
         errorMessage
       );
     });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockExplainCommand.mockRejectedValue(new Error(errorMessage));
+
+      await expect(explainCommand("nmap -sS target.com")).rejects.toThrow(
+        errorMessage
+      );
+    });
   });
 
   describe("explainScript", () => {
@@ -213,6 +277,16 @@ describe("API Tests", () => {
       mockExplainScript.mockRejectedValue(new Error(errorMessage));
 
       await expect(explainScript("invalid syntax", "python")).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockExplainScript.mockRejectedValue(new Error(errorMessage));
+
+      await expect(explainScript("import socket", "python")).rejects.toThrow(
         errorMessage
       );
     });
@@ -263,6 +337,16 @@ describe("API Tests", () => {
 
       expect(result).toEqual(emptyResponse);
       expect(result.exploits).toHaveLength(0);
+    });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockSearchExploits.mockRejectedValue(new Error(errorMessage));
+
+      await expect(searchExploits("Apache server")).rejects.toThrow(
+        errorMessage
+      );
     });
   });
 });

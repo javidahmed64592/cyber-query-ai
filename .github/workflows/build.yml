@@ -265,7 +265,7 @@ jobs:
           2. **Start Ollama**: `ollama serve`
           3. **Pull an AI model**: `ollama pull mistral`
           4. **Launch CyberQueryAI**: `./cyber-query-ai`
-          5. **Open your browser**: Navigate to `http://localhost:8000`
+          5. **Open your browser**: Navigate to `http://localhost:8000` (default port)
 
           ### Features
 

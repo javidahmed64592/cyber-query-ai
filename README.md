@@ -197,6 +197,8 @@ npm run dev
    }
    ```
 
+   **Note:** This `config.json` file is the single source of truth for all configuration settings, including server host/port and AI model selection.
+
 3. **Launch the application**:
    ```bash
    cyber-query-ai

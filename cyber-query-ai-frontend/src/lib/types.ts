@@ -16,6 +16,13 @@ export interface HealthResponse {
   timestamp: string;
 }
 
+export interface ConfigResponse {
+  model: string;
+  embedding_model: string;
+  host: string;
+  port: number;
+}
+
 export interface CommandGenerationResponse {
   commands: string[];
   explanation: string;

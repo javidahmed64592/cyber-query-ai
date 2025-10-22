@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
 from cyber_query_ai.rag import RAGSystem

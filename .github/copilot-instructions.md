@@ -9,6 +9,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ### Backend: FastAPI + LangChain + Ollama
 
 - **Single chatbot instance**: Created once in `main.create_app()` and stored on `app.state.chatbot` for all routes to share
+- **Configuration on app.state**: Config loaded from `config.json` and stored on `app.state.config` for app-wide access
 - **Async LLM calls**: Always wrap `chatbot.llm()` with `run_in_threadpool()` to prevent blocking the event loop
 - **JSON-only LLM contract**: All prompts enforce strict JSON responses; use `clean_json_response()` before `json.loads()` to handle LLM formatting quirks (code blocks, single quotes, trailing commas)
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
@@ -16,6 +17,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ### Frontend: Next.js App Router + Static Export
 
 - **Dual deployment modes**: Dev uses Next.js rewrites to proxy `/api` requests; production serves static build from `static/` with same-origin API calls
+- **Single source of truth**: `config.json` is read by `next.config.ts` at build time to configure the dev proxy URL
 - **Error mapping in api.ts**: All backend calls flow through `src/lib/api.ts` which standardizes error handling and timeouts (30s for LLM responses)
 - **Type safety**: Keep `src/lib/types.ts` interfaces synchronized with backend Pydantic models in `cyber_query_ai/models.py`
 
@@ -26,7 +28,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ```bash
 # Backend only
 uv sync --extra dev
-cyber-query-ai  # Runs on localhost:8000
+cyber-query-ai  # Runs on localhost:8000 by default
 
 # Frontend dev (proxies to backend)
 cd cyber-query-ai-frontend
@@ -87,16 +89,20 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ### Backend
 
-- `api.py`: Route definitions; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
+- `api.py`: Route definitions including `/api/config` endpoint; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
 - `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection
 - `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `tools.json`
 - `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas)
+- `models.py`: All Pydantic models including `ConfigResponse` used throughout the application
+- `config.py`: Loads `config.json` and returns `ConfigResponse` model from `models.py`
 
 ### Frontend
 
-- `src/lib/api.ts`: Single source for all backend communication; 30s timeout, error normalization
+- `src/lib/api.ts`: Single source for all backend communication including `getConfig()`; 30s timeout, error normalization
+- `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models, including `ConfigResponse`
 - `src/lib/sanitization.ts`: DOMPurify wrapper + command safety checker
 - `src/components/`: Presentational components; keep business logic in `api.ts`
+- `next.config.ts`: Reads `config.json` at build time to configure dev proxy; uses `ConfigResponse` type
 
 ## RAG System Details
 
@@ -207,6 +213,12 @@ Users must:
 }
 ```
 
+**Note:** `config.json` is the single source of truth for all configuration:
+
+- Backend server reads it to configure host/port and model settings
+- `next.config.ts` reads it at build time to configure the development proxy
+- Available via `/api/config` endpoint returning `ConfigResponse` model
+
 ### Environment variables
 
 - `CYBER_QUERY_AI_ROOT_DIR`: Points to application root
@@ -215,10 +227,11 @@ Users must:
 
 1. **Forgetting `run_in_threadpool()`**: LLM calls block the event loop → use async wrapper
 2. **Not cleaning LLM JSON**: Always use `clean_json_response()` before parsing
-3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together
+3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together (especially `ConfigResponse`)
 4. **Missing sanitization**: All user input and LLM output must be sanitized
-5. **Breaking version checks**: Update all 3 files when bumping versions
-6. **Ollama not running**: Application requires local Ollama server at runtime
+5. **Config model location**: `ConfigResponse` is defined in `models.py` (not `config.py`) and imported by `config.load_config()`
+6. **Breaking version checks**: Update all 3 files when bumping versions
+7. **Ollama not running**: Application requires local Ollama server at runtime
 
 ## Ethical Guidelines
 

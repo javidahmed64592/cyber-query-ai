@@ -19,34 +19,43 @@ class PromptWithLanguageRequest(BaseModel):
 
 # Response schemas
 class HealthResponse(BaseModel):
-    """Response model for health check."""
+    """Response model for health check endpoint."""
 
     status: str
     timestamp: str
 
 
+class ConfigResponse(BaseModel):
+    """Configuration settings for the CyberQueryAI application."""
+
+    model: str
+    embedding_model: str
+    host: str
+    port: int
+
+
 class CommandGenerationResponse(BaseModel):
-    """Response model for command generation."""
+    """Response model for command generation endpoint."""
 
     commands: list[str]
     explanation: str
 
 
 class ScriptGenerationResponse(BaseModel):
-    """Response model for script generation."""
+    """Response model for script generation endpoint."""
 
     script: str
     explanation: str
 
 
 class ExplanationResponse(BaseModel):
-    """Response model for explanation."""
+    """Response model for explanation endpoint."""
 
     explanation: str
 
 
 class Exploit(BaseModel):
-    """Response model for exploit."""
+    """Response model for exploit endpoint."""
 
     title: str
     link: str
@@ -55,7 +64,7 @@ class Exploit(BaseModel):
 
 
 class ExploitSearchResponse(BaseModel):
-    """Response model for exploit search."""
+    """Response model for exploit search endpoint."""
 
     exploits: list[Exploit]
     explanation: str

@@ -66,7 +66,7 @@ Start the FastAPI server:
 uv run cyber-query-ai
 ```
 
-The backend will be available at `http://localhost:8000`.
+The backend will be available at `http://localhost:8000` by default.
 
 ### Testing, Linting, and Type Checking
 

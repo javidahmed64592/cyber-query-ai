@@ -2,6 +2,7 @@
 
 from cyber_query_ai.models import (
     CommandGenerationResponse,
+    ConfigResponse,
     ExplanationResponse,
     Exploit,
     ExploitSearchResponse,
@@ -46,6 +47,20 @@ class TestHealthResponse:
         timestamp = "<timestamp>"
         response = HealthResponse(status=status, timestamp=timestamp)
         expected = {"status": status, "timestamp": timestamp}
+        assert response.model_dump() == expected
+
+
+class TestConfigResponse:
+    """Unit tests for the ConfigResponse model."""
+
+    def test_model_dump(self) -> None:
+        """Test the model_dump method."""
+        model = "mistral"
+        embedding_model = "bge-m3"
+        host = "localhost"
+        port = 8000
+        response = ConfigResponse(model=model, embedding_model=embedding_model, host=host, port=port)
+        expected = {"model": model, "embedding_model": embedding_model, "host": host, "port": port}
         assert response.model_dump() == expected
 
 
