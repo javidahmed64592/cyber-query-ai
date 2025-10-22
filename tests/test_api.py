@@ -13,6 +13,7 @@ from cyber_query_ai.api import api_router, get_server_error, limiter
 HTTP_OK = 200
 HTTP_UNPROCESSABLE_ENTITY = 422
 HTTP_INTERNAL_SERVER_ERROR = 500
+DEFAULT_PORT = 8000
 
 
 @pytest.fixture
@@ -43,6 +44,11 @@ def test_app() -> TestClient:
     """Fixture to create a test FastAPI app."""
     app = FastAPI()
     app.include_router(api_router)
+    # Mock the config
+    mock_config = MagicMock()
+    mock_config.host = "localhost"
+    mock_config.port = DEFAULT_PORT
+    app.state.config = mock_config
     # Mock the chatbot
     mock_chatbot = MagicMock()
     mock_chatbot.prompt_command_generation.return_value = "formatted prompt"
@@ -82,6 +88,19 @@ class TestHealthCheck:
         assert data["status"] == "healthy"
         assert "timestamp" in data
         assert data["timestamp"].endswith("Z")
+
+
+class TestConfigEndpoint:
+    """Tests for the config endpoint."""
+
+    def test_config_endpoint_success(self, test_app: TestClient) -> None:
+        """Test successful config retrieval."""
+        response = test_app.get("/api/config")
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["host"] == "localhost"
+        assert data["port"] == DEFAULT_PORT
 
 
 class TestGenerateCommand:
