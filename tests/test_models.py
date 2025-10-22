@@ -55,10 +55,12 @@ class TestConfigResponse:
 
     def test_model_dump(self) -> None:
         """Test the model_dump method."""
+        model = "mistral"
+        embedding_model = "bge-m3"
         host = "localhost"
         port = 8000
-        response = ConfigResponse(host=host, port=port)
-        expected = {"host": host, "port": port}
+        response = ConfigResponse(model=model, embedding_model=embedding_model, host=host, port=port)
+        expected = {"model": model, "embedding_model": embedding_model, "host": host, "port": port}
         assert response.model_dump() == expected
 
 

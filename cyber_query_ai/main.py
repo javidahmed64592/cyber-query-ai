@@ -14,11 +14,12 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from cyber_query_ai.api import get_api_router, get_limiter
 from cyber_query_ai.chatbot import Chatbot
-from cyber_query_ai.config import Config, get_tools_filepath, load_config
+from cyber_query_ai.config import get_tools_filepath, load_config
 from cyber_query_ai.helpers import get_static_dir, get_static_files
+from cyber_query_ai.models import ConfigResponse
 
 
-def create_app(config: Config, api_router: APIRouter, limiter: Limiter) -> FastAPI:
+def create_app(config: ConfigResponse, api_router: APIRouter, limiter: Limiter) -> FastAPI:
     """Create and configure the FastAPI application."""
     app = FastAPI()
     app.add_middleware(

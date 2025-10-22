@@ -26,8 +26,10 @@ class HealthResponse(BaseModel):
 
 
 class ConfigResponse(BaseModel):
-    """Response model for config endpoint."""
+    """Configuration settings for the CyberQueryAI application."""
 
+    model: str
+    embedding_model: str
     host: str
     port: int
 

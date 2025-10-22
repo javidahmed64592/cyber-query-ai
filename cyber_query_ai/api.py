@@ -55,9 +55,9 @@ async def health_check() -> HealthResponse:
 
 @api_router.get("/config", response_model=ConfigResponse)
 async def get_config(request: Request) -> ConfigResponse:
-    """Get the server configuration (host and port only)."""
-    config = request.app.state.config
-    return ConfigResponse(host=config.host, port=config.port)
+    """Get the server configuration."""
+    config: ConfigResponse = request.app.state.config
+    return config
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)

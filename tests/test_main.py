@@ -9,8 +9,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from cyber_query_ai.api import api_router, limiter
-from cyber_query_ai.config import Config
 from cyber_query_ai.main import create_app, run
+from cyber_query_ai.models import ConfigResponse
 
 HTTP_OK = 200
 HTTP_NOT_FOUND = 404
@@ -18,9 +18,9 @@ HTTP_INTERNAL_SERVER_ERROR = 500
 
 
 @pytest.fixture
-def mock_config() -> Config:
+def mock_config() -> ConfigResponse:
     """Fixture for a mock configuration."""
-    return Config(model="test-model", embedding_model="test-embedding-model", host="localhost", port=8000)
+    return ConfigResponse(model="test-model", embedding_model="test-embedding-model", host="localhost", port=8000)
 
 
 @pytest.fixture
@@ -56,7 +56,7 @@ def mock_get_static_files() -> Generator[MagicMock, None, None]:
 
 @pytest.fixture
 def mock_app(
-    mock_config: Config,
+    mock_config: ConfigResponse,
     mock_chatbot: MagicMock,
     mock_static_files: MagicMock,
     mock_get_static_dir: MagicMock,
@@ -78,7 +78,9 @@ def disable_limiter() -> Generator[None, None, None]:
 class TestCreateApp:
     """Unit tests for the create_app function."""
 
-    def test_create_app_configuration(self, mock_app: FastAPI, mock_config: Config, mock_chatbot: MagicMock) -> None:
+    def test_create_app_configuration(
+        self, mock_app: FastAPI, mock_config: ConfigResponse, mock_chatbot: MagicMock
+    ) -> None:
         """Test that create_app properly configures the FastAPI application."""
         mock_chatbot.assert_called_once_with(
             model=mock_config.model,
@@ -89,7 +91,9 @@ class TestCreateApp:
         assert mock_app.state.chatbot == mock_chatbot.return_value
         assert mock_app.state.limiter == limiter
 
-    def test_create_app_cors_settings(self, mock_app: FastAPI, mock_config: Config, mock_chatbot: MagicMock) -> None:
+    def test_create_app_cors_settings(
+        self, mock_app: FastAPI, mock_config: ConfigResponse, mock_chatbot: MagicMock
+    ) -> None:
         """Test that CORS middleware is configured with proper settings."""
         cors_middleware = None
         for middleware in mock_app.user_middleware:
@@ -106,7 +110,7 @@ class TestCreateApp:
     def test_create_app_static_files_not_exist(
         self,
         mock_get_static_dir: MagicMock,
-        mock_config: Config,
+        mock_config: ConfigResponse,
         mock_chatbot: MagicMock,
     ) -> None:
         """Test create_app when static directory doesn't exist."""
@@ -131,7 +135,7 @@ class TestCreateApp:
         self,
         mock_static_files: MagicMock,
         mock_get_static_dir: MagicMock,
-        mock_config: Config,
+        mock_config: ConfigResponse,
         mock_chatbot: MagicMock,
     ) -> None:
         """Test create_app when static directory exists."""
@@ -158,7 +162,7 @@ class TestStaticFileServing:
         mock_static_files: MagicMock,
         mock_get_static_dir: MagicMock,
         mock_get_static_files: MagicMock,
-        mock_config: Config,
+        mock_config: ConfigResponse,
         mock_chatbot: MagicMock,
     ) -> None:
         """Test that SPA route calls get_static_files and handles the response."""
@@ -184,7 +188,7 @@ class TestStaticFileServing:
         mock_static_files: MagicMock,
         mock_get_static_dir: MagicMock,
         mock_get_static_files: MagicMock,
-        mock_config: Config,
+        mock_config: ConfigResponse,
         mock_chatbot: MagicMock,
     ) -> None:
         """Test that SPA route returns 404 when get_static_files returns None."""

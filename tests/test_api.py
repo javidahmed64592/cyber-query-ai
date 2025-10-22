@@ -48,6 +48,8 @@ def test_app() -> TestClient:
     mock_config = MagicMock()
     mock_config.host = "localhost"
     mock_config.port = DEFAULT_PORT
+    mock_config.model = "test-model"
+    mock_config.embedding_model = "test-embedding-model"
     app.state.config = mock_config
     # Mock the chatbot
     mock_chatbot = MagicMock()
@@ -101,6 +103,8 @@ class TestConfigEndpoint:
         data = response.json()
         assert data["host"] == "localhost"
         assert data["port"] == DEFAULT_PORT
+        assert data["model"] == "test-model"
+        assert data["embedding_model"] == "test-embedding-model"
 
 
 class TestGenerateCommand:

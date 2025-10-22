@@ -7,7 +7,8 @@ from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
-from cyber_query_ai.config import Config, get_config_path, get_root_dir, get_tools_filepath, load_config
+from cyber_query_ai.config import get_config_path, get_root_dir, get_tools_filepath, load_config
+from cyber_query_ai.models import ConfigResponse
 
 TEST_MODEL = "model"
 TEST_EMBEDDING_MODEL = "embedding-model"
@@ -16,30 +17,16 @@ TEST_PORT = 1234
 
 
 @pytest.fixture
-def mock_config() -> Config:
+def mock_config() -> ConfigResponse:
     """Fixture for a mock configuration."""
-    return Config(model=TEST_MODEL, embedding_model=TEST_EMBEDDING_MODEL, host=TEST_HOST, port=TEST_PORT)
+    return ConfigResponse(model=TEST_MODEL, embedding_model=TEST_EMBEDDING_MODEL, host=TEST_HOST, port=TEST_PORT)
 
 
 @pytest.fixture
-def mock_config_file(mock_config: Config) -> MagicMock:
+def mock_config_file(mock_config: ConfigResponse) -> MagicMock:
     """Fixture that mocks the config file using mock_open."""
     config_json = json.dumps(mock_config.model_dump())
     return mock_open(read_data=config_json)  # type: ignore[no-any-return]
-
-
-class TestConfig:
-    """Unit tests for the Config class."""
-
-    def test_model_dump(self, mock_config: Config) -> None:
-        """Test the model_dump method."""
-        expected = {
-            "model": mock_config.model,
-            "embedding_model": mock_config.embedding_model,
-            "host": mock_config.host,
-            "port": mock_config.port,
-        }
-        assert mock_config.model_dump() == expected
 
 
 class TestConfigUtils:
@@ -82,7 +69,7 @@ class TestConfigUtils:
         assert get_tools_filepath() == get_root_dir() / "rag_data" / "tools.json"
 
     def test_load_config_with_mock_file(
-        self, mock_config: Config, mock_config_file: MagicMock, mock_get_config_path: MagicMock
+        self, mock_config: ConfigResponse, mock_config_file: MagicMock, mock_get_config_path: MagicMock
     ) -> None:
         """Test load_config using the mock file fixture."""
         mock_get_config_path.return_value.exists.return_value = True

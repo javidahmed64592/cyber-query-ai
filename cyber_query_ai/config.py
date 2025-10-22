@@ -4,19 +4,10 @@ import json
 import os
 from pathlib import Path
 
-from pydantic import BaseModel
+from cyber_query_ai.models import ConfigResponse
 
 CONFIG_FILENAME = "config.json"
 TOOLS_FILENAME = "tools.json"
-
-
-class Config(BaseModel):
-    """Configuration settings for the CyberQueryAI application."""
-
-    model: str
-    embedding_model: str
-    host: str
-    port: int
 
 
 def get_root_dir() -> Path:
@@ -34,7 +25,7 @@ def get_tools_filepath() -> Path:
     return get_root_dir() / "rag_data" / TOOLS_FILENAME
 
 
-def load_config() -> Config:
+def load_config() -> ConfigResponse:
     """Load the configuration from the config file."""
     config_path = get_config_path()
     if not config_path.exists():
@@ -42,4 +33,4 @@ def load_config() -> Config:
         raise FileNotFoundError(msg)
 
     with config_path.open() as f:
-        return Config(**json.load(f))
+        return ConfigResponse(**json.load(f))
