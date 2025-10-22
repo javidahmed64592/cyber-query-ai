@@ -1,6 +1,10 @@
 import DOMPurify from "dompurify";
 
-import { sanitizeInput, sanitizeOutput, isCommandSafe } from "../sanitization";
+import {
+  sanitizeInput,
+  sanitizeOutput,
+  isCommandSafe,
+} from "@/lib/sanitization";
 
 // Mock DOMPurify for testing
 jest.mock("dompurify", () => ({

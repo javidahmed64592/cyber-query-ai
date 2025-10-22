@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 
-import { getConfig } from "../lib/api";
-import { ConfigResponse } from "../lib/types";
-import { version } from "../lib/version";
+import { getConfig } from "@/lib/api";
+import type { ConfigResponse } from "@/lib/types";
+import { version } from "@/lib/version";
 
 const Footer = () => {
   const [config, setConfig] = useState<ConfigResponse | null>(null);

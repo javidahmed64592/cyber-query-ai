@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
-import HealthIndicator from "./HealthIndicator";
+import HealthIndicator from "@/components/HealthIndicator";
 
 const Navigation = () => {
   const pathname = usePathname();
