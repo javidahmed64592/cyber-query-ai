@@ -28,6 +28,7 @@ def create_app(config: Config, api_router: APIRouter, limiter: Limiter) -> FastA
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
     )
+    app.state.config = config
     app.state.chatbot = Chatbot(
         model=config.model, embedding_model=config.embedding_model, tools_json_filepath=get_tools_filepath()
     )

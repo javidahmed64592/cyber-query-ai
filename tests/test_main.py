@@ -85,6 +85,7 @@ class TestCreateApp:
             embedding_model=mock_config.embedding_model,
             tools_json_filepath=Path("rag_data") / "tools.json",
         )
+        assert mock_app.state.config == mock_config
         assert mock_app.state.chatbot == mock_chatbot.return_value
         assert mock_app.state.limiter == limiter
 
