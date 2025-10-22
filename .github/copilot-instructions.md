@@ -26,7 +26,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ```bash
 # Backend only
 uv sync --extra dev
-cyber-query-ai  # Runs on localhost:8000
+cyber-query-ai  # Runs on localhost:8000 by default
 
 # Frontend dev (proxies to backend)
 cd cyber-query-ai-frontend
