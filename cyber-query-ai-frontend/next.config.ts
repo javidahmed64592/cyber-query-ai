@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 import fs from "fs";
 import path from "path";
+import { ConfigResponse } from "@/lib/types";
 
 // Read backend config to get host and port
 const getBackendURL = () => {
   try {
     const configPath = path.resolve(__dirname, "..", "config.json");
     const configData = fs.readFileSync(configPath, "utf-8");
-    const config = JSON.parse(configData);
+    const config: ConfigResponse = JSON.parse(configData);
     return `http://${config.host}:${config.port}`;
   } catch (error) {
     console.warn(
