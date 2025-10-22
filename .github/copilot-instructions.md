@@ -89,7 +89,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ### Backend
 
-- `api.py`: Route definitions; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
+- `api.py`: Route definitions including `/api/config` endpoint; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
 - `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection
 - `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `tools.json`
 - `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas)
