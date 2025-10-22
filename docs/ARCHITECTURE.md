@@ -70,16 +70,16 @@ This document summarizes the code architecture and technology stack for the Cybe
     - `Navigation.tsx`, `LanguageSelector.tsx`, `HealthIndicator.tsx` - lightweight app chrome and utilities.
 - `src/lib/api.ts`
   - Single place to handle backend requests, error mapping, and timeouts (30s per request).
-  - Includes `getConfig()` function to retrieve server configuration.
+  - Includes `getHealth()` and `getConfig()` functions to retrieve server health and configuration.
+  - Exports `useHealthStatus()` hook used by `HealthIndicator` to show online/offline state.
+  - Exports `HealthStatus` type for type-safe health status handling.
   - Keep business logic out of components by using these helpers.
 - `src/lib/types.ts`
   - Shared TypeScript interfaces mirroring backend Pydantic models; keep these in sync with backend models.
-  - `ConfigResponse` interface matches backend configuration model.
+  - `ConfigResponse` and `HealthResponse` interfaces match backend models.
 - `src/lib/sanitization.ts`
   - Client-side sanitization utilities for safe rendering
   - DOMPurify wrapper used in components that render LLM-provided HTML/code.
-- `src/lib/useHealthStatus.ts`
-  - Health-check hook used by `HealthIndicator` to show online/offline state.
 - `next.config.ts`
   - Reads `config.json` at build time to configure the development proxy.
   - Uses `ConfigResponse` type for type safety when parsing configuration.

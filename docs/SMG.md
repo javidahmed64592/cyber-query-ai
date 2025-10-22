@@ -113,7 +113,6 @@ cyber-query-ai-frontend/
 │   │   ├── api.ts               # API communication functions
 │   │   ├── sanitization.ts      # Input sanitization utilities
 │   │   ├── types.ts             # TypeScript type definitions
-│   │   ├── useHealthStatus.ts   # Hook for server health status
 │   │   └── version.ts           # Application versioning
 ├── jest.config.js               # Jest configuration for testing
 ├── jest.setup.js                # Jest setup for mocking and environment

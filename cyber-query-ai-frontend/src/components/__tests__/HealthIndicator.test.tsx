@@ -1,11 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
-import { HealthStatus, useHealthStatus } from "../../lib/useHealthStatus";
-import HealthIndicator from "../HealthIndicator";
+import HealthIndicator from "@/components/HealthIndicator";
+import { useHealthStatus, type HealthStatus } from "@/lib/api";
 
 // Mock the useHealthStatus hook
-jest.mock("../../lib/useHealthStatus", () => ({
+jest.mock("../../lib/api", () => ({
   useHealthStatus: jest.fn(),
 }));
 

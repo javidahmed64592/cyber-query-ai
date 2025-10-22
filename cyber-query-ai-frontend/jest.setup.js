@@ -20,3 +20,9 @@ Object.assign(navigator, {
     writeText: jest.fn(),
   },
 });
+
+// Global cleanup to prevent "Jest did not exit" warnings
+// This handles lingering async operations and timers
+afterEach(() => {
+  jest.clearAllTimers();
+});

@@ -1,4 +1,4 @@
-import { useHealthStatus, type HealthStatus } from "@/lib/useHealthStatus";
+import { useHealthStatus, type HealthStatus } from "@/lib/api";
 
 function HealthIndicator() {
   const status = useHealthStatus();

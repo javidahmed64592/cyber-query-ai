@@ -2,8 +2,8 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import React from "react";
 
-import { useHealthStatus } from "../../lib/useHealthStatus";
-import Navigation from "../Navigation";
+import Navigation from "@/components/Navigation";
+import { useHealthStatus } from "@/lib/api";
 
 // Mock Next.js Link component
 jest.mock("next/link", () => {
@@ -30,7 +30,7 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock the useHealthStatus hook
-jest.mock("../../lib/useHealthStatus", () => ({
+jest.mock("../../lib/api", () => ({
   useHealthStatus: jest.fn(),
 }));
 
