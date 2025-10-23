@@ -9,6 +9,8 @@ from slowapi import Limiter
 
 from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import (
+    ChatRequest,
+    ChatResponse,
     CommandGenerationResponse,
     ConfigResponse,
     ExplanationResponse,
@@ -58,6 +60,28 @@ async def get_config(request: Request) -> ConfigResponse:
     """Get the server configuration."""
     config: ConfigResponse = request.app.state.config
     return config
+
+
+@api_router.post("/chat", response_model=ChatResponse)
+@limiter.limit(LIMITER_INTERVAL)
+async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
+    """Chat with the AI assistant using conversation history."""
+    chatbot = request.app.state.chatbot
+
+    history_text = ""
+    for msg in chat_request.history:
+        role = "User" if msg.role == "user" else "Assistant"
+        history_text += f"{role}: {msg.content}\n"
+
+    formatted_prompt = sanitize_text(chatbot.prompt_chat(chat_request.message, history_text))
+    response_text = None
+
+    try:
+        response_text = await run_in_threadpool(chatbot.llm, formatted_prompt)
+        return ChatResponse(message=sanitize_text(response_text))
+    except Exception as e:
+        msg = "Failed to generate chat response"
+        raise get_server_error(msg, e, response_text) from e
 
 
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)

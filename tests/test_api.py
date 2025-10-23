@@ -53,6 +53,7 @@ def test_app() -> TestClient:
     app.state.config = mock_config
     # Mock the chatbot
     mock_chatbot = MagicMock()
+    mock_chatbot.prompt_chat.return_value = "formatted prompt"
     mock_chatbot.prompt_command_generation.return_value = "formatted prompt"
     mock_chatbot.prompt_script_generation.return_value = "formatted prompt"
     mock_chatbot.prompt_command_explanation.return_value = "formatted prompt"
@@ -105,6 +106,154 @@ class TestConfigEndpoint:
         assert data["port"] == DEFAULT_PORT
         assert data["model"] == "test-model"
         assert data["embedding_model"] == "test-embedding-model"
+
+
+class TestChat:
+    """Integration tests for the chat endpoint."""
+
+    def test_chat_success_no_history(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test successful chat with no conversation history."""
+        mock_response = "Here's how to scan for open ports using nmap..."
+        mock_run_in_threadpool.return_value = mock_response
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "How do I scan for open ports?", "history": []},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
+
+    def test_chat_success_with_history(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test successful chat with conversation history."""
+        mock_response = "nmap -sS is a SYN scan that..."
+        mock_run_in_threadpool.return_value = mock_response
+
+        history = [
+            {"role": "user", "content": "How do I scan for open ports?"},
+            {"role": "assistant", "content": "You can use nmap with the -sS flag"},
+        ]
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "What does the -sS flag do?", "history": history},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
+
+    def test_chat_empty_message(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat with empty message."""
+        mock_response = "I need more information to help you."
+        mock_run_in_threadpool.return_value = mock_response
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "", "history": []},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
+
+    def test_chat_missing_message(self, test_app: TestClient) -> None:
+        """Test chat with missing message field."""
+        response = test_app.post(
+            "/api/chat",
+            json={"history": []},
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+    def test_chat_invalid_history(self, test_app: TestClient) -> None:
+        """Test chat with invalid history format."""
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "test", "history": "invalid"},
+        )
+
+        assert response.status_code == HTTP_UNPROCESSABLE_ENTITY
+
+    def test_chat_llm_exception(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat when LLM raises an exception."""
+        mock_run_in_threadpool.side_effect = Exception("LLM connection failed")
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "test message", "history": []},
+        )
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate chat response" in data["detail"]["error"]
+        assert "LLM connection failed" in data["detail"]["details"]
+
+    def test_chat_empty_history(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat explicitly with empty history list."""
+        mock_response = "Test response"
+        mock_run_in_threadpool.return_value = mock_response
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "test", "history": []},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
+
+    def test_chat_long_history(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat with long conversation history."""
+        mock_response = "Based on our previous discussion..."
+        mock_run_in_threadpool.return_value = mock_response
+
+        history = []
+        for i in range(10):
+            history.append({"role": "user", "content": f"Question {i}"})
+            history.append({"role": "assistant", "content": f"Answer {i}"})
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "New question", "history": history},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
+
+    def test_chat_special_characters(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat with special characters in message and response."""
+        mock_response = "Response with special chars: <>&\"'"
+        mock_run_in_threadpool.return_value = mock_response
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": "What about <script>alert('xss')</script>?", "history": []},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert "&lt;" in data["message"] or "&gt;" in data["message"] or "&amp;" in data["message"]
+
+    def test_chat_multiline_message(self, mock_run_in_threadpool: MagicMock, test_app: TestClient) -> None:
+        """Test chat with multiline message."""
+        mock_response = "Here's the explanation..."
+        mock_run_in_threadpool.return_value = mock_response
+
+        multiline_message = """How do I use nmap?
+        I want to scan for open ports
+        on my local network"""
+
+        response = test_app.post(
+            "/api/chat",
+            json={"message": multiline_message, "history": []},
+        )
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["message"] == mock_response
 
 
 class TestGenerateCommand:
