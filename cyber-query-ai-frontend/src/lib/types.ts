@@ -1,6 +1,16 @@
 // TypeScript types matching FastAPI Pydantic models
 
 // Request types
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface ChatRequest {
+  message: string;
+  history: ChatMessage[];
+}
+
 export interface PromptRequest {
   prompt: string;
 }
@@ -21,6 +31,10 @@ export interface ConfigResponse {
   embedding_model: string;
   host: string;
   port: number;
+}
+
+export interface ChatResponse {
+  message: string;
 }
 
 export interface CommandGenerationResponse {

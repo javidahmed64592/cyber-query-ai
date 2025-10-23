@@ -1,6 +1,9 @@
 """Unit tests for the cyber_query_ai.models module."""
 
 from cyber_query_ai.models import (
+    ChatMessage,
+    ChatRequest,
+    ChatResponse,
     CommandGenerationResponse,
     ConfigResponse,
     ExplanationResponse,
@@ -14,6 +17,36 @@ from cyber_query_ai.models import (
 
 
 # Request schemas
+class TestChatMessage:
+    """Unit tests for the ChatMessage model."""
+
+    def test_model_dump(self) -> None:
+        """Test the model_dump method."""
+        role = "user"
+        content = "Hello, how can I help you?"
+        message = ChatMessage(role=role, content=content)
+        expected = {"role": role, "content": content}
+        assert message.model_dump() == expected
+
+
+class TestChatRequest:
+    """Unit tests for the ChatRequest model."""
+
+    def test_model_dump(self) -> None:
+        """Test the model_dump method."""
+        message = "What is cybersecurity?"
+        history = [
+            ChatMessage(role="user", content="Hello"),
+            ChatMessage(role="assistant", content="Hi! How can I assist you?"),
+        ]
+        request = ChatRequest(message=message, history=history)
+        expected = {
+            "message": message,
+            "history": [msg.model_dump() for msg in history],
+        }
+        assert request.model_dump() == expected
+
+
 class TestPromptRequest:
     """Unit tests for the PromptRequest model."""
 
@@ -61,6 +94,17 @@ class TestConfigResponse:
         port = 8000
         response = ConfigResponse(model=model, embedding_model=embedding_model, host=host, port=port)
         expected = {"model": model, "embedding_model": embedding_model, "host": host, "port": port}
+        assert response.model_dump() == expected
+
+
+class TestChatResponse:
+    """Unit tests for the ChatResponse model."""
+
+    def test_model_dump(self) -> None:
+        """Test the model_dump method."""
+        message = "This is a response message."
+        response = ChatResponse(message=message)
+        expected = {"message": message}
         assert response.model_dump() == expected
 
 

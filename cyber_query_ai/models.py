@@ -4,6 +4,20 @@ from pydantic import BaseModel
 
 
 # Request schemas
+class ChatMessage(BaseModel):
+    """Chat message model for conversation history."""
+
+    role: str  # "user" or "assistant"
+    content: str
+
+
+class ChatRequest(BaseModel):
+    """Request model for chat endpoint."""
+
+    message: str
+    history: list[ChatMessage] = []
+
+
 class PromptRequest(BaseModel):
     """Request model with prompt."""
 
@@ -32,6 +46,12 @@ class ConfigResponse(BaseModel):
     embedding_model: str
     host: str
     port: int
+
+
+class ChatResponse(BaseModel):
+    """Response model for chat endpoint."""
+
+    message: str
 
 
 class CommandGenerationResponse(BaseModel):
