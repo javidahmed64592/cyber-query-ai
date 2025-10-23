@@ -8,6 +8,7 @@ import {
   searchExploits,
   getConfig,
   getHealth,
+  sendChatMessage,
   useHealthStatus,
   type HealthStatus,
 } from "@/lib/api";
@@ -18,6 +19,7 @@ import type {
   ExploitSearchResponse,
   ConfigResponse,
   HealthResponse,
+  ChatResponse,
 } from "@/lib/types";
 
 jest.mock("../api", () => {
@@ -31,6 +33,7 @@ jest.mock("../api", () => {
     explainCommand: jest.fn(),
     explainScript: jest.fn(),
     searchExploits: jest.fn(),
+    sendChatMessage: jest.fn(),
   };
 });
 
@@ -54,6 +57,9 @@ const mockSearchExploits = searchExploits as jest.MockedFunction<
 >;
 const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
 const mockGetHealth = getHealth as jest.MockedFunction<typeof getHealth>;
+const mockSendChatMessage = sendChatMessage as jest.MockedFunction<
+  typeof sendChatMessage
+>;
 
 describe("API Tests", () => {
   beforeEach(() => {
@@ -126,6 +132,180 @@ describe("API Tests", () => {
       mockGetConfig.mockRejectedValue(new Error(errorMessage));
 
       await expect(getConfig()).rejects.toThrow(errorMessage);
+    });
+  });
+
+  describe("sendChatMessage", () => {
+    const mockResponse: ChatResponse = {
+      message: "Here's how to use nmap for network scanning...",
+    };
+
+    it("should successfully send chat message with empty history", async () => {
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage(
+        "How do I use nmap for network scanning?",
+        []
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(
+        "How do I use nmap for network scanning?",
+        []
+      );
+    });
+
+    it("should successfully send chat message with conversation history", async () => {
+      const history = [
+        { role: "user" as const, content: "What is penetration testing?" },
+        {
+          role: "assistant" as const,
+          content:
+            "Penetration testing is a simulated cyber attack against your system...",
+        },
+      ];
+
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage("Tell me more about tools", history);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(
+        "Tell me more about tools",
+        history
+      );
+    });
+
+    it("should successfully send chat message with long conversation history", async () => {
+      const longHistory = Array(10)
+        .fill(null)
+        .map((_, i) => ({
+          role: (i % 2 === 0 ? "user" : "assistant") as "user" | "assistant",
+          content: `Message ${i + 1}`,
+        }));
+
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage("Continue discussion", longHistory);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(
+        "Continue discussion",
+        longHistory
+      );
+    });
+
+    it("should handle empty message", async () => {
+      const emptyMessageResponse: ChatResponse = {
+        message: "I need more information to help you.",
+      };
+      mockSendChatMessage.mockResolvedValue(emptyMessageResponse);
+
+      const result = await sendChatMessage("", []);
+
+      expect(result).toEqual(emptyMessageResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith("", []);
+    });
+
+    it("should handle multiline message", async () => {
+      const multilineMessage = `How do I use nmap?
+I want to scan for open ports
+And check service versions`;
+
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage(multilineMessage, []);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(multilineMessage, []);
+    });
+
+    it("should handle server error with string message", async () => {
+      const errorMessage = "Invalid request format";
+      mockSendChatMessage.mockRejectedValue(new Error(errorMessage));
+
+      await expect(sendChatMessage("test message", [])).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle server error with detail field", async () => {
+      const errorDetail = "Message too long";
+      mockSendChatMessage.mockRejectedValue(new Error(errorDetail));
+
+      await expect(sendChatMessage("very long message...", [])).rejects.toThrow(
+        errorDetail
+      );
+    });
+
+    it("should handle server error with generic status message", async () => {
+      const errorMessage = "Server error: 500 Internal Server Error";
+      mockSendChatMessage.mockRejectedValue(new Error(errorMessage));
+
+      await expect(sendChatMessage("test message", [])).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle network error (no response)", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockSendChatMessage.mockRejectedValue(new Error(errorMessage));
+
+      await expect(sendChatMessage("test message", [])).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle request setup error", async () => {
+      const errorMessage = "Request failed: Request timeout";
+      mockSendChatMessage.mockRejectedValue(new Error(errorMessage));
+
+      await expect(sendChatMessage("test message", [])).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle non-Axios error", async () => {
+      const errorMessage = "An unexpected error occurred";
+      mockSendChatMessage.mockRejectedValue(new Error(errorMessage));
+
+      await expect(sendChatMessage("test message", [])).rejects.toThrow(
+        errorMessage
+      );
+    });
+
+    it("should handle special characters in message", async () => {
+      const specialMessage = "Test <script>alert('xss')</script> message";
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage(specialMessage, []);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(specialMessage, []);
+    });
+
+    it("should handle special characters in history", async () => {
+      const historyWithSpecialChars = [
+        {
+          role: "user" as const,
+          content: "What about <>&\"' characters?",
+        },
+        {
+          role: "assistant" as const,
+          content: "They are handled properly with sanitization.",
+        },
+      ];
+
+      mockSendChatMessage.mockResolvedValue(mockResponse);
+
+      const result = await sendChatMessage("Continue", historyWithSpecialChars);
+
+      expect(result).toEqual(mockResponse);
+      expect(mockSendChatMessage).toHaveBeenCalledWith(
+        "Continue",
+        historyWithSpecialChars
+      );
     });
   });
 
