@@ -50,7 +50,7 @@ cd cyber-query-ai-frontend
 npm run test
 
 # All checks
-npm run quality  # type-check + lint:check + format:check
+npm run quality  # type-check + lint + format
 ```
 
 ### Version consistency check
@@ -120,7 +120,7 @@ The RAG system enhances prompts with relevant tool documentation:
 - **Ruff**: Linting/formatting
 - **mypy**: Type checking
 - **pytest**: Backend tests with coverage
-- **Frontend**: type-check + lint:check + format:check + jest
+- **Frontend**: type-check + lint + format + jest
 - **version-check**: Ensures `pyproject.toml`, `uv.lock`, `package.json` versions match
 
 ### Build Workflow (`.github/workflows/build.yml`)

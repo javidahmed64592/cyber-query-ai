@@ -144,8 +144,8 @@ The frontend will be available at `http://localhost:3000`.
 - **Run tests:** `npm run test`
 - **Run all quality checks:** `npm run quality`
 - **Fix all quality issues:** `npm run quality:fix`
-- **Lint code:** `npm run lint:check`
-- **Fix lint issues:** `npm run lint`
-- **Format code:** `npm run format`
-- **Check formatting:** `npm run format:check`
 - **Type check:** `npm run type-check`
+- **Lint code:** `npm run lint`
+- **Fix lint issues:** `npm run lint:fix`
+- **Check formatting:** `npm run format`
+- **Format code:** `npm run format:fix`

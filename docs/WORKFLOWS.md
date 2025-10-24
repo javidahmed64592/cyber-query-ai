@@ -40,8 +40,8 @@ It consists of the following jobs:
   - Set up Node.js 18 with npm caching
   - Install dependencies with `npm ci`
   - Run type checking with `npm run type-check`
-  - Run linting check with `npm run lint:check`
-  - Run formatting check with `npm run format:check`
+  - Run linting with `npm run lint`
+  - Run formatting check with `npm run format`
   - Run tests with `npm run test`
 
 ### version-check
