@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
 
 import HealthIndicator from "@/components/HealthIndicator";
 import { useHealthStatus, type HealthStatus } from "@/lib/api";
