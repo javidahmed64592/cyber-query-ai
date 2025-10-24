@@ -232,6 +232,34 @@ Users must:
 5. **Config model location**: `ConfigResponse` is defined in `models.py` (not `config.py`) and imported by `config.load_config()`
 6. **Breaking version checks**: Update all 3 files when bumping versions
 7. **Ollama not running**: Application requires local Ollama server at runtime
+8. **Directory context in terminal commands**: Check the current working directory before using `cd` commands; if already in the target directory, omit the `cd` command to avoid errors
+
+## Terminal Command Best Practices
+
+When using `run_in_terminal` tool:
+
+1. **Check terminal context**: Review the `<context>` section for the current working directory (`Cwd:`) before running commands
+2. **Avoid redundant `cd` commands**: If the terminal is already in the correct directory, run the command directly without `cd`
+3. **Use full paths for cross-directory commands**: When running commands from the project root that need to operate on frontend files, either:
+   - Use full paths: `npm --prefix cyber-query-ai-frontend install`
+   - Change directory once, then run multiple commands
+4. **Pattern for sequential commands in same directory**:
+
+   ```bash
+   # Bad: Changes directory twice
+   cd cyber-query-ai-frontend && npm install
+   cd cyber-query-ai-frontend && npm run test
+
+   # Good: Check context first
+   # If Cwd is already cyber-query-ai-frontend:
+   npm install
+   npm run test
+
+   # If Cwd is project root:
+   cd cyber-query-ai-frontend && npm install && npm run test
+   ```
+
+5. **Windows-specific**: On Windows (PowerShell), commands like `cd cyber-query-ai-frontend && npm install` work, but checking context is still important
 
 ## Ethical Guidelines
 
