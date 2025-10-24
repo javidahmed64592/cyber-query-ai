@@ -36,6 +36,7 @@ This document summarizes the code architecture and technology stack for the Cybe
     - Defines API router (`/api`) and endpoints:
         - `GET /api/health`
         - `GET /api/config`
+        - `POST /api/chat` - **Primary endpoint** for AI Assistant with conversation history
         - `POST /api/generate-command`
         - `POST /api/generate-script`
         - `POST /api/explain-command`
@@ -45,8 +46,9 @@ This document summarizes the code architecture and technology stack for the Cybe
     - Calls `chatbot` to format prompts, sanitizes them, runs LLM calls off the event loop using `run_in_threadpool`, cleans LLM JSON-like text (`clean_json_response`) and validates/parses responses into Pydantic models.
 
 - `chatbot.py`
-    - `Chatbot` class wraps an `OllamaLLM` LLM and provides prompt templates (via LangChain `PromptTemplate`) for each use case: command generation, script generation, explanations, exploit search.
+    - `Chatbot` class wraps an `OllamaLLM` LLM and provides prompt templates (via LangChain `PromptTemplate`) for each use case: chat assistance, command generation, script generation, explanations, exploit search.
     - Enforces a strict JSON-only response contract in the prompt templates (the LLM is instructed to reply in valid JSON with clearly documented rules).
+    - The `prompt_chat` method supports conversational interactions with full history context for the AI Assistant interface.
 
 - `helpers.py`
     - Sanitization helpers: `sanitize_text`, `sanitize_dictionary` using `bleach`.
@@ -54,7 +56,7 @@ This document summarizes the code architecture and technology stack for the Cybe
     - Static serving helpers to support SPA fallback.
 
 - `models.py`
-    - Pydantic request/response models used across the API (e.g., `PromptRequest`, `CommandGenerationResponse`, `ExploitSearchResponse`, `ConfigResponse`).
+    - Pydantic request/response models used across the API (e.g., `ChatRequest`, `ChatResponse`, `ChatMessage`, `PromptRequest`, `CommandGenerationResponse`, `ExploitSearchResponse`, `ConfigResponse`).
 
 - `config.py`
     - Loads `config.json` into a `ConfigResponse` Pydantic model containing `model`, `embedding_model`, `host`, and `port`.
@@ -63,20 +65,23 @@ This document summarizes the code architecture and technology stack for the Cybe
 ## Frontend Structure: `cyber-query-ai-frontend`
 
 - `src/app/`
-  - Top-level Next App Router pages and layouts. Each feature page (e.g., `command-generation`, `script-generation`, `exploit-search`) contains the page UI and wires components together.
+  - Top-level Next App Router pages and layouts. Each feature page (e.g., `page.tsx` for AI Assistant, `command-generation`, `script-generation`, `exploit-search`) contains the page UI and wires components together.
+  - The root `page.tsx` (home page) contains the AI Assistant interface with conversational chat.
 - `src/components/`
+    - `ChatWindow.tsx` - Main conversational interface component for the AI Assistant
+    - `ChatMessage.tsx` - Individual message rendering with code block support and syntax highlighting
     - `CommandBox.tsx`, `ScriptBox.tsx`, `ExplanationBox.tsx` - present command/script output and loading states.
     - `ExploitList.tsx` - renders exploit search results (title, description/link, severity badge).
     - `Navigation.tsx`, `LanguageSelector.tsx`, `HealthIndicator.tsx` - lightweight app chrome and utilities.
 - `src/lib/api.ts`
   - Single place to handle backend requests, error mapping, and timeouts (30s per request).
-  - Includes `getHealth()` and `getConfig()` functions to retrieve server health and configuration.
+  - Includes `sendChatMessage()` for AI Assistant, `getHealth()` and `getConfig()` functions to retrieve server health and configuration.
   - Exports `useHealthStatus()` hook used by `HealthIndicator` to show online/offline state.
   - Exports `HealthStatus` type for type-safe health status handling.
   - Keep business logic out of components by using these helpers.
 - `src/lib/types.ts`
   - Shared TypeScript interfaces mirroring backend Pydantic models; keep these in sync with backend models.
-  - `ConfigResponse` and `HealthResponse` interfaces match backend models.
+  - `ChatMessage`, `ChatRequest`, `ChatResponse`, `ConfigResponse` and `HealthResponse` interfaces match backend models.
 - `src/lib/sanitization.ts`
   - Client-side sanitization utilities for safe rendering
   - DOMPurify wrapper used in components that render LLM-provided HTML/code.
