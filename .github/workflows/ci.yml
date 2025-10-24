@@ -94,9 +94,9 @@ jobs:
       - name: Run type checking
         run: npm run type-check
       - name: Run linting
-        run: npm run lint:check
+        run: npm run lint
       - name: Run formatting check
-        run: npm run format:check
+        run: npm run format
       - name: Run tests
         run: npm run test:coverage
       - name: Upload frontend coverage report
