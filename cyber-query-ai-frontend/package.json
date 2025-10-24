@@ -20,7 +20,7 @@
     "test:coverage:open": "jest --coverage && start coverage/lcov-report/index.html"
   },
   "dependencies": {
-    "@types/dompurify": "^3.0.5",
+    "@types/dompurify": "^3.2.0",
     "axios": "^1.12.2",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.0",
@@ -38,7 +38,7 @@
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
