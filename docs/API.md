@@ -13,6 +13,7 @@ The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSO
 - [Endpoints](#endpoints)
   - [GET /api/health](#get-apihealth)
   - [GET /api/config](#get-apiconfig)
+  - [POST /api/chat](#post-apichat)
   - [POST /api/generate-command](#post-apigenerate-command)
   - [POST /api/generate-script](#post-apigenerate-script)
   - [POST /api/explain-command](#post-apiexplain-command)
@@ -56,6 +57,44 @@ Example response:
     "embedding_model": "bge-m3",
     "host": "localhost",
     "port": 8000
+}
+
+### POST /api/chat
+
+- Purpose: Interactive conversational interface for general cybersecurity assistance with full conversation history support.
+- Request model: `ChatRequest`
+    - message: string (user's message)
+    - history: array of `ChatMessage` objects (conversation context)
+        - role: "user" | "assistant"
+        - content: string
+- Response model: `ChatResponse`
+    - message: string (AI assistant's response with markdown support)
+
+Notes:
+- This is the **primary endpoint** for the AI Assistant interface (home page `/`)
+- Supports full conversation history, allowing for context-aware responses and follow-up questions
+- The assistant can handle all types of requests: commands, scripts, explanations, exploit research, etc.
+- Responses are formatted in markdown with code blocks when appropriate
+- Both input and output are sanitized using `sanitize_text()`
+
+Example request:
+{
+    "message": "How do I perform a stealth port scan?",
+    "history": [
+        {
+            "role": "user",
+            "content": "What is nmap used for?"
+        },
+        {
+            "role": "assistant",
+            "content": "Nmap is a network scanning tool..."
+        }
+    ]
+}
+
+Example response:
+{
+    "message": "To perform a stealth port scan with nmap, use the `-sS` flag:\n\n```bash\nnmap -sS target.com\n```\n\nThis performs a SYN scan which is less likely to be detected..."
 }
 
 ### POST /api/generate-command
@@ -176,6 +215,9 @@ Example response:
 ## Request and Response Models (Pydantic)
 
 The primary Pydantic models are defined in `cyber_query_ai/models.py`:
+- ChatMessage: { role: Literal["user", "assistant"], content: str }
+- ChatRequest: { message: str, history: list[ChatMessage] }
+- ChatResponse: { message: str }
 - PromptRequest: { prompt: str }
 - PromptWithLanguageRequest: { prompt: str, language: str }
 - HealthResponse: { status: str, timestamp: str }
@@ -202,5 +244,5 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 
 - The Next.js frontend uses `src/lib/api.ts` and expects the backend API under `/api` (same-origin in production, proxied in development).
 - In development mode, `next.config.ts` reads `config.json` at build time to configure the proxy URL for API requests.
-- Client helper functions: `generateCommand`, `generateScript`, `explainCommand`, `explainScript`, `searchExploits`, `getConfig` map directly to the endpoints above and expect the response shapes listed.
+- Client helper functions: `sendChatMessage`, `generateCommand`, `generateScript`, `explainCommand`, `explainScript`, `searchExploits`, `getConfig` map directly to the endpoints above and expect the response shapes listed.
 - The `config.json` file is the single source of truth for host and port configuration, used by both the backend server and the Next.js development proxy.

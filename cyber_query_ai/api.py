@@ -9,6 +9,8 @@ from slowapi import Limiter
 
 from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import (
+    ChatRequest,
+    ChatResponse,
     CommandGenerationResponse,
     ConfigResponse,
     ExplanationResponse,
@@ -60,6 +62,28 @@ async def get_config(request: Request) -> ConfigResponse:
     return config
 
 
+@api_router.post("/chat", response_model=ChatResponse)
+@limiter.limit(LIMITER_INTERVAL)
+async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
+    """Chat with the AI assistant using conversation history."""
+    chatbot = request.app.state.chatbot
+
+    history_text = ""
+    for msg in chat_request.history:
+        role = "User" if msg.role == "user" else "Assistant"
+        history_text += f"{role}: {msg.content}\n"
+
+    formatted_prompt = sanitize_text(chatbot.prompt_chat(chat_request.message, history_text))
+    response_text = None
+
+    try:
+        response_text = await run_in_threadpool(chatbot.llm, formatted_prompt)
+        return ChatResponse(message=sanitize_text(response_text))
+    except Exception as e:
+        error_msg = "Failed to generate chat response"
+        raise get_server_error(error_msg, e, response_text) from e
+
+
 @api_router.post("/generate-command", response_model=CommandGenerationResponse)
 @limiter.limit(LIMITER_INTERVAL)
 async def generate_command(request: Request, prompt: PromptRequest) -> CommandGenerationResponse:
@@ -78,11 +102,11 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
 
         return CommandGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
-        msg = "Invalid JSON response from LLM"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Invalid JSON response from LLM"
+        raise get_server_error(error_msg, e, response_text) from e
     except Exception as e:
-        msg = "Failed to generate or parse LLM response"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Failed to generate or parse LLM response"
+        raise get_server_error(error_msg, e, response_text) from e
 
 
 @api_router.post("/generate-script", response_model=ScriptGenerationResponse)
@@ -103,11 +127,11 @@ async def generate_script(request: Request, prompt: PromptWithLanguageRequest) -
 
         return ScriptGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
-        msg = "Invalid JSON response from LLM"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Invalid JSON response from LLM"
+        raise get_server_error(error_msg, e, response_text) from e
     except Exception as e:
-        msg = "Failed to generate or parse LLM response"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Failed to generate or parse LLM response"
+        raise get_server_error(error_msg, e, response_text) from e
 
 
 @api_router.post("/explain-command", response_model=ExplanationResponse)
@@ -128,11 +152,11 @@ async def explain_command(request: Request, prompt: PromptRequest) -> Explanatio
 
         return ExplanationResponse(**parsed)
     except json.JSONDecodeError as e:
-        msg = "Invalid JSON response from LLM"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Invalid JSON response from LLM"
+        raise get_server_error(error_msg, e, response_text) from e
     except Exception as e:
-        msg = "Failed to generate or parse LLM response"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Failed to generate or parse LLM response"
+        raise get_server_error(error_msg, e, response_text) from e
 
 
 @api_router.post("/explain-script", response_model=ExplanationResponse)
@@ -153,11 +177,11 @@ async def explain_script(request: Request, prompt: PromptWithLanguageRequest) ->
 
         return ExplanationResponse(**parsed)
     except json.JSONDecodeError as e:
-        msg = "Invalid JSON response from LLM"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Invalid JSON response from LLM"
+        raise get_server_error(error_msg, e, response_text) from e
     except Exception as e:
-        msg = "Failed to generate or parse LLM response"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Failed to generate or parse LLM response"
+        raise get_server_error(error_msg, e, response_text) from e
 
 
 @api_router.post("/search-exploits", response_model=ExploitSearchResponse)
@@ -178,8 +202,8 @@ async def search_exploits(request: Request, prompt: PromptRequest) -> ExploitSea
 
         return ExploitSearchResponse(**parsed)
     except json.JSONDecodeError as e:
-        msg = "Invalid JSON response from LLM"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Invalid JSON response from LLM"
+        raise get_server_error(error_msg, e, response_text) from e
     except Exception as e:
-        msg = "Failed to generate or parse LLM response"
-        raise get_server_error(msg, e, response_text) from e
+        error_msg = "Failed to generate or parse LLM response"
+        raise get_server_error(error_msg, e, response_text) from e

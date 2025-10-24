@@ -20,8 +20,11 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 
 **See CyberQueryAI in action!** These screenshots showcase the intuitive interface and powerful capabilities that make cybersecurity tasks faster and more accessible. Experience natural language command generation, comprehensive tool explanations, and seamless workflow integration - all designed to accelerate your security research and testing.
 
+**AI Assistant Page:**
+![AI Assistant Page - Shows the main interface for converting natural language to a variety of cybersecurity tasks](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/assistant.png "AI Assistant Page")
+
 **Command Generation Page:**
-![Command Generation Interface - Shows the main interface for converting natural language to cybersecurity commands](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Command Generation Interface")
+![Command Generation Interface - Shows an interface for converting natural language to cybersecurity commands](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Command Generation Interface")
 
 **About Page:**
 ![About Page - Displays comprehensive information about CyberQueryAI features and usage](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/about.png "About Page")
@@ -30,12 +33,14 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 ## Table of Contents
 - [Why CyberQueryAI?](#why-cyberqueryai)
 - [Key Features](#key-features)
+  - [**AI Assistant (Conversational Interface)**](#ai-assistant-conversational-interface)
   - [**Intelligent Command Generation**](#intelligent-command-generation)
   - [**Multi-Language Script Creation**](#multi-language-script-creation)
   - [**Command \& Script Analysis**](#command--script-analysis)
   - [**Exploit Research \& Discovery**](#exploit-research--discovery)
   - [**Security \& Sanitization**](#security--sanitization)
 - [Web Application Pages](#web-application-pages)
+  - [**AI Assistant** (`/`)](#ai-assistant-)
   - [**Command Generation** (`/command-generation`)](#command-generation-command-generation)
   - [**Script Generation** (`/script-generation`)](#script-generation-script-generation)
   - [**Command Explanation** (`/command-explanation`)](#command-explanation-command-explanation)
@@ -73,6 +78,13 @@ Whether you're conducting authorized penetration tests, participating in CTF com
 
 ## Key Features
 
+### **AI Assistant (Conversational Interface)**
+- **Primary interaction method** for natural, context-aware assistance
+- Full conversation history maintained across your session
+- Ask questions, request commands/scripts, and get explanations in one place
+- Perfect for learning workflows and iterative problem-solving
+- Code block rendering with syntax highlighting and copy functionality
+
 ### **Intelligent Command Generation**
 - Natural language to CLI translation for common security tools
 - Context-aware parameter suggestions optimized for Kali Linux environments
@@ -105,8 +117,19 @@ Whether you're conducting authorized penetration tests, participating in CTF com
 
 CyberQueryAI's intuitive web interface provides specialized tools for different cybersecurity workflows:
 
+### **AI Assistant** (`/`)
+The **primary interface** for interacting with CyberQueryAI - a conversational AI assistant with full chat history:
+
+- **Conversational Experience**: Natural back-and-forth dialogue with context awareness
+- **Universal Capability**: Can handle all types of requests (commands, scripts, explanations, exploit research)
+- **Learning-Friendly**: Perfect for asking follow-up questions and iterative problem-solving
+- **Code Rendering**: Beautiful syntax-highlighted code blocks with copy functionality
+- **Example**: "How do I scan a network with nmap?" → Detailed explanation + follow-up questions like "Can you show me the stealth scan version?"
+
+**Tip**: Start here for most tasks - the AI Assistant provides the most natural and flexible interaction model.
+
 ### **Command Generation** (`/command-generation`)
-The primary interface for converting natural language into executable security commands:
+Focused interface for converting natural language into executable security commands:
 
 - **Example**: "Scan a network for open ports" → `nmap -sS -O 192.168.1.0/24`
 

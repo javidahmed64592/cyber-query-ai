@@ -46,28 +46,54 @@ export default function About() {
           <div className="text-[var(--text-secondary)] space-y-4">
             <p>
               This tool uses advanced AI models to understand your requests and
-              generate appropriate responses:
+              generate appropriate responses. You can interact with CyberQueryAI
+              in two ways:
             </p>
-            <ul className="list-disc list-inside space-y-2 ml-4">
-              <li>
-                <strong>Command Generation:</strong> Converts natural language
-                descriptions into precise CLI commands for security tools like
-                nmap, metasploit, john, and more.
-              </li>
-              <li>
-                <strong>Script Generation:</strong> Creates custom scripts in
-                various programming languages (Python, Bash, PowerShell, etc.)
-                for specific security tasks.
-              </li>
-              <li>
-                <strong>Explanations:</strong> Provides detailed breakdowns of
-                commands and scripts to help you understand how they work.
-              </li>
-              <li>
-                <strong>Exploit Research:</strong> Suggests known
-                vulnerabilities and attack vectors based on target descriptions.
-              </li>
-            </ul>
+            <div className="bg-[var(--background-secondary)] p-4 rounded border border-[var(--border-accent)]">
+              <h3 className="font-semibold text-[var(--border-accent)] mb-2">
+                🤖 AI Assistant (Recommended)
+              </h3>
+              <p className="mb-2">
+                The <strong>AI Assistant</strong> is your primary interface for
+                interacting with CyberQueryAI. It provides a conversational
+                experience where you can ask questions, request commands or
+                scripts, and get explanations - all in one place with full
+                conversation history.
+              </p>
+              <p className="text-sm italic">
+                Best for: General queries, learning, and interactive workflows
+              </p>
+            </div>
+            <div className="bg-[var(--background-secondary)] p-4 rounded border border-[var(--terminal-border)]">
+              <h3 className="font-semibold text-[var(--text-primary)] mb-2">
+                🎯 Specialized Pages
+              </h3>
+              <p className="mb-2">
+                For more specific tasks, you can use the dedicated pages:
+              </p>
+              <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
+                <li>
+                  <strong>Command Generation:</strong> Focused interface for
+                  generating CLI commands
+                </li>
+                <li>
+                  <strong>Script Generation:</strong> Create scripts in specific
+                  programming languages
+                </li>
+                <li>
+                  <strong>Command Explanation:</strong> Get detailed breakdowns
+                  of existing commands
+                </li>
+                <li>
+                  <strong>Script Explanation:</strong> Understand how scripts
+                  work line-by-line
+                </li>
+                <li>
+                  <strong>Exploit Search:</strong> Research known
+                  vulnerabilities for specific targets
+                </li>
+              </ul>
+            </div>
             <p>
               All outputs are sanitized and filtered to promote safe and ethical
               usage patterns.
@@ -81,6 +107,15 @@ export default function About() {
             🚀 Features
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-[var(--border-accent)]">
+                🤖 AI Assistant
+              </h3>
+              <p className="text-[var(--text-secondary)] text-sm">
+                Interactive conversational interface with full chat history for
+                natural, context-aware assistance with all cybersecurity tasks.
+              </p>
+            </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-[var(--border-accent)]">
                 🛠️ Command Generation

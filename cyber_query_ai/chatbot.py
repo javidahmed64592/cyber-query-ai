@@ -39,6 +39,27 @@ class Chatbot:
         )
 
     @property
+    def pt_chat(self) -> PromptTemplate:
+        """Prompt template for conversational chat."""
+        base_template = (
+            f"{self.profile}"
+            "You are chatting with a user about cybersecurity tasks. Based on their requests:\n"
+            "- Generate commands when they need to execute something (format in code blocks)\n"
+            "- Generate scripts when they need automation (format in code blocks with language)\n"
+            "- Provide explanations when they ask how something works\n"
+            "- Search for exploits when they mention specific vulnerabilities\n"
+            "- Ask clarifying questions if their request is vague\n\n"
+            "Keep responses concise and actionable. Use markdown formatting for code blocks.\n"
+            "Example: ```bash\\nnmap -sn 192.168.1.0/24\\n```\n\n"
+            "Previous conversation:\n{history}\n\n"
+            "User: {message}\n"
+            "Assistant:"
+        )
+        rag_content = self.rag_system.generate_rag_content(base_template)
+        template = f"{base_template}{rag_content}"
+        return PromptTemplate(input_variables=["history", "message"], template=template)
+
+    @property
     def pt_command_generation(self) -> PromptTemplate:
         """Prompt template for command generation."""
         base_template = (
@@ -160,6 +181,10 @@ class Chatbot:
             f"{rag_content}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
+
+    def prompt_chat(self, message: str, history: str) -> str:
+        """Generate the prompt template for conversational chat."""
+        return self.pt_chat.format(message=message, history=history)
 
     def prompt_command_generation(self, prompt: str) -> str:
         """Generate the prompt template for command generation."""

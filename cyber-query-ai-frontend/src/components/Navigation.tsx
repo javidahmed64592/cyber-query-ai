@@ -13,6 +13,11 @@ const Navigation = () => {
 
   const navItems = [
     {
+      name: "AI Assistant",
+      href: "/assistant",
+      active: pathname === "/assistant/",
+    },
+    {
       name: "Command Generation",
       href: "/command-generation",
       active: pathname === "/command-generation/",
@@ -82,7 +87,7 @@ const Navigation = () => {
               const normalized = (pathname || "").replace(/\/$/, "") || "/";
               const isActive =
                 normalized === item.href ||
-                (item.href === "/command-generation" && normalized === "/");
+                (item.href === "/assistant" && normalized === "/");
 
               return (
                 <Link
@@ -154,7 +159,7 @@ const Navigation = () => {
               const normalized = (pathname || "").replace(/\/$/, "") || "/";
               const isActive =
                 normalized === item.href ||
-                (item.href === "/command-generation" && normalized === "/");
+                (item.href === "/assistant" && normalized === "/");
 
               return (
                 <Link

@@ -53,6 +53,15 @@ class TestChatbot:
         assert "cybersecurity assistant" in profile
         assert "Kali Linux" in profile
 
+    def test_pt_chat_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
+        """Test the pt_chat property."""
+        prompt_template = mock_chatbot.pt_chat
+        assert prompt_template.input_variables == ["history", "message"]
+        assert "You are chatting with a user about cybersecurity tasks" in prompt_template.template
+        assert "{history}" in prompt_template.template
+        assert "User: {message}" in prompt_template.template
+        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
+
     def test_pt_command_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
         """Test the pt_command_generation property."""
         prompt_template = mock_chatbot.pt_command_generation
@@ -92,6 +101,13 @@ class TestChatbot:
         assert "suggest known exploits" in prompt_template.template
         assert "Target: `{prompt}`" in prompt_template.template
         assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
+
+    def test_prompt_chat_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_chat method."""
+        message = "Hello, how can I help you?"
+        history = "User: Hi\nAssistant: Hello!"
+        result = mock_chatbot.prompt_chat(message, history)
+        assert result == mock_chatbot.pt_chat.format(history=history, message=message)
 
     def test_prompt_command_generation_method(self, mock_chatbot: Chatbot) -> None:
         """Test the prompt_command_generation method."""

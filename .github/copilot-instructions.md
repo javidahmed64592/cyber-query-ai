@@ -89,19 +89,19 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ### Backend
 
-- `api.py`: Route definitions including `/api/config` endpoint; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
-- `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection
+- `api.py`: Route definitions including `/api/config` and `/api/chat` endpoints; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
+- `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection; includes `prompt_chat()` for conversational interface
 - `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `tools.json`
 - `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas)
-- `models.py`: All Pydantic models including `ConfigResponse` used throughout the application
+- `models.py`: All Pydantic models including `ConfigResponse`, `ChatMessage`, `ChatRequest`, and `ChatResponse` used throughout the application
 - `config.py`: Loads `config.json` and returns `ConfigResponse` model from `models.py`
 
 ### Frontend
 
-- `src/lib/api.ts`: Single source for all backend communication including `getConfig()`; 30s timeout, error normalization
-- `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models, including `ConfigResponse`
+- `src/lib/api.ts`: Single source for all backend communication including `getConfig()` and `sendChatMessage()`; 30s timeout, error normalization
+- `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models, including `ConfigResponse`, `ChatMessage`, `ChatRequest`, and `ChatResponse`
 - `src/lib/sanitization.ts`: DOMPurify wrapper + command safety checker
-- `src/components/`: Presentational components; keep business logic in `api.ts`
+- `src/components/`: Presentational components including `ChatWindow.tsx` and `ChatMessage.tsx` for conversational interface; keep business logic in `api.ts`
 - `next.config.ts`: Reads `config.json` at build time to configure dev proxy; uses `ConfigResponse` type
 
 ## RAG System Details
