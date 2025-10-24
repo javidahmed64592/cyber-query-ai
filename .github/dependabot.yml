@@ -1,0 +1,74 @@
+version: 2
+updates:
+  # Python packages
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      # Group LangChain ecosystem together
+      langchain:
+        patterns:
+          - "langchain*"
+      # Group testing dependencies together
+      test-dependencies:
+        patterns:
+          - "pytest*"
+      # Group linting/formatting tools together
+      dev-tools:
+        patterns:
+          - "ruff"
+          - "mypy"
+    # Ignore major version updates for stable dependencies
+    ignore:
+      - dependency-name: "fastapi"
+        update-types: ["version-update:semver-major"]
+
+  # Node.js packages
+  - package-ecosystem: "npm"
+    directory: "/cyber-query-ai-frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "frontend"
+    groups:
+      # Group React ecosystem together
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "next"
+      # Group testing libraries together
+      testing:
+        patterns:
+          - "jest"
+          - "jest-*"
+          - "@testing-library/*"
+      # Group ESLint ecosystem together
+      eslint:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+      # Group TypeScript types together
+      typescript-types:
+        patterns:
+          - "@types/*"
+    # Ignore major version updates for core dependencies
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
