@@ -24,13 +24,6 @@ class PromptRequest(BaseModel):
     prompt: str
 
 
-class PromptWithLanguageRequest(BaseModel):
-    """Request model with prompt and language."""
-
-    prompt: str
-    language: str
-
-
 # Response schemas
 class HealthResponse(BaseModel):
     """Response model for health check endpoint."""
@@ -54,22 +47,16 @@ class ChatResponse(BaseModel):
     message: str
 
 
-class CommandGenerationResponse(BaseModel):
-    """Response model for command generation endpoint."""
+class CodeGenerationResponse(BaseModel):
+    """Response model for code generation."""
 
-    commands: list[str]
+    code: str
     explanation: str
+    language: str = "bash"
 
 
-class ScriptGenerationResponse(BaseModel):
-    """Response model for script generation endpoint."""
-
-    script: str
-    explanation: str
-
-
-class ExplanationResponse(BaseModel):
-    """Response model for explanation endpoint."""
+class CodeExplanationResponse(BaseModel):
+    """Response model for code explanation endpoint."""
 
     explanation: str
 

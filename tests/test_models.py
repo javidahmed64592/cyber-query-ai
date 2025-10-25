@@ -4,15 +4,13 @@ from cyber_query_ai.models import (
     ChatMessage,
     ChatRequest,
     ChatResponse,
-    CommandGenerationResponse,
+    CodeExplanationResponse,
+    CodeGenerationResponse,
     ConfigResponse,
-    ExplanationResponse,
     Exploit,
     ExploitSearchResponse,
     HealthResponse,
     PromptRequest,
-    PromptWithLanguageRequest,
-    ScriptGenerationResponse,
 )
 
 
@@ -58,18 +56,6 @@ class TestPromptRequest:
         assert request.model_dump() == expected
 
 
-class TestPromptWithLanguageRequest:
-    """Unit tests for the PromptWithLanguageRequest model."""
-
-    def test_model_dump(self) -> None:
-        """Test the model_dump method."""
-        prompt = "Generate a command"
-        language = "bash"
-        request = PromptWithLanguageRequest(prompt=prompt, language=language)
-        expected = {"prompt": prompt, "language": language}
-        assert request.model_dump() == expected
-
-
 # Response schemas
 class TestHealthResponse:
     """Unit tests for the HealthResponse model."""
@@ -108,40 +94,43 @@ class TestChatResponse:
         assert response.model_dump() == expected
 
 
-class TestCommandGenerationResponse:
-    """Unit tests for the CommandGenerationResponse model."""
+class TestCodeGenerationResponse:
+    """Unit tests for the CodeGenerationResponse model."""
 
-    def test_model_dump(self) -> None:
-        """Test the model_dump method."""
-        commands = ["ls -la", "cat /etc/passwd"]
-        explanation = "List all files and show the contents of passwd file."
-        response = CommandGenerationResponse(commands=commands, explanation=explanation)
+    def test_model_dump_single_line(self) -> None:
+        """Test the model_dump method for single-line command."""
+        code = "nmap -sn 192.168.1.0/24"
+        explanation = "Performs a ping scan of the network"
+        language = "bash"
+        response = CodeGenerationResponse(code=code, explanation=explanation, language=language)
         expected = {
-            "commands": commands,
+            "code": code,
             "explanation": explanation,
+            "language": language,
+        }
+        assert response.model_dump() == expected
+
+    def test_model_dump_multi_line(self) -> None:
+        """Test the model_dump method for multi-line script."""
+        code = "#!/bin/bash\nfor i in $(seq 1 254); do\n  ping -c 1 192.168.1.$i\ndone"
+        explanation = "Script that pings all hosts in the network"
+        language = "bash"
+        response = CodeGenerationResponse(code=code, explanation=explanation, language=language)
+        expected = {
+            "code": code,
+            "explanation": explanation,
+            "language": language,
         }
         assert response.model_dump() == expected
 
 
-class TestScriptGenerationResponse:
-    """Unit tests for the ScriptGenerationResponse model."""
-
-    def test_model_dump(self) -> None:
-        """Test the model_dump method."""
-        script = "#!/bin/bash\necho hello"
-        explanation = "A simple script"
-        response = ScriptGenerationResponse(script=script, explanation=explanation)
-        expected = {"script": script, "explanation": explanation}
-        assert response.model_dump() == expected
-
-
-class TestExplanationResponse:
-    """Unit tests for the ExplanationResponse model."""
+class TestCodeExplanationResponse:
+    """Unit tests for the CodeExplanationResponse model."""
 
     def test_model_dump(self) -> None:
         """Test the model_dump method."""
         explanation = "This is an explanation"
-        response = ExplanationResponse(explanation=explanation)
+        response = CodeExplanationResponse(explanation=explanation)
         expected = {"explanation": explanation}
         assert response.model_dump() == expected
 
