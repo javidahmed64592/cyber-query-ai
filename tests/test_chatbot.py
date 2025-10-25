@@ -62,36 +62,22 @@ class TestChatbot:
         assert "User: {message}" in prompt_template.template
         assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_command_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
-        """Test the pt_command_generation property."""
-        prompt_template = mock_chatbot.pt_command_generation
+    def test_pt_code_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
+        """Test the pt_code_generation property."""
+        prompt_template = mock_chatbot.pt_code_generation
         assert prompt_template.input_variables == ["prompt"]
-        assert "RESPONSE SCENARIOS" in prompt_template.template
+        assert "SIMPLICITY-FIRST APPROACH" in prompt_template.template
         assert "Task: `{prompt}`" in prompt_template.template
+        assert "Automatically detect the appropriate language" in prompt_template.template
         assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
-    def test_pt_script_generation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
-        """Test the pt_script_generation property."""
-        prompt_template = mock_chatbot.pt_script_generation
-        assert prompt_template.input_variables == ["language", "prompt"]
-        assert "Write a script in {language}" in prompt_template.template
-        assert "Task: `{prompt}`" in prompt_template.template
-        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
-
-    def test_pt_command_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
-        """Test the pt_command_explanation property."""
-        prompt_template = mock_chatbot.pt_command_explanation
+    def test_pt_code_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
+        """Test the pt_code_explanation property."""
+        prompt_template = mock_chatbot.pt_code_explanation
         assert prompt_template.input_variables == ["prompt"]
-        assert "Explain the following CLI command" in prompt_template.template
-        assert "Command: `{prompt}`" in prompt_template.template
-        assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
-
-    def test_pt_script_explanation_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
-        """Test the pt_script_explanation property."""
-        prompt_template = mock_chatbot.pt_script_explanation
-        assert prompt_template.input_variables == ["language", "prompt"]
-        assert "Explain the following {language} script" in prompt_template.template
-        assert "Script:\n```\n{prompt}\n```\n" in prompt_template.template
+        assert "Explain the following code" in prompt_template.template
+        assert "Automatically detect the language" in prompt_template.template
+        assert "Code:\n```\n{prompt}\n```\n" in prompt_template.template
         assert mock_rag_system.return_value.generate_rag_content.return_value in prompt_template.template
 
     def test_pt_exploit_search_property(self, mock_chatbot: Chatbot, mock_rag_system: MagicMock) -> None:
@@ -109,31 +95,17 @@ class TestChatbot:
         result = mock_chatbot.prompt_chat(message, history)
         assert result == mock_chatbot.pt_chat.format(history=history, message=message)
 
-    def test_prompt_command_generation_method(self, mock_chatbot: Chatbot) -> None:
-        """Test the prompt_command_generation method."""
+    def test_prompt_code_generation_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_code_generation method."""
         prompt = "example task"
-        result = mock_chatbot.prompt_command_generation(prompt)
-        assert result == mock_chatbot.pt_command_generation.format(prompt=prompt)
+        result = mock_chatbot.prompt_code_generation(prompt)
+        assert result == mock_chatbot.pt_code_generation.format(prompt=prompt)
 
-    def test_prompt_script_generation_method(self, mock_chatbot: Chatbot) -> None:
-        """Test the prompt_script_generation method."""
-        language = "python"
-        prompt = "example task"
-        result = mock_chatbot.prompt_script_generation(language, prompt)
-        assert result == mock_chatbot.pt_script_generation.format(language=language, prompt=prompt)
-
-    def test_prompt_command_explanation_method(self, mock_chatbot: Chatbot) -> None:
-        """Test the prompt_command_explanation method."""
+    def test_prompt_code_explanation_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the prompt_code_explanation method."""
         prompt = "nmap -p- 192.168.1.1"
-        result = mock_chatbot.prompt_command_explanation(prompt)
-        assert result == mock_chatbot.pt_command_explanation.format(prompt=prompt)
-
-    def test_prompt_script_explanation_method(self, mock_chatbot: Chatbot) -> None:
-        """Test the prompt_script_explanation method."""
-        language = "python"
-        prompt = "import os\nos.system('ls')"
-        result = mock_chatbot.prompt_script_explanation(language, prompt)
-        assert result == mock_chatbot.pt_script_explanation.format(language=language, prompt=prompt)
+        result = mock_chatbot.prompt_code_explanation(prompt)
+        assert result == mock_chatbot.pt_code_explanation.format(prompt=prompt)
 
     def test_prompt_exploit_search_method(self, mock_chatbot: Chatbot) -> None:
         """Test the prompt_exploit_search method."""
