@@ -75,7 +75,7 @@ async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
     response_text = None
 
     try:
-        response_text = await run_in_threadpool(chatbot.llm, formatted_prompt)
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         return ChatResponse(message=sanitize_text(response_text))
     except Exception as e:
         error_msg = "Failed to generate chat response"
@@ -95,7 +95,7 @@ async def generate_code(request: Request, prompt_request: PromptRequest) -> Code
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
         if missing_keys := set(CodeGenerationResponse.model_fields) - parsed.keys():
@@ -123,7 +123,7 @@ async def explain_code(request: Request, prompt_request: PromptRequest) -> CodeE
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
         if missing_keys := set(CodeExplanationResponse.model_fields) - parsed.keys():
@@ -148,7 +148,7 @@ async def search_exploits(request: Request, prompt: PromptRequest) -> ExploitSea
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
         if missing_keys := set(ExploitSearchResponse.model_fields) - parsed.keys():
