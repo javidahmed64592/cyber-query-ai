@@ -48,7 +48,7 @@ def get_server_error(error: str, exception: Exception, response_text: str | None
 
 
 @api_router.get("/health", response_model=HealthResponse)
-async def health_check() -> HealthResponse:
+async def get_health() -> HealthResponse:
     """Check the health of the server."""
     return HealthResponse(status="healthy", timestamp=datetime.now().isoformat() + "Z")
 

@@ -80,7 +80,7 @@ class TestGetServerError:
 class TestHealthCheck:
     """Tests for the health check endpoint."""
 
-    def test_health_check_success(self, test_app: TestClient) -> None:
+    def test_get_health_success(self, test_app: TestClient) -> None:
         """Test successful health check."""
         response = test_app.get("/api/health")
 
