@@ -384,7 +384,7 @@ class TestExplainCode:
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
         """Test code explanation with missing required keys in LLM response via endpoint."""
-        mock_response = {}
+        mock_response: dict[str, str] = {}
         mock_run_in_threadpool.return_value = json.dumps(mock_response)
         mock_clean_json_response.return_value = json.dumps(mock_response)
 
