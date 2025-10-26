@@ -3,25 +3,26 @@
 import { useState } from "react";
 
 import ExplanationBox from "@/components/ExplanationBox";
+import ScriptBox from "@/components/ScriptBox";
 import TextInput from "@/components/TextInput";
-import { explainCommand } from "@/lib/api";
+import { generateCode } from "@/lib/api";
 import { sanitizeInput } from "@/lib/sanitization";
-import { ExplanationResponse } from "@/lib/types";
+import { CodeGenerationResponse } from "@/lib/types";
 
-export default function CommandExplanation() {
-  const [command, setCommand] = useState("");
+export default function CodeGeneration() {
+  const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [response, setResponse] = useState<ExplanationResponse | null>(null);
+  const [response, setResponse] = useState<CodeGenerationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
-    if (!command.trim()) return;
+    if (!prompt.trim()) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const result = await explainCommand(sanitizeInput(command));
+      const result = await generateCode(sanitizeInput(prompt));
       setResponse(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -36,27 +37,28 @@ export default function CommandExplanation() {
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
-          Command Explanation
+          Code Generation
         </h1>
         <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
-          Get detailed explanations of cybersecurity CLI commands. Understand
-          what each parameter does and learn how to use tools effectively for
-          ethical penetration testing.
+          Describe your cybersecurity task and get commands or scripts for
+          ethical penetration testing and security research. The AI
+          automatically determines whether to generate a simple command or a
+          full script. AI can make mistakes - please verify the generated code
+          before use.
         </p>
       </div>
 
       {/* Input Section */}
       <div className="max-w-4xl mx-auto">
         <TextInput
-          label="🔍 Command Input:"
-          value={command}
-          onChange={setCommand}
+          label="🧠 Prompt:"
+          value={prompt}
+          onChange={setPrompt}
           onSubmit={handleSubmit}
-          placeholder="Enter the CLI command you want to understand... (Ctrl+Enter to submit)"
-          buttonText="🚀 Explain Command"
+          placeholder="Describe the task you want to perform... (Ctrl+Enter to submit)"
+          buttonText="🚀 Generate Code"
           isLoading={isLoading}
-          loadingText="Analyzing..."
-          multiline={false}
+          loadingText="Generating..."
         />
       </div>
 
@@ -74,6 +76,13 @@ export default function CommandExplanation() {
             </div>
           )}
 
+          {/* Code Output */}
+          <ScriptBox
+            script={response?.code || ""}
+            language={response?.language || "bash"}
+            isLoading={isLoading}
+          />
+
           {/* Explanation */}
           <ExplanationBox
             explanation={response?.explanation || ""}
@@ -86,14 +95,16 @@ export default function CommandExplanation() {
       {!isLoading && !response && !error && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <div className="text-[var(--text-muted)] text-lg">
-            Understand any cybersecurity command! 🔍
+            Welcome to CyberQueryAI! 🚀
           </div>
           <div className="text-sm text-[var(--text-muted)] space-y-2">
-            <p>Try explaining commands like:</p>
+            <p>Try asking for code like:</p>
             <ul className="space-y-1 text-left list-disc list-inside">
-              <li>&quot;nmap -sS -O 192.168.1.0/24&quot;</li>
-              <li>&quot;john --wordlist=rockyou.txt hashes.txt&quot;</li>
-              <li>&quot;hydra -l admin -P passwords.txt ssh://target&quot;</li>
+              <li>&quot;Scan a network for open ports&quot;</li>
+              <li>&quot;Write a Python script to crack MD5 hashes&quot;</li>
+              <li>&quot;Perform a basic web vulnerability scan&quot;</li>
+              <li>&quot;Extract metadata from image files&quot;</li>
+              <li>&quot;Automate subdomain enumeration&quot;</li>
             </ul>
           </div>
         </div>

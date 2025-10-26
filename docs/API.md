@@ -14,10 +14,8 @@ The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSO
   - [GET /api/health](#get-apihealth)
   - [GET /api/config](#get-apiconfig)
   - [POST /api/chat](#post-apichat)
-  - [POST /api/generate-command](#post-apigenerate-command)
-  - [POST /api/generate-script](#post-apigenerate-script)
-  - [POST /api/explain-command](#post-apiexplain-command)
-  - [POST /api/explain-script](#post-apiexplain-script)
+  - [POST /api/generate-code](#post-apigenerate-code)
+  - [POST /api/explain-code](#post-apiexplain-code)
   - [POST /api/search-exploits](#post-apisearch-exploits)
 - [Request and Response Models (Pydantic)](#request-and-response-models-pydantic)
 - [Error handling](#error-handling)
@@ -97,88 +95,77 @@ Example response:
     "message": "To perform a stealth port scan with nmap, use the `-sS` flag:\n\n```bash\nnmap -sS target.com\n```\n\nThis performs a SYN scan which is less likely to be detected..."
 }
 
-### POST /api/generate-command
+### POST /api/generate-code
 
-- Purpose: Generate cybersecurity CLI commands plus an explanation from a user prompt.
+- Purpose: Generate cybersecurity code (CLI commands or scripts) from a user prompt. The LLM automatically infers whether to generate a command or script and which language to use based on the prompt.
 - Request model: `PromptRequest`
     - prompt: string
-- Response model: `CommandGenerationResponse`
-    - commands: list[string]
+- Response model: `CodeGenerationResponse`
+    - code: string (single command or multi-line script)
     - explanation: string
+    - language: string (e.g., "bash", "python", "powershell", etc.)
 
 Notes:
 - The server formats the prompt using the chatbot prompt template, sanitizes it, calls the LLM and then tries to clean the LLM response into JSON (`clean_json_response`).
-- If required keys are missing from the parsed JSON, the response will still be returned as the Pydantic model with empty commands and an explanation describing the missing keys.
+- The LLM intelligently determines whether to generate a single command or a full script based on the complexity of the request.
+- The language is automatically detected and returned (no need to specify upfront).
+- If required keys are missing from the parsed JSON, the response will still be returned with an explanation describing the issue.
 
-Example request:
+Example request (command):
 {
     "prompt": "enumerate open ports on a Linux host"
 }
 
-Example response:
+Example response (command):
 {
-    "commands": ["nmap -sC -sV target.example.com", "ss -tuln"],
-    "explanation": "Use nmap for network scanning and ss to list listening sockets locally."
+    "code": "nmap -sC -sV target.example.com",
+    "explanation": "This nmap command performs a service version detection scan with default scripts on the target host.",
+    "language": "bash"
 }
 
-### POST /api/generate-script
-
-- Purpose: Generate a script in a specified language from a prompt.
-- Request model: `PromptWithLanguageRequest`
-    - prompt: string
-    - language: string
-- Response model: `ScriptGenerationResponse`
-    - script: string
-    - explanation: string
-
-Example request:
+Example request (script):
 {
-    "prompt": "download a file and compute its sha256",
+    "prompt": "download a file and compute its sha256 in python"
+}
+
+Example response (script):
+{
+    "code": "import requests\nimport hashlib\n\nurl = 'https://example.com/file.zip'\nresponse = requests.get(url)\n\nsha256_hash = hashlib.sha256(response.content).hexdigest()\nprint(f'SHA256: {sha256_hash}')",
+    "explanation": "This Python script downloads a file using requests and computes its SHA256 hash by passing the downloaded content to hashlib.",
     "language": "python"
 }
 
-Example response:
-{
-    "script": "import requests, hashlib\n...",
-    "explanation": "This script downloads a file and computes its sha256 by streaming bytes to the hasher."
-}
+### POST /api/explain-code
 
-### POST /api/explain-command
-
-- Purpose: Explain a CLI command step-by-step.
+- Purpose: Explain code (CLI commands or scripts) step-by-step. The LLM automatically detects the code type and provides an appropriate explanation.
 - Request model: `PromptRequest`
-    - prompt: string
-- Response model: `ExplanationResponse`
+    - prompt: string (the code to explain)
+- Response model: `CodeExplanationResponse`
     - explanation: string
 
-Example request:
+Notes:
+- The LLM automatically determines whether the code is a command or script and provides context-appropriate explanations.
+- No need to specify the language or code type upfront—the AI detects it from the code itself.
+- Explanations include parameter breakdowns for commands and line-by-line analysis for scripts.
+
+Example request (command):
 {
     "prompt": "tar -xzf archive.tar.gz"
 }
 
-Example response:
+Example response (command):
 {
-    "explanation": "tar -xzf extracts a gzip-compressed tar archive; -x extract, -z filter through gzip, -f specify file."
+    "explanation": "This tar command extracts a gzip-compressed archive:\n\n- `-x`: Extract files from an archive\n- `-z`: Filter the archive through gzip for decompression\n- `-f archive.tar.gz`: Specify the filename of the archive to extract\n\nThe command will extract all contents of archive.tar.gz to the current directory."
 }
 
-### POST /api/explain-script
-
-- Purpose: Explain a script in a given language step-by-step.
-- Request model: `PromptWithLanguageRequest`
-    - prompt: string
-    - language: string
-- Response model: `ExplanationResponse`
-    - explanation: string
-
-Example request:
+Example request (script):
 {
-    "prompt": "for each line print reversed line",
-    "language": "bash"
+    "prompt": "#!/bin/bash\nwhile IFS= read -r line; do\n  echo \"$line\" | rev\ndone"
 }
 
-Example response:
+Example response (script):
 {
-    "explanation": "This script reads stdin line-by-line and reverses each line using parameter expansion..."
+    "explanation": "This Bash script reads input line-by-line and reverses each line:\n\n- `while IFS= read -r line`: Reads each line from stdin, preserving whitespace\n- `echo \"$line\" | rev`: Outputs the line and pipes it to the rev command which reverses the string\n- `done`: Closes the while loop\n\nExample: Input 'hello' outputs 'olleh'."
 }
 
 ### POST /api/search-exploits
@@ -219,12 +206,10 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - ChatRequest: { message: str, history: list[ChatMessage] }
 - ChatResponse: { message: str }
 - PromptRequest: { prompt: str }
-- PromptWithLanguageRequest: { prompt: str, language: str }
 - HealthResponse: { status: str, timestamp: str }
 - ConfigResponse: { model: str, embedding_model: str, host: str, port: int }
-- CommandGenerationResponse: { commands: list[str], explanation: str }
-- ScriptGenerationResponse: { script: str, explanation: str }
-- ExplanationResponse: { explanation: str }
+- CodeGenerationResponse: { code: str, explanation: str, language: str }
+- CodeExplanationResponse: { explanation: str }
 - Exploit: { title: str, link: str, severity: str, description: str }
 - ExploitSearchResponse: { exploits: list[Exploit], explanation: str }
 
@@ -232,7 +217,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 
 - Server errors are returned with HTTP 500 and a JSON `detail` object with keys `error`, `details` (exception string), and `raw` (raw LLM text if available).
 - If the LLM returns invalid JSON, a 500 is raised with detail indicating a JSON decode failure.
-- If the LLM response is missing required fields, the endpoint returns a valid response model with an explanatory message in the `explanation` field (or empty list for `commands`/`exploits`).
+- If the LLM response is missing required fields, the endpoint returns a valid response model with an explanatory message in the `explanation` field (or empty string for `code`, or empty list for `exploits`).
 
 ## Sanitization and LLM handling
 
@@ -244,5 +229,5 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 
 - The Next.js frontend uses `src/lib/api.ts` and expects the backend API under `/api` (same-origin in production, proxied in development).
 - In development mode, `next.config.ts` reads `config.json` at build time to configure the proxy URL for API requests.
-- Client helper functions: `sendChatMessage`, `generateCommand`, `generateScript`, `explainCommand`, `explainScript`, `searchExploits`, `getConfig` map directly to the endpoints above and expect the response shapes listed.
+- Client helper functions: `sendChatMessage`, `generateCode`, `explainCode`, `searchExploits`, `getConfig` map directly to the endpoints above and expect the response shapes listed.
 - The `config.json` file is the single source of truth for host and port configuration, used by both the backend server and the Next.js development proxy.

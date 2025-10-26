@@ -11,14 +11,12 @@ from cyber_query_ai.helpers import clean_json_response, sanitize_text
 from cyber_query_ai.models import (
     ChatRequest,
     ChatResponse,
-    CommandGenerationResponse,
+    CodeExplanationResponse,
+    CodeGenerationResponse,
     ConfigResponse,
-    ExplanationResponse,
     ExploitSearchResponse,
     HealthResponse,
     PromptRequest,
-    PromptWithLanguageRequest,
-    ScriptGenerationResponse,
 )
 
 LIMITER_INTERVAL = "5/minute"
@@ -77,30 +75,34 @@ async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
     response_text = None
 
     try:
-        response_text = await run_in_threadpool(chatbot.llm, formatted_prompt)
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         return ChatResponse(message=sanitize_text(response_text))
     except Exception as e:
         error_msg = "Failed to generate chat response"
         raise get_server_error(error_msg, e, response_text) from e
 
 
-@api_router.post("/generate-command", response_model=CommandGenerationResponse)
+@api_router.post("/generate-code", response_model=CodeGenerationResponse)
 @limiter.limit(LIMITER_INTERVAL)
-async def generate_command(request: Request, prompt: PromptRequest) -> CommandGenerationResponse:
-    """Generate cybersecurity commands based on user prompt."""
+async def generate_code(request: Request, prompt_request: PromptRequest) -> CodeGenerationResponse:
+    """Generate cybersecurity code based on user prompt.
+
+    The LLM automatically infers the appropriate language (bash, python, powershell, etc.)
+    based on the task description.
+    """
     chatbot = request.app.state.chatbot
-    formatted_prompt = sanitize_text(chatbot.prompt_command_generation(prompt.prompt))
+    formatted_prompt = sanitize_text(chatbot.prompt_code_generation(prompt_request.prompt))
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
-        if missing_keys := set(CommandGenerationResponse.model_fields) - parsed.keys():
+        if missing_keys := set(CodeGenerationResponse.model_fields) - parsed.keys():
             msg = f"Missing required keys in LLM response: {missing_keys}"
-            return CommandGenerationResponse(commands=[], explanation=msg)
+            return CodeGenerationResponse(code="", explanation=msg, language="bash")
 
-        return CommandGenerationResponse(**parsed)
+        return CodeGenerationResponse(**parsed)
     except json.JSONDecodeError as e:
         error_msg = "Invalid JSON response from LLM"
         raise get_server_error(error_msg, e, response_text) from e
@@ -109,73 +111,26 @@ async def generate_command(request: Request, prompt: PromptRequest) -> CommandGe
         raise get_server_error(error_msg, e, response_text) from e
 
 
-@api_router.post("/generate-script", response_model=ScriptGenerationResponse)
+@api_router.post("/explain-code", response_model=CodeExplanationResponse)
 @limiter.limit(LIMITER_INTERVAL)
-async def generate_script(request: Request, prompt: PromptWithLanguageRequest) -> ScriptGenerationResponse:
-    """Generate a script in the specified language based on user prompt."""
+async def explain_code(request: Request, prompt_request: PromptRequest) -> CodeExplanationResponse:
+    """Explain code step-by-step.
+
+    The LLM automatically detects the language from the code syntax.
+    """
     chatbot = request.app.state.chatbot
-    formatted_prompt = sanitize_text(chatbot.prompt_script_generation(prompt.language, prompt.prompt))
+    formatted_prompt = sanitize_text(chatbot.prompt_code_explanation(prompt_request.prompt))
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
-        if missing_keys := set(ScriptGenerationResponse.model_fields) - parsed.keys():
+        if missing_keys := set(CodeExplanationResponse.model_fields) - parsed.keys():
             msg = f"Missing required keys in LLM response: {missing_keys}"
-            return ScriptGenerationResponse(script="", explanation=msg)
+            return CodeExplanationResponse(explanation=msg)
 
-        return ScriptGenerationResponse(**parsed)
-    except json.JSONDecodeError as e:
-        error_msg = "Invalid JSON response from LLM"
-        raise get_server_error(error_msg, e, response_text) from e
-    except Exception as e:
-        error_msg = "Failed to generate or parse LLM response"
-        raise get_server_error(error_msg, e, response_text) from e
-
-
-@api_router.post("/explain-command", response_model=ExplanationResponse)
-@limiter.limit(LIMITER_INTERVAL)
-async def explain_command(request: Request, prompt: PromptRequest) -> ExplanationResponse:
-    """Explain a CLI command step-by-step."""
-    chatbot = request.app.state.chatbot
-    formatted_prompt = sanitize_text(chatbot.prompt_command_explanation(prompt.prompt))
-    response_text = None
-
-    try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
-        parsed = json.loads(response_text)
-
-        if missing_keys := set(ExplanationResponse.model_fields) - parsed.keys():
-            msg = f"Missing required keys in LLM response: {missing_keys}"
-            return ExplanationResponse(explanation=msg)
-
-        return ExplanationResponse(**parsed)
-    except json.JSONDecodeError as e:
-        error_msg = "Invalid JSON response from LLM"
-        raise get_server_error(error_msg, e, response_text) from e
-    except Exception as e:
-        error_msg = "Failed to generate or parse LLM response"
-        raise get_server_error(error_msg, e, response_text) from e
-
-
-@api_router.post("/explain-script", response_model=ExplanationResponse)
-@limiter.limit(LIMITER_INTERVAL)
-async def explain_script(request: Request, prompt: PromptWithLanguageRequest) -> ExplanationResponse:
-    """Explain a script in the specified language step-by-step."""
-    chatbot = request.app.state.chatbot
-    formatted_prompt = sanitize_text(chatbot.prompt_script_explanation(prompt.language, prompt.prompt))
-    response_text = None
-
-    try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
-        parsed = json.loads(response_text)
-
-        if missing_keys := set(ExplanationResponse.model_fields) - parsed.keys():
-            msg = f"Missing required keys in LLM response: {missing_keys}"
-            return ExplanationResponse(explanation=msg)
-
-        return ExplanationResponse(**parsed)
+        return CodeExplanationResponse(**parsed)
     except json.JSONDecodeError as e:
         error_msg = "Invalid JSON response from LLM"
         raise get_server_error(error_msg, e, response_text) from e
@@ -193,7 +148,7 @@ async def search_exploits(request: Request, prompt: PromptRequest) -> ExploitSea
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm, formatted_prompt))
+        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
         parsed = json.loads(response_text)
 
         if missing_keys := set(ExploitSearchResponse.model_fields) - parsed.keys():

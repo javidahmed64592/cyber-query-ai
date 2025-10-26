@@ -18,24 +18,14 @@ const Navigation = () => {
       active: pathname === "/assistant/",
     },
     {
-      name: "Command Generation",
-      href: "/command-generation",
-      active: pathname === "/command-generation/",
+      name: "Code Generation",
+      href: "/code-generation",
+      active: pathname === "/code-generation/",
     },
     {
-      name: "Script Generation",
-      href: "/script-generation",
-      active: pathname === "/script-generation/",
-    },
-    {
-      name: "Command Explain",
-      href: "/command-explanation",
-      active: pathname === "/command-explanation/",
-    },
-    {
-      name: "Script Explain",
-      href: "/script-explanation",
-      active: pathname === "/script-explanation/",
+      name: "Code Explanation",
+      href: "/code-explanation",
+      active: pathname === "/code-explanation/",
     },
     {
       name: "Exploit Search",

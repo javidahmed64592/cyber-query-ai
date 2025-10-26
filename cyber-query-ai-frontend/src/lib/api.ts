@@ -3,10 +3,8 @@ import { useEffect, useState } from "react";
 
 import type {
   PromptRequest,
-  PromptWithLanguageRequest,
-  CommandGenerationResponse,
-  ScriptGenerationResponse,
-  ExplanationResponse,
+  CodeGenerationResponse,
+  CodeExplanationResponse,
   ExploitSearchResponse,
   ConfigResponse,
   HealthResponse,
@@ -151,15 +149,15 @@ export const sendChatMessage = async (
   }
 };
 
-// Generate command based on prompt
-export const generateCommand = async (
+// Generate code (commands or scripts) based on prompt
+export const generateCode = async (
   prompt: string
-): Promise<CommandGenerationResponse> => {
+): Promise<CodeGenerationResponse> => {
   const request: PromptRequest = { prompt };
 
   try {
-    const response = await api.post<CommandGenerationResponse>(
-      "/generate-command",
+    const response = await api.post<CodeGenerationResponse>(
+      "/generate-code",
       request
     );
     return response.data;
@@ -198,103 +196,15 @@ export const generateCommand = async (
   }
 };
 
-// Generate script based on prompt and language
-export const generateScript = async (
-  prompt: string,
-  language: string
-): Promise<ScriptGenerationResponse> => {
-  const request: PromptWithLanguageRequest = { prompt, language };
+// Explain code (commands or scripts)
+export const explainCode = async (
+  code: string
+): Promise<CodeExplanationResponse> => {
+  const request: PromptRequest = { prompt: code };
 
   try {
-    const response = await api.post<ScriptGenerationResponse>(
-      "/generate-script",
-      request
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
-
-// Explain a command
-export const explainCommand = async (
-  command: string
-): Promise<ExplanationResponse> => {
-  const request: PromptRequest = { prompt: command };
-
-  try {
-    const response = await api.post<ExplanationResponse>(
-      "/explain-command",
-      request
-    );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
-    }
-    throw new Error("An unexpected error occurred");
-  }
-};
-
-// Explain a script
-export const explainScript = async (
-  script: string,
-  language: string
-): Promise<ExplanationResponse> => {
-  const request: PromptWithLanguageRequest = { prompt: script, language };
-
-  try {
-    const response = await api.post<ExplanationResponse>(
-      "/explain-script",
+    const response = await api.post<CodeExplanationResponse>(
+      "/explain-code",
       request
     );
     return response.data;

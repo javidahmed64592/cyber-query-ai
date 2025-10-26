@@ -54,10 +54,9 @@ describe("Navigation", () => {
   it("renders all navigation items", () => {
     render(<Navigation />);
     // Check that navigation items exist (they appear in both desktop and mobile)
-    expect(screen.getAllByText("Command Generation")).toHaveLength(2);
-    expect(screen.getAllByText("Script Generation")).toHaveLength(2);
-    expect(screen.getAllByText("Command Explain")).toHaveLength(2);
-    expect(screen.getAllByText("Script Explain")).toHaveLength(2);
+    expect(screen.getAllByText("AI Assistant")).toHaveLength(2);
+    expect(screen.getAllByText("Code Generation")).toHaveLength(2);
+    expect(screen.getAllByText("Code Explanation")).toHaveLength(2);
     expect(screen.getAllByText("Exploit Search")).toHaveLength(2);
     expect(screen.getAllByText("About")).toHaveLength(2);
   });
@@ -65,31 +64,20 @@ describe("Navigation", () => {
   it("renders navigation links with correct hrefs", () => {
     render(<Navigation />);
     // Get desktop navigation links (first occurrence)
-    const commandGenLinks = screen.getAllByRole("link", {
-      name: /Command Generation/,
+    const aiAssistantLinks = screen.getAllByRole("link", {
+      name: /AI Assistant/,
     });
-    expect(commandGenLinks[0]).toHaveAttribute("href", "/command-generation");
+    expect(aiAssistantLinks[0]).toHaveAttribute("href", "/assistant");
 
-    const scriptGenLinks = screen.getAllByRole("link", {
-      name: /Script Generation/,
+    const codeGenLinks = screen.getAllByRole("link", {
+      name: /Code Generation/,
     });
-    expect(scriptGenLinks[0]).toHaveAttribute("href", "/script-generation");
+    expect(codeGenLinks[0]).toHaveAttribute("href", "/code-generation");
 
-    const commandExplainLinks = screen.getAllByRole("link", {
-      name: /Command Explain/,
+    const codeExplainLinks = screen.getAllByRole("link", {
+      name: /Code Explanation/,
     });
-    expect(commandExplainLinks[0]).toHaveAttribute(
-      "href",
-      "/command-explanation"
-    );
-
-    const scriptExplainLinks = screen.getAllByRole("link", {
-      name: /Script Explain/,
-    });
-    expect(scriptExplainLinks[0]).toHaveAttribute(
-      "href",
-      "/script-explanation"
-    );
+    expect(codeExplainLinks[0]).toHaveAttribute("href", "/code-explanation");
 
     const exploitSearchLinks = screen.getAllByRole("link", {
       name: /Exploit Search/,
@@ -101,15 +89,15 @@ describe("Navigation", () => {
   });
 
   it("applies active styling to current page", () => {
-    mockUsePathname.mockReturnValue("/command-generation");
+    mockUsePathname.mockReturnValue("/code-generation");
 
     render(<Navigation />);
-    const commandGenLinks = screen.getAllByRole("link", {
-      name: /Command Generation/,
+    const codeGenLinks = screen.getAllByRole("link", {
+      name: /Code Generation/,
     });
     // Both desktop and mobile links should have active styling
-    expect(commandGenLinks[0]).toHaveClass("neon-glow");
-    expect(commandGenLinks[1]).toHaveClass("neon-glow");
+    expect(codeGenLinks[0]).toHaveClass("neon-glow");
+    expect(codeGenLinks[1]).toHaveClass("neon-glow");
   });
 
   describe("Mobile Navigation", () => {
@@ -199,10 +187,9 @@ describe("Navigation", () => {
       fireEvent.click(menuButton);
 
       // All navigation items should appear twice (desktop and mobile)
-      expect(screen.getAllByText("Command Generation")).toHaveLength(2);
-      expect(screen.getAllByText("Script Generation")).toHaveLength(2);
-      expect(screen.getAllByText("Command Explain")).toHaveLength(2);
-      expect(screen.getAllByText("Script Explain")).toHaveLength(2);
+      expect(screen.getAllByText("AI Assistant")).toHaveLength(2);
+      expect(screen.getAllByText("Code Generation")).toHaveLength(2);
+      expect(screen.getAllByText("Code Explanation")).toHaveLength(2);
       expect(screen.getAllByText("Exploit Search")).toHaveLength(2);
       expect(screen.getAllByText("About")).toHaveLength(2);
     });

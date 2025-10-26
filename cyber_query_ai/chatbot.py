@@ -60,88 +60,62 @@ class Chatbot:
         return PromptTemplate(input_variables=["history", "message"], template=template)
 
     @property
-    def pt_command_generation(self) -> PromptTemplate:
-        """Prompt template for command generation."""
+    def pt_code_generation(self) -> PromptTemplate:
+        """Prompt template for unified code generation (commands and scripts)."""
         base_template = (
             f"{self.profile}"
-            "Generate CLI commands to accomplish the following cybersecurity task.\n\n"
+            "Generate code to accomplish the following cybersecurity task.\n\n"
             "Task: `{prompt}`\n\n"
-            "RESPONSE SCENARIOS:\n"
-            "1. NO APPROPRIATE TOOL: If no cybersecurity tool can accomplish the task, "
-            "return 'commands': [] (empty array) and explain why in 'explanation'.\n"
-            "2. SINGLE COMMAND: If one command accomplishes the task, "
-            "return 'commands': ['command'] (array with one string).\n"
-            "3. MULTIPLE ALTERNATIVES: If multiple tools/commands could work, "
-            "return 'commands': ['cmd1', 'cmd2', ...] and compare them in 'explanation'.\n"
-            "4. SEQUENTIAL WORKFLOW: If multiple commands must be run in order, "
-            "return 'commands': ['step1', 'step2', ...] and explain the workflow in 'explanation'.\n\n"
-            "The 'commands' array should contain exact CLI commands ready to execute on Kali Linux. "
-            "If the user requests a specific tool, ENSURE you include it if appropriate."
-            "The 'explanation' should describe what the commands do, why they're used, and any important context.\n\n"
+            "**SIMPLICITY-FIRST APPROACH:**\n"
+            "1. If the task can be accomplished with a SINGLE command, generate only that command\n"
+            "2. Only generate multi-line scripts when absolutely necessary:\n"
+            "   - Complex logic requiring conditionals or loops\n"
+            "   - Multiple steps with error handling\n"
+            "   - Variable assignments and state management\n"
+            "3. Prefer built-in tools over custom scripts when possible\n"
+            "4. Automatically detect the appropriate language based on the task:\n"
+            "   - Use bash for Linux commands and shell scripts\n"
+            "   - Use python for complex parsing, API interactions, or data processing\n"
+            "   - Use powershell for Windows-specific tasks\n\n"
+            "**RESPONSE SCENARIOS:**\n"
+            "- NO APPROPRIATE TOOL: If no tool can accomplish the task, "
+            "return empty code string and explain why\n"
+            "- SINGLE COMMAND: Return the command as 'code'\n"
+            "- MULTI-LINE SCRIPT: Return the full script as 'code'\n\n"
+            "The 'code' field should contain executable code ready to run on Kali Linux. "
+            "DO NOT include markdown code blocks (```).\n"
+            "The 'explanation' should describe what the code does, why it's used, and any important context.\n"
+            "The 'language' should be the programming/scripting language (bash, python, powershell, etc.).\n\n"
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
         template = (
             f"{base_template}"
             f"{JSON_FORMATTING_RULES}"
-            "- The explanation must be ONE continuous string, not multiple separate strings\n"
-            "- Use \\n for line breaks within the explanation string\n"
-            "- Do NOT create multiple separate quoted strings\n"
-            '- Escape any quotes within strings using backslash (\\")\n\n'
-            'Example format: {{"commands": ["command1", "command2"], "explanation": "Description here."}}\n\n'
-            'Respond in JSON format: {{"commands": [...], "explanation": "..."}}'
-            f"{rag_content}"
-        )
-        return PromptTemplate(input_variables=["prompt"], template=template)
-
-    @property
-    def pt_script_generation(self) -> PromptTemplate:
-        """Prompt template for script generation."""
-        base_template = (
-            f"{self.profile}Write a script in {{language}} that performs the following task:\n\nTask: `{{prompt}}`\n\n"
-        )
-        rag_content = self.rag_system.generate_rag_content(base_template)
-        template = (
-            f"{base_template}"
-            f"{JSON_FORMATTING_RULES}"
-            "- ENSURE you DO NOT include markdown code blocks (```python, ```) in the script content\n"
-            "- The script should be plain text code without formatting\n"
+            "- ENSURE you DO NOT include markdown code blocks in the code field\n"
+            "- The code should be plain text without formatting\n"
             "- The explanation must be ONE continuous string, not multiple separate strings\n"
             "- Use \\n for line breaks within strings\n"
             "- Do NOT create multiple separate quoted strings\n"
             '- Escape any quotes within strings using backslash (\\")\n\n'
-            'Example format: {{"script": "import os\\nprint(\\"Hello World\\")", '
-            '"explanation": "This script imports os and prints Hello World."}}\n\n'
-            'Respond in JSON format: {{"script": "...", "explanation": "..."}}'
-            f"{rag_content}"
-        )
-        return PromptTemplate(input_variables=["language", "prompt"], template=template)
-
-    @property
-    def pt_command_explanation(self) -> PromptTemplate:
-        """Prompt template for command explanation."""
-        base_template = f"{self.profile}Explain the following CLI command step-by-step:\n\nCommand: `{{prompt}}`\n\n"
-        rag_content = self.rag_system.generate_rag_content(base_template)
-        template = (
-            f"{base_template}"
-            f"{JSON_FORMATTING_RULES}"
-            "- The explanation must be ONE continuous string, not multiple separate strings\n"
-            "- Use \\n for line breaks within the explanation string\n"
-            "- Do NOT create multiple separate quoted strings\n"
-            '- Escape any quotes within the explanation using backslash (\\")\n\n'
-            'Example format: {{"explanation": "This command does X.\\nIt works by Y.\\nImportant note: Z."}}\n\n'
-            'Respond in JSON format: {{"explanation": "..."}}'
+            'Example single command: {{"code": "nmap -sn 192.168.1.0/24", '
+            '"explanation": "This performs a ping scan...", "language": "bash"}}\n\n'
+            'Example script: {{"code": "#!/bin/bash\\nfor i in $(seq 1 254); do\\n  '
+            'ping -c 1 192.168.1.$i\\ndone", '
+            '"explanation": "This script pings all hosts...", "language": "bash"}}\n\n'
+            'Respond in JSON format: {{"code": "...", "explanation": "...", "language": "..."}}'
             f"{rag_content}"
         )
         return PromptTemplate(input_variables=["prompt"], template=template)
 
     @property
-    def pt_script_explanation(self) -> PromptTemplate:
-        """Prompt template for script explanation."""
+    def pt_code_explanation(self) -> PromptTemplate:
+        """Prompt template for unified code explanation (commands and scripts)."""
         base_template = (
             f"{self.profile}"
-            "Explain the following {language} script step-by-step. "
-            "Describe what each line does and highlight any risks or important behaviors.\n\n"
-            "Script:\n```\n{prompt}\n```\n\n"
+            "Explain the following code step-by-step. "
+            "Automatically detect the language from the code syntax. "
+            "Describe what each part does and highlight any risks or important behaviors.\n\n"
+            "Code:\n```\n{prompt}\n```\n\n"
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
         template = (
@@ -151,12 +125,12 @@ class Chatbot:
             "- Use \\n for line breaks within the explanation string\n"
             "- Do NOT create multiple separate quoted strings\n"
             '- Escape any quotes within the explanation using backslash (\\")\n\n'
-            'Example format: {{"explanation": "Step 1: This does X.\\n'
-            'Step 2: This does Y.\\nStep 3: This does Z."}}\n\n'
+            'Example format: {{"explanation": "This code does X.\\n'
+            'Step 1: This line does Y.\\nStep 2: This line does Z.\\nImportant: Security consideration A."}}\n\n'
             'Respond in JSON format: {{"explanation": "..."}}'
             f"{rag_content}"
         )
-        return PromptTemplate(input_variables=["language", "prompt"], template=template)
+        return PromptTemplate(input_variables=["prompt"], template=template)
 
     @property
     def pt_exploit_search(self) -> PromptTemplate:
@@ -186,21 +160,19 @@ class Chatbot:
         """Generate the prompt template for conversational chat."""
         return self.pt_chat.format(message=message, history=history)
 
-    def prompt_command_generation(self, prompt: str) -> str:
-        """Generate the prompt template for command generation."""
-        return self.pt_command_generation.format(prompt=prompt)
+    def prompt_code_generation(self, prompt: str) -> str:
+        """Generate the prompt template for unified code generation.
 
-    def prompt_script_generation(self, language: str, prompt: str) -> str:
-        """Generate the prompt template for script generation."""
-        return self.pt_script_generation.format(language=language, prompt=prompt)
+        The LLM will automatically infer the appropriate language from the task description.
+        """
+        return self.pt_code_generation.format(prompt=prompt)
 
-    def prompt_command_explanation(self, prompt: str) -> str:
-        """Generate the prompt template for command explanation."""
-        return self.pt_command_explanation.format(prompt=prompt)
+    def prompt_code_explanation(self, prompt: str) -> str:
+        """Generate the prompt template for unified code explanation.
 
-    def prompt_script_explanation(self, language: str, prompt: str) -> str:
-        """Generate the prompt template for script explanation."""
-        return self.pt_script_explanation.format(language=language, prompt=prompt)
+        The LLM will automatically detect the language from the code syntax.
+        """
+        return self.pt_code_explanation.format(prompt=prompt)
 
     def prompt_exploit_search(self, prompt: str) -> str:
         """Generate the prompt template for exploit search."""
