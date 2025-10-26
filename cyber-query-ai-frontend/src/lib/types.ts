@@ -15,11 +15,6 @@ export interface PromptRequest {
   prompt: string;
 }
 
-export interface PromptWithLanguageRequest {
-  prompt: string;
-  language: string;
-}
-
 // Response types
 export interface HealthResponse {
   status: string;
@@ -37,17 +32,13 @@ export interface ChatResponse {
   message: string;
 }
 
-export interface CommandGenerationResponse {
-  commands: string[];
+export interface CodeGenerationResponse {
+  code: string;
   explanation: string;
+  language: string;
 }
 
-export interface ScriptGenerationResponse {
-  script: string;
-  explanation: string;
-}
-
-export interface ExplanationResponse {
+export interface CodeExplanationResponse {
   explanation: string;
 }
 
@@ -64,15 +55,16 @@ export interface ExploitSearchResponse {
 }
 
 // UI State types
-export interface CommandState {
+export interface CodeState {
   isLoading: boolean;
-  response: CommandGenerationResponse | null;
+  response: CodeGenerationResponse | null;
   error: string | null;
 }
 
 // Component prop types
-export interface CommandBoxProps {
-  commands: string[];
+export interface CodeBoxProps {
+  code: string;
+  language: string;
   isLoading: boolean;
 }
 
