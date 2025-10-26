@@ -1,10 +1,8 @@
 import { renderHook } from "@testing-library/react";
 
 import {
-  generateCommand,
-  generateScript,
-  explainCommand,
-  explainScript,
+  generateCode,
+  explainCode,
   searchExploits,
   getConfig,
   getHealth,
@@ -13,9 +11,8 @@ import {
   type HealthStatus,
 } from "@/lib/api";
 import type {
-  CommandGenerationResponse,
-  ScriptGenerationResponse,
-  ExplanationResponse,
+  CodeGenerationResponse,
+  CodeExplanationResponse,
   ExploitSearchResponse,
   ConfigResponse,
   HealthResponse,
@@ -28,10 +25,8 @@ jest.mock("../api", () => {
     ...actual,
     getHealth: jest.fn(),
     getConfig: jest.fn(),
-    generateCommand: jest.fn(),
-    generateScript: jest.fn(),
-    explainCommand: jest.fn(),
-    explainScript: jest.fn(),
+    generateCode: jest.fn(),
+    explainCode: jest.fn(),
     searchExploits: jest.fn(),
     sendChatMessage: jest.fn(),
   };
@@ -40,18 +35,10 @@ jest.mock("../api", () => {
 // Mock fetch for config endpoint
 global.fetch = jest.fn();
 
-const mockGenerateCommand = generateCommand as jest.MockedFunction<
-  typeof generateCommand
+const mockGenerateCode = generateCode as jest.MockedFunction<
+  typeof generateCode
 >;
-const mockGenerateScript = generateScript as jest.MockedFunction<
-  typeof generateScript
->;
-const mockExplainCommand = explainCommand as jest.MockedFunction<
-  typeof explainCommand
->;
-const mockExplainScript = explainScript as jest.MockedFunction<
-  typeof explainScript
->;
+const mockExplainCode = explainCode as jest.MockedFunction<typeof explainCode>;
 const mockSearchExploits = searchExploits as jest.MockedFunction<
   typeof searchExploits
 >;
@@ -309,207 +296,149 @@ And check service versions`;
     });
   });
 
-  describe("generateCommand", () => {
-    const mockResponse: CommandGenerationResponse = {
-      commands: ["nmap -sV -p 80,443 target.com", "nikto -h target.com"],
+  describe("generateCode", () => {
+    const mockResponse: CodeGenerationResponse = {
+      code: "nmap -sV -p 80,443 target.com",
       explanation:
-        "These commands will scan the target for open ports and web vulnerabilities.",
+        "This command scans the target for open ports 80 and 443 with service version detection.",
+      language: "bash",
     };
 
-    it("should successfully generate commands with valid prompt", async () => {
-      mockGenerateCommand.mockResolvedValue(mockResponse);
+    it("should successfully generate code with valid prompt", async () => {
+      mockGenerateCode.mockResolvedValue(mockResponse);
 
-      const result = await generateCommand(
-        "Scan a website for vulnerabilities"
-      );
+      const result = await generateCode("Scan a website for open ports");
 
       expect(result).toEqual(mockResponse);
-      expect(mockGenerateCommand).toHaveBeenCalledWith(
-        "Scan a website for vulnerabilities"
+      expect(mockGenerateCode).toHaveBeenCalledWith(
+        "Scan a website for open ports"
+      );
+    });
+
+    it("should handle code generation for scripts", async () => {
+      const scriptResponse: CodeGenerationResponse = {
+        code: 'import socket\n\ndef port_scan():\n    print("Scanning ports")',
+        explanation: "This Python script scans for open ports on a target.",
+        language: "python",
+      };
+
+      mockGenerateCode.mockResolvedValue(scriptResponse);
+
+      const result = await generateCode("Create a Python port scanner");
+
+      expect(result).toEqual(scriptResponse);
+      expect(result.language).toBe("python");
+      expect(mockGenerateCode).toHaveBeenCalledWith(
+        "Create a Python port scanner"
       );
     });
 
     it("should handle server error with string message", async () => {
       const errorMessage = "Invalid prompt format";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("invalid prompt")).rejects.toThrow(
+      await expect(generateCode("invalid prompt")).rejects.toThrow(
         errorMessage
       );
     });
 
     it("should handle server error with detail field", async () => {
       const errorDetail = "Prompt too long";
-      mockGenerateCommand.mockRejectedValue(new Error(errorDetail));
+      mockGenerateCode.mockRejectedValue(new Error(errorDetail));
 
-      await expect(generateCommand("very long prompt...")).rejects.toThrow(
+      await expect(generateCode("very long prompt...")).rejects.toThrow(
         errorDetail
       );
     });
 
     it("should handle server error with message field", async () => {
       const errorMessage = "Internal server error";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
 
     it("should handle server error with generic status message", async () => {
       const errorMessage = "Server error: 404 Not Found";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
 
     it("should handle network error (no response)", async () => {
       const errorMessage =
         "No response from server. Please check if the backend is running.";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
 
     it("should handle request setup error", async () => {
       const errorMessage = "Request failed: Request timeout";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
 
     it("should handle non-Axios error", async () => {
       const errorMessage = "An unexpected error occurred";
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
 
     it("should handle complex error detail object", async () => {
       const errorDetail = { code: "VALIDATION_ERROR", field: "prompt" };
       const errorMessage = JSON.stringify(errorDetail);
-      mockGenerateCommand.mockRejectedValue(new Error(errorMessage));
+      mockGenerateCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(generateCommand("test prompt")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(generateCode("test prompt")).rejects.toThrow(errorMessage);
     });
   });
 
-  describe("generateScript", () => {
-    const mockResponse: ScriptGenerationResponse = {
-      script: 'import socket\n\ndef port_scan():\n    print("Scanning ports")',
-      explanation: "This Python script scans for open ports on a target.",
-    };
-
-    it("should successfully generate script with valid prompt and language", async () => {
-      mockGenerateScript.mockResolvedValue(mockResponse);
-
-      const result = await generateScript("Create a port scanner", "python");
-
-      expect(result).toEqual(mockResponse);
-      expect(mockGenerateScript).toHaveBeenCalledWith(
-        "Create a port scanner",
-        "python"
-      );
-    });
-
-    it("should handle error when generating script", async () => {
-      const errorMessage = "Invalid language specified";
-      mockGenerateScript.mockRejectedValue(new Error(errorMessage));
-
-      await expect(
-        generateScript("Create a script", "invalid-lang")
-      ).rejects.toThrow(errorMessage);
-    });
-
-    it("should handle network error (no response)", async () => {
-      const errorMessage =
-        "No response from server. Please check if the backend is running.";
-      mockGenerateScript.mockRejectedValue(new Error(errorMessage));
-
-      await expect(generateScript("Create a script", "python")).rejects.toThrow(
-        errorMessage
-      );
-    });
-  });
-
-  describe("explainCommand", () => {
-    const mockResponse: ExplanationResponse = {
+  describe("explainCode", () => {
+    const mockResponse: CodeExplanationResponse = {
       explanation:
         "This nmap command performs a SYN scan (-sS) on all ports (-p-) of the target.",
     };
 
     it("should successfully explain a command", async () => {
-      mockExplainCommand.mockResolvedValue(mockResponse);
+      mockExplainCode.mockResolvedValue(mockResponse);
 
-      const result = await explainCommand("nmap -sS -p- target.com");
+      const result = await explainCode("nmap -sS -p- target.com");
 
       expect(result).toEqual(mockResponse);
-      expect(mockExplainCommand).toHaveBeenCalledWith(
-        "nmap -sS -p- target.com"
-      );
+      expect(mockExplainCode).toHaveBeenCalledWith("nmap -sS -p- target.com");
     });
-
-    it("should handle error when explaining command", async () => {
-      const errorMessage = "Command not recognized";
-      mockExplainCommand.mockRejectedValue(new Error(errorMessage));
-
-      await expect(explainCommand("invalid-command")).rejects.toThrow(
-        errorMessage
-      );
-    });
-
-    it("should handle network error (no response)", async () => {
-      const errorMessage =
-        "No response from server. Please check if the backend is running.";
-      mockExplainCommand.mockRejectedValue(new Error(errorMessage));
-
-      await expect(explainCommand("nmap -sS target.com")).rejects.toThrow(
-        errorMessage
-      );
-    });
-  });
-
-  describe("explainScript", () => {
-    const mockResponse: ExplanationResponse = {
-      explanation:
-        "This Python script imports the socket library and defines a function to scan ports.",
-    };
 
     it("should successfully explain a script", async () => {
-      mockExplainScript.mockResolvedValue(mockResponse);
+      const scriptResponse: CodeExplanationResponse = {
+        explanation:
+          "This Python script imports the socket library and defines a function to scan ports.",
+      };
+
+      mockExplainCode.mockResolvedValue(scriptResponse);
 
       const script = "import socket\ndef scan_ports(): pass";
-      const result = await explainScript(script, "python");
+      const result = await explainCode(script);
 
-      expect(result).toEqual(mockResponse);
-      expect(mockExplainScript).toHaveBeenCalledWith(script, "python");
+      expect(result).toEqual(scriptResponse);
+      expect(mockExplainCode).toHaveBeenCalledWith(script);
     });
 
-    it("should handle error when explaining script", async () => {
-      const errorMessage = "Script syntax error";
-      mockExplainScript.mockRejectedValue(new Error(errorMessage));
+    it("should handle error when explaining code", async () => {
+      const errorMessage = "Code not recognized";
+      mockExplainCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(explainScript("invalid syntax", "python")).rejects.toThrow(
-        errorMessage
-      );
+      await expect(explainCode("invalid-code")).rejects.toThrow(errorMessage);
     });
 
     it("should handle network error (no response)", async () => {
       const errorMessage =
         "No response from server. Please check if the backend is running.";
-      mockExplainScript.mockRejectedValue(new Error(errorMessage));
+      mockExplainCode.mockRejectedValue(new Error(errorMessage));
 
-      await expect(explainScript("import socket", "python")).rejects.toThrow(
+      await expect(explainCode("nmap -sS target.com")).rejects.toThrow(
         errorMessage
       );
     });
