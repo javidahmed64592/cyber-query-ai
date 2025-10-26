@@ -69,12 +69,6 @@ class TestToolSuite:
             },
         }
 
-    @pytest.fixture
-    def sample_tool_suite(self, sample_tools_data: dict) -> ToolSuite:
-        """Fixture for sample tool suite."""
-        tools = {name: ToolsMetadata(**info) for name, info in sample_tools_data.items()}
-        return ToolSuite(tools=tools)
-
     def test_from_json_with_valid_file(self, sample_tools_data: dict) -> None:
         """Test loading ToolSuite from a valid JSON file."""
         mock_json_data = json.dumps(sample_tools_data)
