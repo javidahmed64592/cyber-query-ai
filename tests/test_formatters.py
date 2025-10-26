@@ -2,123 +2,110 @@
 
 from cyber_query_ai.formatters import ResponseFormatter
 from cyber_query_ai.models import (
-    CommandGenerationResponse,
-    ExplanationResponse,
+    CodeExplanationResponse,
+    CodeGenerationResponse,
     Exploit,
     ExploitSearchResponse,
-    ScriptGenerationResponse,
 )
 
 
 class TestResponseFormatter:
     """Test cases for the ResponseFormatter class."""
 
-    def test_format_command_generation_single_command(self) -> None:
-        """Test formatting command generation with a single command."""
-        response = CommandGenerationResponse(
-            commands=["nmap -sV -p 80,443 192.168.1.1"],
+    def test_format_code_generation_single_line(self) -> None:
+        """Test formatting code generation with a single-line command."""
+        response = CodeGenerationResponse(
+            code="nmap -sV -p 80,443 192.168.1.1",
             explanation="Scan ports 80 and 443 on 192.168.1.1 for service versions",
+            language="bash",
         )
 
-        result = ResponseFormatter.format_command_generation(response)
+        result = ResponseFormatter.format_code_generation(response)
 
-        assert "Here are the commands you can use:" in result
+        assert "Here's the command you can use:" in result
         assert "```bash" in result
         assert "nmap -sV -p 80,443 192.168.1.1" in result
         assert "**Explanation**:" in result
         assert "Scan ports 80 and 443" in result
 
-    def test_format_command_generation_multiple_commands(self) -> None:
-        """Test formatting command generation with multiple commands."""
-        response = CommandGenerationResponse(
-            commands=[
-                "nmap -sV -p 80,443 192.168.1.1",
-                "nikto -h http://192.168.1.1",
-                "gobuster dir -u http://192.168.1.1 -w /path/to/wordlist",
-            ],
-            explanation="Web server reconnaissance commands",
+    def test_format_code_generation_multi_line_bash(self) -> None:
+        """Test formatting code generation with multi-line bash script."""
+        response = CodeGenerationResponse(
+            code="#!/bin/bash\nfor ip in $(seq 1 254); do\n  ping -c 1 192.168.1.$ip\ndone",
+            explanation="Script that pings all hosts in the network",
+            language="bash",
         )
 
-        result = ResponseFormatter.format_command_generation(response)
+        result = ResponseFormatter.format_code_generation(response)
 
+        assert "I've written a bash script for you:" in result
         assert "```bash" in result
-        assert "nmap -sV" in result
-        assert "nikto -h" in result
-        assert "gobuster dir" in result
-        assert all(cmd in result for cmd in response.commands)
+        assert "for ip in" in result
+        assert "ping -c 1" in result
+        assert "**Explanation**:" in result
 
-    def test_format_command_generation_empty_commands(self) -> None:
-        """Test formatting when no commands could be generated."""
-        response = CommandGenerationResponse(
-            commands=[],
-            explanation="Unable to generate commands for this request",
-        )
-
-        result = ResponseFormatter.format_command_generation(response)
-
-        assert "I couldn't generate commands" in result
-        assert "Unable to generate commands" in result
-        assert "```bash" not in result
-
-    def test_format_script_generation_python(self) -> None:
+    def test_format_code_generation_python_script(self) -> None:
         """Test formatting Python script generation responses."""
-        response = ScriptGenerationResponse(
-            script="#!/usr/bin/env python3\nimport socket\nprint('Hello World')",
+        response = CodeGenerationResponse(
+            code="#!/usr/bin/env python3\nimport socket\nprint('Hello World')",
             explanation="A simple Python script that prints Hello World",
+            language="python",
         )
 
-        result = ResponseFormatter.format_script_generation(response, "python")
+        result = ResponseFormatter.format_code_generation(response)
 
         assert "I've written a python script for you:" in result
         assert "```python" in result
         assert "import socket" in result
-        assert "**How it works**:" in result
+        assert "**Explanation**:" in result
         assert "simple Python script" in result
 
-    def test_format_script_generation_bash(self) -> None:
-        """Test formatting Bash script generation responses."""
-        response = ScriptGenerationResponse(
-            script="#!/bin/bash\necho 'Test'\nexit 0",
-            explanation="A test bash script that echoes Test",
+    def test_format_code_generation_empty_code(self) -> None:
+        """Test formatting when no code could be generated."""
+        response = CodeGenerationResponse(
+            code="",
+            explanation="Unable to generate code for this request",
+            language="bash",
         )
 
-        result = ResponseFormatter.format_script_generation(response, "bash")
+        result = ResponseFormatter.format_code_generation(response)
 
-        assert "I've written a bash script for you:" in result
-        assert "```bash" in result
-        assert "echo 'Test'" in result
-        assert "**How it works**:" in result
+        assert "I couldn't generate code" in result
+        assert "Unable to generate code" in result
+        assert "```bash" not in result
 
-    def test_format_script_generation_powershell(self) -> None:
-        """Test formatting PowerShell script generation responses."""
-        response = ScriptGenerationResponse(
-            script="Write-Host 'Hello from PowerShell'",
-            explanation="PowerShell script to display a message",
+    def test_format_code_generation_powershell(self) -> None:
+        """Test formatting PowerShell code generation responses."""
+        response = CodeGenerationResponse(
+            code="Get-Process | Where-Object {$_.CPU -gt 100}",
+            explanation="Get processes using more than 100 CPU time",
+            language="powershell",
         )
 
-        result = ResponseFormatter.format_script_generation(response, "powershell")
+        result = ResponseFormatter.format_code_generation(response)
 
         assert "```powershell" in result
-        assert "Write-Host" in result
+        assert "Get-Process" in result
+        assert "Here's the command you can use:" in result
 
-    def test_format_explanation_with_context(self) -> None:
-        """Test formatting explanation with context."""
-        response = ExplanationResponse(
+    def test_format_explanation_default_context(self) -> None:
+        """Test formatting explanation with default context."""
+        response = CodeExplanationResponse(
             explanation="This command lists all files in the current directory with detailed information.",
         )
 
-        result = ResponseFormatter.format_explanation(response, "command")
+        result = ResponseFormatter.format_explanation(response)
 
-        assert "Let me explain this command:" in result
+        assert "Let me explain this code:" in result
         assert "lists all files" in result
 
-    def test_format_explanation_script_context(self) -> None:
-        """Test formatting explanation with script context."""
-        response = ExplanationResponse(
+    def test_format_explanation_custom_context(self) -> None:
+        """Test formatting explanation with custom context."""
+        response = CodeExplanationResponse(
             explanation="This script automates system reconnaissance tasks.",
         )
 
-        result = ResponseFormatter.format_explanation(response, "script")
+        result = ResponseFormatter.format_explanation(response, context="script")
 
         assert "Let me explain this script:" in result
         assert "automates system reconnaissance" in result
@@ -184,30 +171,32 @@ class TestResponseFormatter:
         assert "I found 1 vulnerability:" in result  # singular form
         assert "### CVE-2023-12345 (MEDIUM)" in result
 
-    def test_format_command_with_multiline_explanation(self) -> None:
-        """Test formatting command with multiline explanation."""
-        response = CommandGenerationResponse(
-            commands=["find . -type f -name '*.log' | xargs grep 'ERROR'"],
+    def test_format_code_with_multiline_explanation(self) -> None:
+        """Test formatting code with multiline explanation."""
+        response = CodeGenerationResponse(
+            code="find . -type f -name '*.log' | xargs grep 'ERROR'",
             explanation=(
                 "This command does several things:\n1. Finds all .log files\n2. Searches for ERROR in each file"
             ),
+            language="bash",
         )
 
-        result = ResponseFormatter.format_command_generation(response)
+        result = ResponseFormatter.format_code_generation(response)
 
         assert "```bash" in result
         assert "find . -type f" in result
         assert "1. Finds all .log files" in result
         assert "2. Searches for ERROR" in result
 
-    def test_format_script_with_special_characters(self) -> None:
-        """Test formatting script containing special characters."""
-        response = ScriptGenerationResponse(
-            script='#!/usr/bin/env python3\nprint("Test < > & \' \\"")',
+    def test_format_code_with_special_characters(self) -> None:
+        """Test formatting code containing special characters."""
+        response = CodeGenerationResponse(
+            code='#!/usr/bin/env python3\nprint("Test < > & \' \\"")',
             explanation="Script with special chars",
+            language="python",
         )
 
-        result = ResponseFormatter.format_script_generation(response, "python")
+        result = ResponseFormatter.format_code_generation(response)
 
         assert "```python" in result
         # Special characters should be preserved in code blocks

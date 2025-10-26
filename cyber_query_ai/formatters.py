@@ -1,10 +1,9 @@
 """Response formatters for converting structured responses to conversational format."""
 
 from cyber_query_ai.models import (
-    CommandGenerationResponse,
-    ExplanationResponse,
+    CodeExplanationResponse,
+    CodeGenerationResponse,
     ExploitSearchResponse,
-    ScriptGenerationResponse,
 )
 
 
@@ -12,33 +11,27 @@ class ResponseFormatter:
     """Format specialized endpoint responses for conversational chat."""
 
     @staticmethod
-    def format_command_generation(response: CommandGenerationResponse) -> str:
-        """Format command generation response for conversational output."""
-        if not response.commands:
-            return f"I couldn't generate commands for this task. {response.explanation}"
+    def format_code_generation(response: CodeGenerationResponse) -> str:
+        """Format code generation response for conversational output.
 
-        commands_str = "\n".join(response.commands)
-        return (
-            "Here are the commands you can use:\n\n"
-            f"```bash\n{commands_str}\n```\n\n"
-            f"**Explanation**: {response.explanation}"
-        )
+        Automatically detects single-line commands vs multi-line scripts.
+        """
+        if not response.code:
+            return f"I couldn't generate code for this task. {response.explanation}"
 
-    @staticmethod
-    def format_script_generation(response: ScriptGenerationResponse, language: str) -> str:
-        """Format script generation response for conversational output."""
-        return (
-            f"I've written a {language} script for you:\n\n"
-            f"```{language}\n{response.script}\n```\n\n"
-            f"**How it works**: {response.explanation}"
-        )
+        # Auto-detect multiline based on presence of newlines
+        is_multiline = "\n" in response.code
+        if is_multiline:
+            header = f"I've written a {response.language} script for you:"
+        else:
+            header = "Here's the command you can use:"
+
+        return f"{header}\n\n```{response.language}\n{response.code}\n```\n\n**Explanation**: {response.explanation}"
 
     @staticmethod
-    def format_explanation(response: ExplanationResponse, context: str) -> str:
+    def format_explanation(response: CodeExplanationResponse, context: str = "code") -> str:
         """Format explanation response for conversational output."""
-        if context:
-            return f"Let me explain this {context}:\n\n{response.explanation}"
-        return f"Let me explain:\n\n{response.explanation}"
+        return f"Let me explain this {context}:\n\n{response.explanation}"
 
     @staticmethod
     def format_exploit_search(response: ExploitSearchResponse) -> str:
