@@ -69,28 +69,27 @@ export default function About() {
                 🎯 Specialized Pages
               </h3>
               <p className="mb-2">
-                For more specific tasks, you can use the dedicated pages:
+                For focused tasks, use one of the simplified pages below.
+              </p>
+              <p className="mb-2">
+                The AI will infer language and intent from your prompt.
               </p>
               <ul className="list-disc list-inside space-y-1 ml-4 text-sm">
                 <li>
-                  <strong>Command Generation:</strong> Focused interface for
-                  generating CLI commands
+                  <strong>AI Assistant:</strong> Conversational interface for
+                  general queries and walkthroughs
                 </li>
                 <li>
-                  <strong>Script Generation:</strong> Create scripts in specific
-                  programming languages
+                  <strong>Code Generation:</strong> Generate commands or
+                  scripts; language is inferred automatically
                 </li>
                 <li>
-                  <strong>Command Explanation:</strong> Get detailed breakdowns
-                  of existing commands
+                  <strong>Code Explanation:</strong> Paste an existing command
+                  or script to get a detailed, line-by-line explanation
                 </li>
                 <li>
-                  <strong>Script Explanation:</strong> Understand how scripts
-                  work line-by-line
-                </li>
-                <li>
-                  <strong>Exploit Search:</strong> Research known
-                  vulnerabilities for specific targets
+                  <strong>Exploit Research:</strong> Research known
+                  vulnerabilities and advisories for targets and CVEs
                 </li>
               </ul>
             </div>
@@ -112,35 +111,26 @@ export default function About() {
                 🤖 AI Assistant
               </h3>
               <p className="text-[var(--text-secondary)] text-sm">
-                Interactive conversational interface with full chat history for
-                natural, context-aware assistance with all cybersecurity tasks.
+                Conversational interface with full chat history. Context-aware
+                assistance for cybersecurity tasks.
               </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-[var(--border-accent)]">
-                🛠️ Command Generation
+                🧾 Code Generation
               </h3>
               <p className="text-[var(--text-secondary)] text-sm">
-                Generate CLI commands for network scanning, vulnerability
-                assessment, and penetration testing tools.
+                Generate commands or scripts. The AI infers the appropriate
+                language and formatting from your prompt.
               </p>
             </div>
             <div className="space-y-2">
               <h3 className="font-semibold text-[var(--border-accent)]">
-                📜 Script Creation
+                � Code Explanation
               </h3>
               <p className="text-[var(--text-secondary)] text-sm">
-                Create custom scripts in multiple programming languages for
-                automated security tasks.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold text-[var(--border-accent)]">
-                🔍 Command Analysis
-              </h3>
-              <p className="text-[var(--text-secondary)] text-sm">
-                Understand complex commands with detailed explanations of
-                parameters and functionality.
+                Paste an existing command or script to receive a detailed,
+                line-by-line explanation and rationale.
               </p>
             </div>
             <div className="space-y-2">
@@ -148,7 +138,7 @@ export default function About() {
                 🧨 Exploit Research
               </h3>
               <p className="text-[var(--text-secondary)] text-sm">
-                Discover known vulnerabilities and attack vectors for specific
+                Research known vulnerabilities, advisories, and CVE details for
                 targets and technologies.
               </p>
             </div>

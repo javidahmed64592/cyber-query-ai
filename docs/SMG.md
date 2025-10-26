@@ -33,7 +33,8 @@ cyber_query_ai/
 ├── config.py       # Configuration management
 ├── helpers.py      # Utility functions
 ├── main.py         # Application entry point
-└── models.py       # Pydantic models
+├── models.py       # Pydantic models
+└── rag.py          # RAG system
 ```
 
 ### Installing Dependencies
@@ -92,22 +93,23 @@ cyber-query-ai-frontend/
 ├── src/
 │   ├── app/
 │   │   ├── about/               # About page
-│   │   ├── command-explanation/ # Command explanation interface
-│   │   ├── command-generation/  # Command generation interface
+│   │   ├── assistant/           # AI assistant interface
+│   │   ├── code-explanation/    # Code explanation interface
+│   │   ├── code-generation/     # Code generation interface
 │   │   ├── exploit-search/      # Exploit search interface
-│   │   ├── script-explanation/  # Script explanation interface
-│   │   ├── script-generation/   # Script generation interface
 │   │   ├── globals.css          # UI style configuration
 │   │   ├── layout.tsx           # Root layout with navigation
-│   │   └── page.tsx             # Homepage (redirects to command-generation)
+│   │   ├── not-found.tsx        # Not found page
+│   │   └── page.tsx             # Homepage (AI Assistant with chat)
 │   ├── components/
-│   │   ├── CommandBox.tsx       # Generated command display
+│   │   ├── ChatMessage.tsx      # Individual message rendering
+│   │   ├── ChatWindow.tsx       # Conversational chat interface
 │   │   ├── ExplanationBox.tsx   # AI explanation display
 │   │   ├── ExploitList.tsx      # Exploit references display
+│   │   ├── Footer.tsx           # App footer
 │   │   ├── HealthIndicator.tsx  # Server health status indicator
-│   │   ├── LanguageSelector.tsx # Dropdown for language selection
 │   │   ├── Navigation.tsx       # Main navigation bar
-│   │   ├── ScriptBox.tsx        # Generated script display
+│   │   ├── ScriptBox.tsx        # Generated code display
 │   │   └── TextInput.tsx        # Text input component
 │   ├── lib/
 │   │   ├── api.ts               # API communication functions

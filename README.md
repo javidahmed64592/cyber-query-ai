@@ -23,8 +23,8 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 **AI Assistant Page:**
 ![AI Assistant Page - Shows the main interface for converting natural language to a variety of cybersecurity tasks](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/assistant.png "AI Assistant Page")
 
-**Command Generation Page:**
-![Command Generation Interface - Shows an interface for converting natural language to cybersecurity commands](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Command Generation Interface")
+**Code Generation Page:**
+![Code Generation Interface - Shows an interface for converting natural language to cybersecurity commands and scripts](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Code Generation Interface")
 
 **About Page:**
 ![About Page - Displays comprehensive information about CyberQueryAI features and usage](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/about.png "About Page")
@@ -34,17 +34,14 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 - [Why CyberQueryAI?](#why-cyberqueryai)
 - [Key Features](#key-features)
   - [**AI Assistant (Conversational Interface)**](#ai-assistant-conversational-interface)
-  - [**Intelligent Command Generation**](#intelligent-command-generation)
-  - [**Multi-Language Script Creation**](#multi-language-script-creation)
-  - [**Command \& Script Analysis**](#command--script-analysis)
+  - [**Intelligent Code Generation**](#intelligent-code-generation)
+  - [**Code Analysis \& Explanation**](#code-analysis--explanation)
   - [**Exploit Research \& Discovery**](#exploit-research--discovery)
   - [**Security \& Sanitization**](#security--sanitization)
 - [Web Application Pages](#web-application-pages)
   - [**AI Assistant** (`/`)](#ai-assistant-)
-  - [**Command Generation** (`/command-generation`)](#command-generation-command-generation)
-  - [**Script Generation** (`/script-generation`)](#script-generation-script-generation)
-  - [**Command Explanation** (`/command-explanation`)](#command-explanation-command-explanation)
-  - [**Script Explanation** (`/script-explanation`)](#script-explanation-script-explanation)
+  - [**Code Generation** (`/code-generation`)](#code-generation-code-generation)
+  - [**Code Explanation** (`/code-explanation`)](#code-explanation-code-explanation)
   - [**Exploit Search** (`/exploit-search`)](#exploit-search-exploit-search)
   - [**About** (`/about`)](#about-about)
 - [Getting Started](#getting-started)
@@ -67,8 +64,7 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 
 Traditional cybersecurity work often involves memorizing complex command syntax, researching tool parameters, and manually crafting scripts for specific scenarios. CyberQueryAI eliminates these productivity bottlenecks by providing:
 
-- **Instant Command Generation**: Convert natural language descriptions into precise CLI commands for tools like nmap, metasploit, john, hydra, and more
-- **Multi-Language Script Creation**: Generate custom automation scripts in Python, Bash, PowerShell, and other languages
+- **Instant Code Generation**: Convert natural language descriptions into precise CLI commands or multi-language scripts (Python, Bash, PowerShell, etc.) for tools like nmap, metasploit, john, hydra, and more
 - **Educational Value**: Learn how security tools work through detailed explanations and examples
 - **Vulnerability Research**: Discover known exploits and attack vectors relevant to specific targets
 - **Time Savings**: Reduce command lookup time from minutes to seconds
@@ -85,19 +81,16 @@ Whether you're conducting authorized penetration tests, participating in CTF com
 - Perfect for learning workflows and iterative problem-solving
 - Code block rendering with syntax highlighting and copy functionality
 
-### **Intelligent Command Generation**
-- Natural language to CLI translation for common security tools
+### **Intelligent Code Generation**
+- Natural language to code translation (CLI commands or scripts in Python, Bash, PowerShell, JavaScript, etc.)
 - Context-aware parameter suggestions optimized for Kali Linux environments
 - Support for network scanning, vulnerability assessment, password cracking, and more
-- Rate-limited API (5 requests/minute) to ensure responsible usage
-
-### **Multi-Language Script Creation**
-- Generate automation scripts in Python, Bash, PowerShell, JavaScript, and more
 - Tailored for cybersecurity use cases including exploit development, data parsing, and tool automation
 - Complete with explanations to help you understand and modify the code
+- Rate-limited API (5 requests/minute) to ensure responsible usage
 
-### **Command & Script Analysis**
-- Detailed breakdowns of complex commands and their parameters
+### **Code Analysis & Explanation**
+- Detailed breakdowns of complex commands and scripts with their parameters
 - Security risk assessment and potential impact analysis
 - Educational explanations to build your cybersecurity knowledge
 
@@ -128,28 +121,24 @@ The **primary interface** for interacting with CyberQueryAI - a conversational A
 
 **Tip**: Start here for most tasks - the AI Assistant provides the most natural and flexible interaction model.
 
-### **Command Generation** (`/command-generation`)
-Focused interface for converting natural language into executable security commands:
+### **Code Generation** (`/code-generation`)
+Focused interface for converting natural language into executable security code. The AI automatically infers whether to generate a command or a script:
 
-- **Example**: "Scan a network for open ports" → `nmap -sS -O 192.168.1.0/24`
+- **Command Example**: "Scan a network for open ports" → `nmap -sS -O 192.168.1.0/24`
+- **Script Example**: "Create a port scanner in Python" → Complete Python script with threading and error handling
+- Supports multiple programming languages: Python, Bash, PowerShell, JavaScript, and more
+- Includes explanations to help you understand the generated code
 
-### **Script Generation** (`/script-generation`)
-Create custom cybersecurity automation scripts in multiple programming languages:
-- **Example**: "Create a port scanner in Python" → Complete Python script with threading and error handling
+### **Code Explanation** (`/code-explanation`)
+Understand complex security commands and scripts through detailed analysis. The AI automatically detects the code type:
 
-### **Command Explanation** (`/command-explanation`)
-Understand complex security commands through detailed analysis:
-- Parameter-by-parameter breakdowns
+- Parameter-by-parameter breakdowns for commands
+- Line-by-line code analysis for scripts
 - Security implications and risks
 - Alternative approaches and variations
-- **Example**: `nmap -sS -O 192.168.1.0/24` → Detailed explanation of SYN scan, OS detection, and target specification
-
-### **Script Explanation** (`/script-explanation`)
-Analyze and understand cybersecurity scripts:
-- Line-by-line code analysis
-- Security considerations and potential risks
 - Optimization suggestions and best practices
-- **Example**: Analyze a privilege escalation script to understand its methodology
+- **Command Example**: `nmap -sS -O 192.168.1.0/24` → Detailed explanation of SYN scan, OS detection, and target specification
+- **Script Example**: Analyze a privilege escalation script to understand its methodology
 
 ### **Exploit Search** (`/exploit-search`)
 Research known vulnerabilities and attack vectors:
