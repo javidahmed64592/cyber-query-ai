@@ -75,7 +75,7 @@ async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
+        response_text = await run_in_threadpool(chatbot.llm.invoke, formatted_prompt)
         return ChatResponse(message=sanitize_text(response_text))
     except Exception as e:
         error_msg = "Failed to generate chat response"
