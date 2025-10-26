@@ -19,9 +19,10 @@ from cyber_query_ai.models import (
     PromptRequest,
 )
 
+API_PREFIX = "/api"
 LIMITER_INTERVAL = "5/minute"
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter(prefix=API_PREFIX)
 limiter = Limiter(key_func=lambda request: request.client.host)
 
 
