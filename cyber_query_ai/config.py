@@ -2,11 +2,13 @@
 
 import json
 import os
+import tomllib
 from pathlib import Path
 
 from cyber_query_ai.models import ConfigResponse
 
 CONFIG_FILENAME = "config.json"
+PYPROJECT_FILENAME = "pyproject.toml"
 TOOLS_FILENAME = "tools.json"
 
 
@@ -20,9 +22,26 @@ def get_config_path() -> Path:
     return get_root_dir() / CONFIG_FILENAME
 
 
+def get_pyproject_path() -> Path:
+    """Get the absolute path to the pyproject.toml file."""
+    return get_root_dir() / PYPROJECT_FILENAME
+
+
 def get_tools_filepath() -> Path:
     """Get the absolute path to the tools JSON file."""
     return get_root_dir() / "rag_data" / TOOLS_FILENAME
+
+
+def get_version() -> str:
+    """Read the version from pyproject.toml."""
+    pyproject_path = get_pyproject_path()
+    if not pyproject_path.exists():
+        msg = f"pyproject.toml not found: {pyproject_path}"
+        raise FileNotFoundError(msg)
+
+    with pyproject_path.open("rb") as f:
+        pyproject_data = tomllib.load(f)
+        return pyproject_data["project"]["version"]
 
 
 def load_config() -> ConfigResponse:
@@ -33,4 +52,6 @@ def load_config() -> ConfigResponse:
         raise FileNotFoundError(msg)
 
     with config_path.open() as f:
-        return ConfigResponse(**json.load(f))
+        config_data = json.load(f)
+        config_data["version"] = get_version()
+        return ConfigResponse(**config_data)
