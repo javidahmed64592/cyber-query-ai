@@ -19,9 +19,10 @@ from cyber_query_ai.models import (
     PromptRequest,
 )
 
+API_PREFIX = "/api"
 LIMITER_INTERVAL = "5/minute"
 
-api_router = APIRouter(prefix="/api")
+api_router = APIRouter(prefix=API_PREFIX)
 limiter = Limiter(key_func=lambda request: request.client.host)
 
 
@@ -48,7 +49,7 @@ def get_server_error(error: str, exception: Exception, response_text: str | None
 
 
 @api_router.get("/health", response_model=HealthResponse)
-async def health_check() -> HealthResponse:
+async def get_health() -> HealthResponse:
     """Check the health of the server."""
     return HealthResponse(status="healthy", timestamp=datetime.now().isoformat() + "Z")
 
@@ -75,7 +76,7 @@ async def chat(request: Request, chat_request: ChatRequest) -> ChatResponse:
     response_text = None
 
     try:
-        response_text = clean_json_response(await run_in_threadpool(chatbot.llm.invoke, formatted_prompt))
+        response_text = await run_in_threadpool(chatbot.llm.invoke, formatted_prompt)
         return ChatResponse(message=sanitize_text(response_text))
     except Exception as e:
         error_msg = "Failed to generate chat response"

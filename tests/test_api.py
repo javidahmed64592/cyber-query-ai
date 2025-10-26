@@ -80,7 +80,7 @@ class TestGetServerError:
 class TestHealthCheck:
     """Tests for the health check endpoint."""
 
-    def test_health_check_success(self, test_app: TestClient) -> None:
+    def test_get_health_success(self, test_app: TestClient) -> None:
         """Test successful health check."""
         response = test_app.get("/api/health")
 
@@ -380,6 +380,21 @@ class TestExplainCode:
         data = response.json()
         assert data["explanation"] == mock_response["explanation"]
 
+    def test_explain_code_with_json_cleaning(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test code explanation with malformed JSON that gets cleaned via endpoint."""
+        malformed_json = '{"explanation": "This command performs a SYN scan",}'
+        cleaned_json = '{"explanation": "This command performs a SYN scan"}'
+        mock_run_in_threadpool.return_value = malformed_json
+        mock_clean_json_response.return_value = cleaned_json
+
+        response = test_app.post("/api/explain-code", json={"prompt": "nmap -sS target"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["explanation"] == "This command performs a SYN scan"
+
     def test_explain_code_missing_keys(
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
@@ -406,6 +421,35 @@ class TestExplainCode:
         assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
         data = response.json()
         assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_explain_code_llm_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test code explanation with LLM exception via endpoint."""
+        mock_run_in_threadpool.side_effect = Exception("LLM service unavailable")
+
+        response = test_app.post("/api/explain-code", json={"prompt": "test"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "LLM service unavailable" in data["detail"]["details"]
+
+    def test_explain_code_empty_response(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test code explanation with empty explanation response via endpoint."""
+        mock_response = {
+            "explanation": "",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/explain-code", json={"prompt": "unknown command"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["explanation"] == ""
 
     def test_explain_code_endpoint_invalid_request(self, test_app: TestClient) -> None:
         """Test code explanation endpoint with invalid request body."""
@@ -443,6 +487,29 @@ class TestSearchExploits:
         assert data["exploits"][0]["title"] == "CVE-2017-5638"
         assert data["explanation"] == mock_response["explanation"]
 
+    def test_search_exploits_with_json_cleaning(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search with malformed JSON that gets cleaned via endpoint."""
+        malformed_json = (
+            '{"exploits": [{"title": "CVE-2021-1234", "link": "https://example.com", '
+            '"severity": "medium", "description": "Test vuln"}], "explanation": "Found vulnerability",}'
+        )
+        cleaned_json = (
+            '{"exploits": [{"title": "CVE-2021-1234", "link": "https://example.com", '
+            '"severity": "medium", "description": "Test vuln"}], "explanation": "Found vulnerability"}'
+        )
+        mock_run_in_threadpool.return_value = malformed_json
+        mock_clean_json_response.return_value = cleaned_json
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "test software"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert len(data["exploits"]) == 1
+        assert data["exploits"][0]["title"] == "CVE-2021-1234"
+        assert data["explanation"] == "Found vulnerability"
+
     def test_search_exploits_missing_keys(
         self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
     ) -> None:
@@ -471,6 +538,37 @@ class TestSearchExploits:
         assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
         data = response.json()
         assert "Invalid JSON response from LLM" in data["detail"]["error"]
+
+    def test_search_exploits_llm_exception(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search with LLM exception via endpoint."""
+        mock_run_in_threadpool.side_effect = Exception("LLM service unavailable")
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "test"})
+
+        assert response.status_code == HTTP_INTERNAL_SERVER_ERROR
+        data = response.json()
+        assert "Failed to generate or parse LLM response" in data["detail"]["error"]
+        assert "LLM service unavailable" in data["detail"]["details"]
+
+    def test_search_exploits_empty_response(
+        self, mock_run_in_threadpool: MagicMock, mock_clean_json_response: MagicMock, test_app: TestClient
+    ) -> None:
+        """Test exploit search with empty exploits list via endpoint."""
+        mock_response = {
+            "exploits": [],
+            "explanation": "No exploits found for this software version",
+        }
+        mock_run_in_threadpool.return_value = json.dumps(mock_response)
+        mock_clean_json_response.return_value = json.dumps(mock_response)
+
+        response = test_app.post("/api/search-exploits", json={"prompt": "secure software v1.0"})
+
+        assert response.status_code == HTTP_OK
+        data = response.json()
+        assert data["exploits"] == []
+        assert "No exploits found" in data["explanation"]
 
     def test_search_exploits_endpoint_invalid_request(self, test_app: TestClient) -> None:
         """Test the search_exploits endpoint with invalid request data."""

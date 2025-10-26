@@ -47,6 +47,16 @@ class TestChatbot:
             tools_json_filepath=Path("test-tools.json"),
         )
 
+    def test_build_json_instructions_method(self, mock_chatbot: Chatbot) -> None:
+        """Test the _build_json_instructions method."""
+        response_format = '{"field1": "...", "field2": "..."}'
+        example = '{"field1": "value1", "field2": "value2"}'
+        instructions = mock_chatbot._build_json_instructions(response_format, example)
+        assert "CRITICAL JSON FORMATTING RULES" in instructions
+        assert "All text fields must be ONE continuous string" in instructions
+        assert 'Example format: {{"field1": "...", "field2": "..."}}' in instructions
+        assert 'Respond in JSON format: {{"field1": "value1", "field2": "value2"}}' in instructions
+
     def test_profile_property(self, mock_chatbot: Chatbot) -> None:
         """Test the profile property."""
         profile = mock_chatbot.profile
