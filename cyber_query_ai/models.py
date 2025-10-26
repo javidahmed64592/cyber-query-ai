@@ -39,6 +39,7 @@ class ConfigResponse(BaseModel):
     embedding_model: str
     host: str
     port: int
+    version: str
 
 
 class ChatResponse(BaseModel):

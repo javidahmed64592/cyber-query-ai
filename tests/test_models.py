@@ -78,8 +78,9 @@ class TestConfigResponse:
         embedding_model = "bge-m3"
         host = "localhost"
         port = 8000
-        response = ConfigResponse(model=model, embedding_model=embedding_model, host=host, port=port)
-        expected = {"model": model, "embedding_model": embedding_model, "host": host, "port": port}
+        version = "x.y.z"
+        response = ConfigResponse(model=model, embedding_model=embedding_model, host=host, port=port, version=version)
+        expected = {"model": model, "embedding_model": embedding_model, "host": host, "port": port, "version": version}
         assert response.model_dump() == expected
 
 
