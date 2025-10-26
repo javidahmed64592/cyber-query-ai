@@ -28,7 +28,10 @@ def mock_chatbot() -> Generator[MagicMock, None, None]:
     """Fixture to create a mock Chatbot class."""
     with patch("cyber_query_ai.main.Chatbot", autospec=True) as mock:
         chatbot_instance = mock.return_value
-        chatbot_instance.prompt_command_generation.return_value = "formatted prompt"
+        chatbot_instance.prompt_code_generation.return_value = "formatted prompt"
+        chatbot_instance.prompt_code_explanation.return_value = "formatted prompt"
+        chatbot_instance.prompt_exploit_search.return_value = "formatted prompt"
+        chatbot_instance.prompt_chat.return_value = "formatted prompt"
         chatbot_instance.llm = MagicMock()
         yield mock
 
