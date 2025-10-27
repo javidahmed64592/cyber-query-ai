@@ -41,7 +41,7 @@ def get_version() -> str:
 
     with pyproject_path.open("rb") as f:
         pyproject_data = tomllib.load(f)
-        return pyproject_data["project"]["version"]
+        return str(pyproject_data["project"]["version"])
 
 
 def load_config() -> ConfigResponse:
