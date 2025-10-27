@@ -15,6 +15,8 @@ This document outlines how to configure and setup a development environment to w
   - [Installing Dependencies](#installing-dependencies-1)
   - [Running the Frontend](#running-the-frontend)
   - [Testing, Linting, and Type Checking](#testing-linting-and-type-checking-1)
+- [Creating a New Release Version](#creating-a-new-release-version)
+  - [Steps to Update Version](#steps-to-update-version)
 
 ## Backend (Python)
 
@@ -150,3 +152,35 @@ The frontend will be available at `http://localhost:3000`.
 - **Fix lint issues:** `npm run lint:fix`
 - **Check formatting:** `npm run format`
 - **Format code:** `npm run format:fix`
+
+## Creating a New Release Version
+
+When preparing a new release, you must update version numbers across multiple files to maintain consistency. The CI pipeline enforces version alignment between backend and frontend.
+
+### Steps to Update Version
+
+1. **Update `pyproject.toml`** (backend version):
+   ```toml
+   [project]
+   name = "cyber-query-ai"
+   version = "X.Y.Z"  # Update this line
+   ```
+
+2. **Update `cyber-query-ai-frontend/package.json`** (frontend version):
+   ```json
+   {
+     "name": "cyber-query-ai-frontend",
+     "version": "X.Y.Z"  // Update this line to match backend
+   }
+   ```
+
+3. **Synchronize `uv.lock`** (from project root):
+   ```sh
+   uv lock
+   ```
+
+4. **Synchronize `package-lock.json`** (from `cyber-query-ai-frontend` directory):
+   ```sh
+   cd cyber-query-ai-frontend
+   npm install --package-lock-only
+   ```

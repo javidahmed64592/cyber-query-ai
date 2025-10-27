@@ -24,7 +24,7 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
 ![AI Assistant Page - Shows the main interface for converting natural language to a variety of cybersecurity tasks](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/assistant.png "AI Assistant Page")
 
 **Code Generation Page:**
-![Code Generation Interface - Shows an interface for converting natural language to cybersecurity commands and scripts](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/command_generation.png "Code Generation Interface")
+![Code Generation Interface - Shows an interface for converting natural language to cybersecurity commands and scripts](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/code_generation.png "Code Generation Interface")
 
 **About Page:**
 ![About Page - Displays comprehensive information about CyberQueryAI features and usage](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/screenshots/about.png "About Page")
