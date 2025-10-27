@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 
 import { getConfig } from "@/lib/api";
 import type { ConfigResponse } from "@/lib/types";
-import { version } from "@/lib/version";
 
 const Footer = () => {
   const [config, setConfig] = useState<ConfigResponse | null>(null);
@@ -32,14 +31,16 @@ const Footer = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-[var(--text-muted)] text-sm font-mono text-center flex flex-wrap justify-center gap-4">
           <span className="text-[var(--neon-green)]">cyber@query:~$</span>
-          <span>--version v{version}</span>
-          {config && (
+          {config ? (
             <>
+              <span>--version v{config.version}</span>
               <span className="text-[var(--terminal-border)]">|</span>
               <span>--model {config.model}</span>
               <span className="text-[var(--terminal-border)]">|</span>
               <span>--rag_model {config.embedding_model}</span>
             </>
+          ) : (
+            <span>--loading...</span>
           )}
         </div>
       </div>
