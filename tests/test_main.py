@@ -20,7 +20,9 @@ HTTP_INTERNAL_SERVER_ERROR = 500
 @pytest.fixture
 def mock_config() -> ConfigResponse:
     """Fixture for a mock configuration."""
-    return ConfigResponse(model="test-model", embedding_model="test-embedding-model", host="localhost", port=8000)
+    return ConfigResponse(
+        model="test-model", embedding_model="test-embedding-model", host="localhost", port=8000, version="1.0.0"
+    )
 
 
 @pytest.fixture
