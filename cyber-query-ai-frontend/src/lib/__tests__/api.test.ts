@@ -92,6 +92,7 @@ describe("API Tests", () => {
         embedding_model: "bge-m3",
         host: "localhost",
         port: 8000,
+        version: "x.y.z",
       };
 
       mockGetConfig.mockResolvedValue(mockConfig);

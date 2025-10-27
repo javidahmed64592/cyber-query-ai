@@ -26,6 +26,7 @@ export interface ConfigResponse {
   embedding_model: string;
   host: string;
   port: number;
+  version: string;
 }
 
 export interface ChatResponse {

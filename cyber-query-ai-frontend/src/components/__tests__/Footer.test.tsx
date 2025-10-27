@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 
 import Footer from "@/components/Footer";
 import { getConfig } from "@/lib/api";
-import { version } from "@/lib/version";
 
 // Mock the API
 jest.mock("../../lib/api", () => ({
@@ -10,6 +9,8 @@ jest.mock("../../lib/api", () => ({
 }));
 
 const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
+
+const TEST_VERSION = "x.y.z";
 
 describe("Footer", () => {
   beforeEach(() => {
@@ -22,6 +23,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -36,6 +38,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -43,17 +46,22 @@ describe("Footer", () => {
     expect(screen.getByText("cyber@query:~$")).toBeInTheDocument();
   });
 
-  it("displays the version information", () => {
+  it("displays the version information from config", async () => {
     mockGetConfig.mockResolvedValue({
       model: "mistral",
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
 
-    expect(screen.getByText(`--version v${version}`)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(`--version v${TEST_VERSION}`)
+      ).toBeInTheDocument();
+    });
   });
 
   it("displays the LLM model when config is loaded", async () => {
@@ -62,6 +70,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -77,6 +86,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -92,6 +102,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -107,14 +118,15 @@ describe("Footer", () => {
 
     render(<Footer />);
 
-    // Should still render version without models
-    expect(screen.getByText(`--version v${version}`)).toBeInTheDocument();
-
-    // Wait to ensure models are not displayed
+    // Should show loading state when config fetch fails
     await waitFor(() => {
-      expect(screen.queryByText(/--model/)).not.toBeInTheDocument();
-      expect(screen.queryByText(/--rag_model/)).not.toBeInTheDocument();
+      expect(screen.getByText("--loading...")).toBeInTheDocument();
     });
+
+    // Ensure models and version are not displayed
+    expect(screen.queryByText(/--version/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/--model/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/--rag_model/)).not.toBeInTheDocument();
   });
 
   it("has fixed positioning at the bottom", () => {
@@ -123,6 +135,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -137,6 +150,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -151,6 +165,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -169,6 +184,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -189,6 +205,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -203,6 +220,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -217,6 +235,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -233,6 +252,7 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
@@ -241,22 +261,22 @@ describe("Footer", () => {
     expect(footer.tagName).toBe("FOOTER");
   });
 
-  it("includes version from version library", () => {
+  it("includes version from config API", async () => {
     mockGetConfig.mockResolvedValue({
       model: "mistral",
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
 
-    // Test that the version is actually dynamic and comes from the version library
-    const versionText = screen.getByText(`--version v${version}`);
-    expect(versionText).toBeInTheDocument();
-
-    // Ensure it's not hardcoded by checking the import
-    expect(typeof version).toBe("string");
+    // Test that the version is loaded from the config API
+    await waitFor(() => {
+      const versionText = screen.getByText(`--version v${TEST_VERSION}`);
+      expect(versionText).toBeInTheDocument();
+    });
   });
 
   it("fetches config on mount", () => {
@@ -265,10 +285,22 @@ describe("Footer", () => {
       embedding_model: "bge-m3",
       host: "localhost",
       port: 8000,
+      version: TEST_VERSION,
     });
 
     render(<Footer />);
 
     expect(mockGetConfig).toHaveBeenCalledTimes(1);
+  });
+
+  it("displays loading state before config is loaded", () => {
+    mockGetConfig.mockImplementation(
+      () => new Promise(() => {}) // Never resolves
+    );
+
+    render(<Footer />);
+
+    expect(screen.getByText("--loading...")).toBeInTheDocument();
+    expect(screen.queryByText(/--version/)).not.toBeInTheDocument();
   });
 });

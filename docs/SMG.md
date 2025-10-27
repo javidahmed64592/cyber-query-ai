@@ -114,8 +114,7 @@ cyber-query-ai-frontend/
 │   ├── lib/
 │   │   ├── api.ts               # API communication functions
 │   │   ├── sanitization.ts      # Input sanitization utilities
-│   │   ├── types.ts             # TypeScript type definitions
-│   │   └── version.ts           # Application versioning
+│   │   └── types.ts             # TypeScript type definitions
 ├── jest.config.js               # Jest configuration for testing
 ├── jest.setup.js                # Jest setup for mocking and environment
 ├── next.config.ts               # Next.js configuration

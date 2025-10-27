@@ -254,9 +254,6 @@ When using `run_in_terminal` tool:
    # If Cwd is already cyber-query-ai-frontend:
    npm install
    npm run test
-
-   # If Cwd is project root:
-   cd cyber-query-ai-frontend && npm install && npm run test
    ```
 
 5. **Windows-specific**: On Windows (PowerShell), commands like `cd cyber-query-ai-frontend && npm install` work, but checking context is still important

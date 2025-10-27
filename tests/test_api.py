@@ -46,10 +46,11 @@ def test_app() -> TestClient:
     app.include_router(api_router)
     # Mock the config
     mock_config = MagicMock()
-    mock_config.host = "localhost"
-    mock_config.port = DEFAULT_PORT
     mock_config.model = "test-model"
     mock_config.embedding_model = "test-embedding-model"
+    mock_config.host = "localhost"
+    mock_config.port = DEFAULT_PORT
+    mock_config.version = "1.0.0"
     app.state.config = mock_config
     # Mock the chatbot
     mock_chatbot = MagicMock()
@@ -100,10 +101,11 @@ class TestConfigEndpoint:
 
         assert response.status_code == HTTP_OK
         data = response.json()
-        assert data["host"] == "localhost"
-        assert data["port"] == DEFAULT_PORT
         assert data["model"] == "test-model"
         assert data["embedding_model"] == "test-embedding-model"
+        assert data["host"] == "localhost"
+        assert data["port"] == DEFAULT_PORT
+        assert data["version"] == "1.0.0"
 
 
 class TestChat:
