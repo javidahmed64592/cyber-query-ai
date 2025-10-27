@@ -251,43 +251,36 @@ jobs:
 
           **AI-powered cybersecurity assistant for ethical hacking and penetration testing**
 
-          ### Installation
-
-          1. **Download** the release tarball below
-          2. **Extract** the archive: `tar -xzf cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz`
-          3. **Run the installer**:
-             - **Linux/macOS**: `./install_cyber_query_ai.sh`
-             - **Windows**: `install_cyber_query_ai.bat`
-
           ### Quick Start
 
-          1. **Install Ollama**: Download from [ollama.ai](https://ollama.ai/)
-          2. **Start Ollama**: `ollama serve`
-          3. **Pull an AI model**: `ollama pull mistral`
-          4. **Launch CyberQueryAI**: `./cyber-query-ai`
-          5. **Open your browser**: Navigate to `http://localhost:8000` (default port)
+          1. Download and extract the tarball: `tar -xzf cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz`
+          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS) or `install_cyber_query_ai.bat` (Windows)
+          3. Install Ollama from [ollama.ai](https://ollama.ai/) and pull models: `ollama pull mistral && ollama pull bge-m3`
+          4. Launch the app: `./cyber-query-ai` (Linux/macOS) or `cyber-query-ai.bat` (Windows)
+          5. Open your browser: `http://localhost:8000`
 
           ### Features
 
-          - **Command Generation**: Convert natural language to security CLI commands
-          - **Script Creation**: Generate cybersecurity scripts in multiple languages
-          - **Command Analysis**: Detailed explanations of complex security commands
-          - **Exploit Research**: Discover vulnerabilities and attack vectors
-          - **Secure & Ethical**: Built-in sanitization and rate limiting
+          - **Conversational AI Assistant** with full chat history and context awareness
+          - **Code Generation** for security commands and scripts (Python, Bash, PowerShell, etc.)
+          - **Code Analysis** with detailed explanations and security risk assessment
+          - **Exploit Research** for CVEs and attack vectors
+          - **Built-in Security** with input/output sanitization and rate limiting
+
+          ### Requirements
+
+          - uv package manager
+          - Python 3.12+
+          - Ollama with `mistral` and `bge-m3` models
 
           ### Documentation
 
-          - [Getting Started Guide](https://github.com/javidahmed64592/cyber-query-ai#getting-started)
-          - [API Documentation](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/API.md)
-          - [Architecture Overview](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/ARCHITECTURE.md)
+          - [Getting Started](https://github.com/javidahmed64592/cyber-query-ai#getting-started)
+          - [API Docs](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/API.md)
+          - [Architecture](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/ARCHITECTURE.md)
+          - See `readme.txt` in the release for detailed installation instructions
 
-          ### Important
-
-          - **Ollama Required**: This application requires Ollama to be running locally
-          - **Ethical Use Only**: Designed for authorized penetration testing and educational purposes
-          - **Verify Commands**: Always verify AI-generated content before execution
-
-          **For detailed installation instructions, see the `readme.txt` file included in the release.**
+          **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
           EOF
           echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
