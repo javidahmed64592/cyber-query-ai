@@ -13,18 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-      - name: Install dependencies
-        run: |
-          uv sync --extra dev
+      - uses: ./.github/actions/setup-python-dev
       - name: Validate pyproject.toml
         run: |
           uv run validate-pyproject pyproject.toml
@@ -32,42 +21,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: chartboost/ruff-action@v1
+      - uses: ./.github/actions/setup-python-dev
+      - name: Check with ruff
+        run: |
+          uv run -m ruff check
   mypy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-      - name: Install dependencies
-        run: |
-          uv sync --extra dev
+      - uses: ./.github/actions/setup-python-dev
       - name: Check with mypy
         run: |
           uv run -m mypy .
-  pytest:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-      - name: Install dependencies
-        run: |
-          uv sync --extra dev
+      - uses: ./.github/actions/setup-python-dev
       - name: Test with pytest
         run: |
           uv run -m pytest --cov-report html
@@ -108,29 +78,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-      - name: Install Python dependencies
-        run: |
-          uv sync --extra dev
+      - uses: ./.github/actions/setup-python-dev
       - name: Check version consistency
         run: |
           echo "Checking version consistency across all package files..."
 
           PACKAGE_NAME="cyber-query-ai"
           TOML_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          LOCK_VERSION=$(uv run python -c "import tomllib; lock_data = tomllib.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '${PACKAGE_NAME/_/-}'), None); print(pkg['version'] if pkg else 'not found')")
+          LOCK_VERSION=$(uv run python -c "import tomllib; lock_data = tomllib.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '${PACKAGE_NAME}'), None); print(pkg['version'] if pkg else 'not found')")
           FRONTEND_VERSION=$(node -p "require('./cyber-query-ai-frontend/package.json').version")
 
           echo "Version in pyproject.toml: $TOML_VERSION"
