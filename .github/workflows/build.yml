@@ -11,18 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
-      - name: Install dependencies
-        run: |
-          uv sync --extra dev
+      - uses: ./.github/actions/setup-python-core
       - name: Create wheel
         run: |
           uv build
@@ -61,15 +50,6 @@ jobs:
     needs: [build_wheel, build_frontend]
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
       - name: Download backend artifact
         uses: actions/download-artifact@v4
         with:
@@ -107,15 +87,7 @@ jobs:
     needs: create_installer
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
+      - uses: ./.github/actions/setup-python-core
       - name: Download artifact from create_installer job
         uses: actions/download-artifact@v4
         with:
@@ -124,13 +96,56 @@ jobs:
         run: |
           TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
           tar -xzf $TAR_FILE
+      - name: Verify pre-installation directory contents
+        run: |
+          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
+          DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
+          PACKAGE_NAME="cyber_query_ai"
+
+          cd "$DIR_NAME"
+          echo "$DIR_NAME/"
+          tree --dirsfirst -F
+
+          WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
+          files=("${WHEEL_FILE}" "readme.txt")
+          scripts=("install_cyber_query_ai.sh")
+
+          for file in "${files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "File $file not found"
+              exit 1
+            fi
+          done
+
+          for script in "${scripts[@]}"; do
+            if [ ! -f "$script" ]; then
+              echo "Script $script not found"
+              exit 1
+            fi
+            if [ ! -x "$script" ]; then
+              echo "Script $script is not executable"
+              exit 1
+            fi
+          done
+
+          if [ ! -d "static" ]; then
+            echo "Static directory not found"
+            exit 1
+          fi
       - name: Run installer script
         run: |
           TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
           DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
+
           cd "$DIR_NAME"
           ./install_cyber_query_ai.sh
 
+      - name: Verify post-installation directory contents
+        run: |
+          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
+          DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
+
+          cd "$DIR_NAME"
           echo "$DIR_NAME/"
           tree --dirsfirst -F
 
@@ -149,60 +164,39 @@ jobs:
             exit 1
           fi
 
-          if [ ! -d ".venv" ]; then
-            echo "Virtual environment not found"
+          if [ -f "$(find . -name 'cyber_query_ai-*-py3-none-any.whl')" ]; then
+            echo "Wheel file not removed"
             exit 1
           fi
 
-          if [ ! -d "static" ]; then
-            echo "Static directory not found"
-            exit 1
-          fi
+          folders=(".venv" "static" "service")
+          files=("config.json" "README.md" "SECURITY.md" "LICENSE")
+          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh" "service/start_service.sh" "service/stop_service.sh")
 
-          if [ ! -d "service" ]; then
-            echo "Service directory not found"
-            exit 1
-          fi
+          for folder in "${folders[@]}"; do
+            if [ ! -d "$folder" ]; then
+              echo "Folder $folder not found"
+              exit 1
+            fi
+          done
 
-          if [ ! -f "service/start_service.sh" ]; then
-            echo "Executable 'service/start_service.sh' not found"
-            exit 1
-          fi
+          for file in "${files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "File $file not found"
+              exit 1
+            fi
+          done
 
-          if [ ! -f "service/stop_service.sh" ]; then
-            echo "Executable 'service/stop_service.sh' not found"
-            exit 1
-          fi
-
-          if [ ! -f "config.json" ]; then
-            echo "Config file not found"
-            exit 1
-          fi
-
-          if [ ! -f "README.md" ]; then
-            echo "README file not found"
-            exit 1
-          fi
-
-          if [ ! -f "SECURITY.md" ]; then
-            echo "SECURITY file not found"
-            exit 1
-          fi
-
-          if [ ! -f "LICENSE" ]; then
-            echo "LICENSE file not found"
-            exit 1
-          fi
-
-          if [ ! -f "cyber-query-ai" ]; then
-            echo "Executable 'cyber-query-ai' not found"
-            exit 1
-          fi
-
-          if [ ! -f "uninstall_cyber_query_ai.sh" ]; then
-            echo "Uninstallation file not found"
-            exit 1
-          fi
+          for script in "${scripts[@]}"; do
+            if [ ! -f "$script" ]; then
+              echo "Script $script not found"
+              exit 1
+            fi
+            if [ ! -x "$script" ]; then
+              echo "Script $script is not executable"
+              exit 1
+            fi
+          done
 
   create_release:
     runs-on: ubuntu-latest
@@ -212,15 +206,7 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      - name: "Set up Python"
-        uses: actions/setup-python@v5
-        with:
-          python-version-file: ".python-version"
+      - uses: ./.github/actions/setup-python-core
       - name: Get version from pyproject.toml
         id: get_version
         run: |
