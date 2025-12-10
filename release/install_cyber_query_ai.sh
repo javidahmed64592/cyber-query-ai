@@ -20,11 +20,13 @@ APP_README_FILE="README.md"
 SECURITY_FILE="SECURITY.md"
 LICENSE_FILE="LICENSE"
 
+CONFIG_DIR="${WD}/configuration"
 LOGS_DIR="${WD}/logs"
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
+CONFIG_PATH="${CONFIG_DIR}/${CONFIG_FILE}"
 EXE_PATH="${WD}/${EXE_NAME}"
 LOG_PATH="${LOGS_DIR}/${LOG_FILE}"
 SERVICE_PATH="${SERVICE_DIR}/${SERVICE_FILE}"
@@ -33,7 +35,6 @@ STOP_SERVICE_PATH="${SERVICE_DIR}/${STOP_SERVICE_FILE}"
 UNINSTALL_PATH="${WD}/${UNINSTALL_FILE}"
 
 INSTALLER_README_PATH="${WD}/${INSTALLER_README_FILE}"
-CONFIG_PATH="${WD}/${CONFIG_FILE}"
 APP_README_PATH="${WD}/${APP_README_FILE}"
 SECURITY_PATH="${WD}/${SECURITY_FILE}"
 LICENSE_PATH="${WD}/${LICENSE_FILE}"
@@ -49,6 +50,7 @@ rm "${WHEEL_FILE}"
 
 echo "${SEPARATOR}"
 echo "Preparing root directory..."
+mkdir -p "${CONFIG_DIR}"
 mkdir -p "${LOGS_DIR}"
 mkdir -p "${SERVICE_DIR}"
 
@@ -59,7 +61,6 @@ mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
 mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
 mv "${SITE_PACKAGES_DIR}/.here" ".here"
 
-echo "${SEPARATOR}"
 echo "Creating API executable: ${EXE_PATH}"
 cat > "${EXE_PATH}" << EOF
 #!/bin/bash
@@ -140,6 +141,7 @@ rm -rf *
 EOF
 chmod +x "${UNINSTALL_PATH}"
 
+echo "${SEPARATOR}"
 echo "Generating self-signed SSL certificate..."
 ${BIN_DIR}/generate-certificate --config="${CONFIG_PATH}"
 
