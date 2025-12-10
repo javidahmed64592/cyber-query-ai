@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system combines FastAPI (Python 3.12+) with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
+CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system combines FastAPI (Python 3.13+) with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
 
 ## Architecture Patterns
 

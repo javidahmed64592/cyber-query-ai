@@ -13,7 +13,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 
 
 ## Technology Stack
-- Backend: Python 3.12+, FastAPI, Uvicorn, Pydantic, LangChain, langchain-ollama (OllamaLLM), SlowAPI (rate limiting), Bleach (sanitization)
+- Backend: Python 3.13+, FastAPI, Uvicorn, Pydantic, LangChain, langchain-ollama (OllamaLLM), SlowAPI (rate limiting), Bleach (sanitization)
 - Frontend: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Zustand (state), Axios for API calls
 - Dev / tooling: pytest, Jest, ESLint, Prettier, TypeScript, Ollama for local LLM hosting
 

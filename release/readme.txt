@@ -13,7 +13,7 @@ Please run the appropriate script for your operating system. Below is a detailed
 
 Prerequisites
 -------------
-- Python 3.12 or higher must be installed on your system.
+- Python 3.13 or higher must be installed on your system.
 - The `uv` package manager must be available (it will be used for virtual environment and package management).
 - For Linux/macOS: Bash shell and standard Unix tools (e.g., tput, chmod).
 - For Windows: Command Prompt (cmd.exe) and Windows batch scripting support.
