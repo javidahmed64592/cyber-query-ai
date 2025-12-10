@@ -40,35 +40,53 @@ jobs:
       - uses: ./.github/actions/setup-python-dev
       - name: Test with pytest
         run: |
-          uv run -m pytest --cov-report html
+          uv run -m pytest --cov-report html --cov-report term
       - name: Upload backend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-report
           path: htmlcov
-  frontend:
+  bandit:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cyber-query-ai-frontend
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-python-dev
+      - name: Security check
+        run: |
+          uv run bandit -r example/ -f json -o bandit-report.json || true
+      - uses: actions/upload-artifact@v4
         with:
-          node-version: "20"
-          cache: "npm"
-          cache-dependency-path: cyber-query-ai-frontend/package-lock.json
-      - name: Install dependencies
-        run: npm ci
+          name: bandit-report
+          path: bandit-report.json
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-dev
+      - name: Audit dependencies
+        run: |
+          uv run pip-audit --desc
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
       - name: Run type checking
-        run: npm run type-check
+        run: |
+          cd cyber-query-ai-frontend
+          npm run type-check
       - name: Run linting
-        run: npm run lint
+        run: |
+          cd cyber-query-ai-frontend
+          npm run lint
       - name: Run formatting check
-        run: npm run format
+        run: |
+          cd cyber-query-ai-frontend
+          npm run format
       - name: Run tests
-        run: npm run test:coverage
+        run: |
+          cd cyber-query-ai-frontend
+          npm run test:coverage
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:

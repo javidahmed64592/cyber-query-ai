@@ -1,0 +1,46 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        require_serial: true
+        args: [--config-file=pyproject.toml]
+      - id: frontend-typescript
+        name: TypeScript Check
+        entry: npm --prefix cyber-query-ai-frontend run type-check
+        language: system
+        files: ^cyber-query-ai-frontend/.*\.(ts|tsx)$
+        pass_filenames: false
+      - id: frontend-eslint
+        name: ESLint
+        entry: npm --prefix cyber-query-ai-frontend run lint
+        language: system
+        files: ^cyber-query-ai-frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: false
+      - id: frontend-prettier
+        name: Prettier
+        entry: npm --prefix cyber-query-ai-frontend run format
+        language: system
+        files: ^cyber-query-ai-frontend/.*\.(ts|tsx|js|jsx|json|css|md)$
+        pass_filenames: false
