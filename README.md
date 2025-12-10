@@ -1,8 +1,9 @@
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=ffd343)](https://docs.python.org/3.12/)
+[![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=ffd343)](https://docs.python.org/3.13/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Ollama](https://img.shields.io/badge/Ollama-AI%20Models-FF6B6B?style=flat-square&logo=ollama&logoColor=white)](https://ollama.ai/)
 [![Kali Linux](https://img.shields.io/badge/Kali%20Linux-Optimized-557C94?style=flat-square&logo=kalilinux&logoColor=white)](https://www.kali.org/)
-[![CI](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/ci.yml)
+[![Build](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/build.yml?branch=main&style=flat-square&label=Build&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/build.yml)
 [![License](https://img.shields.io/github/license/javidahmed64592/cyber-query-ai?style=flat-square)](https://github.com/javidahmed64592/cyber-query-ai/blob/main/LICENSE)
 
 <!-- omit from toc -->
@@ -160,7 +161,7 @@ Comprehensive information about the application, including:
 ### Prerequisites
 
 1. **Ollama**: Download and install from [ollama.ai](https://ollama.ai/)
-2. **Python 3.12+**: Required for the backend application
+2. **Python 3.13+**: Required for the backend application
 3. **AI Model**: Pull a compatible model using Ollama (e.g., `ollama pull mistral`)
 
 **Note:** You can configure the LLMs used in the application by editing the `config.json` file.

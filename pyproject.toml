@@ -7,14 +7,14 @@ name = "cyber-query-ai"
 version = "1.0.3"
 description = "AI-powered cybersecurity assistant for ethical penetration testing and security research."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = { file = "LICENSE" }
 authors = [
     { name = "Javid Ahmed", email = "javidahmed@icloud.com" }
 ]
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
@@ -29,11 +29,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "ruff>=0.14.2",
     "mypy>=1.18.2",
     "pytest>=8.4.2",
     "pytest-asyncio>=1.2.0",
     "pytest-cov>=7.0.0",
+    "ruff>=0.14.2",
     "validate-pyproject>=0.24.1",
 ]
 
@@ -45,11 +45,11 @@ cyber-query-ai = "cyber_query_ai.main:run"
 
 [tool.hatch.build]
 include = [
+  "cyber_query_ai/**",
   "config.json",
   "README.md",
   "SECURITY.md",
   "LICENSE",
-  "cyber_query_ai/**",
 ]
 
 [tool.pytest.ini_options]
@@ -60,8 +60,21 @@ addopts = [
     "term-missing",
 ]
 
+[tool.coverage.run]
+branch = true
+source = ["cyber_query_ai"]
+omit = [
+    "tests/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+skip_covered = false
+show_missing = true
+
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 line-length = 120
 indent-width = 4
 
@@ -147,6 +160,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.mypy]
 warn_unused_configs = true

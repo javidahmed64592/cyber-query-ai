@@ -256,7 +256,7 @@ jobs:
           ### Requirements
 
           - uv package manager
-          - Python 3.12+
+          - Python 3.13+
           - Ollama with `mistral` and `bge-m3` models
 
           ### Documentation

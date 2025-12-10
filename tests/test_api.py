@@ -17,21 +17,21 @@ DEFAULT_PORT = 8000
 
 
 @pytest.fixture
-def mock_run_in_threadpool() -> Generator[MagicMock, None, None]:
+def mock_run_in_threadpool() -> Generator[MagicMock]:
     """Fixture to mock the run_in_threadpool function."""
     with patch("cyber_query_ai.api.run_in_threadpool") as mock:
         yield mock
 
 
 @pytest.fixture
-def mock_clean_json_response() -> Generator[MagicMock, None, None]:
+def mock_clean_json_response() -> Generator[MagicMock]:
     """Fixture to mock the clean_json_response function."""
     with patch("cyber_query_ai.api.clean_json_response") as mock:
         yield mock
 
 
 @pytest.fixture(autouse=True)
-def disable_limiter() -> Generator[None, None, None]:
+def disable_limiter() -> Generator[None]:
     """Disable the rate limiter for unit tests."""
     original_enabled = limiter.enabled
     limiter.enabled = False
