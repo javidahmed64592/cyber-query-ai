@@ -12,4 +12,6 @@ runs:
         cache-dependency-path: cyber-query-ai-frontend/package-lock.json
     - name: Install dependencies
       shell: bash
-      run: npm ci
+      run: |
+        cd cyber-query-ai-frontend
+        npm ci
