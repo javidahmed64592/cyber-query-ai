@@ -45,11 +45,11 @@ cyber-query-ai = "cyber_query_ai.main:run"
 
 [tool.hatch.build]
 include = [
+  "cyber_query_ai/**",
   "config.json",
   "README.md",
   "SECURITY.md",
   "LICENSE",
-  "cyber_query_ai/**",
 ]
 
 [tool.pytest.ini_options]
@@ -59,6 +59,19 @@ addopts = [
     "--cov-report",
     "term-missing",
 ]
+
+[tool.coverage.run]
+branch = true
+source = ["cyber_query_ai"]
+omit = [
+    "tests/*",
+    "*/__init__.py",
+]
+
+[tool.coverage.report]
+fail_under = 80
+skip_covered = false
+show_missing = true
 
 [tool.ruff]
 target-version = "py313"
