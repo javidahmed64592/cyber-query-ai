@@ -40,12 +40,32 @@ jobs:
       - uses: ./.github/actions/setup-python-dev
       - name: Test with pytest
         run: |
-          uv run -m pytest --cov-report html
+          uv run -m pytest --cov-report html --cov-report term
       - name: Upload backend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage-report
           path: htmlcov
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-dev
+      - name: Security check
+        run: |
+          uv run bandit -r example/ -f json -o bandit-report.json || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-dev
+      - name: Audit dependencies
+        run: |
+          uv run pip-audit --desc
   frontend:
     runs-on: ubuntu-latest
     defaults:

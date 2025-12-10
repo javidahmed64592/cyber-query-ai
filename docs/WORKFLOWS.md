@@ -1,41 +1,48 @@
 # GitHub Workflows
 
-This document details the CI/CD workflows to build and release the CyberQueryAI application. They run automated code quality checks to ensure code remains robust, maintainable, and testable.
+This document details the CI/CD workflows to build and release the CyberQueryAI application.
+They run automated code quality checks to ensure code remains robust, maintainable, and testable.
 
 ## CI Workflow
 
 The CI workflow runs on pushes and pull requests to the `main` branch.
 It consists of the following jobs:
 
-### ruff
-- **Runner**: Ubuntu Latest
-- **Steps**:
+### validate-pyproject
   - Checkout code
-  - Run Ruff linter using `chartboost/ruff-action@v1`
+  - Setup Python environment with dev dependencies (via custom action)
+  - Validate `pyproject.toml` structure using `validate-pyproject`
+
+### ruff
+  - Checkout code
+  - Setup Python environment with dev dependencies (via custom action)
+  - Run Ruff linter with `uv run -m ruff check`
 
 ### mypy
-- **Runner**: Ubuntu Latest
-- **Steps**:
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
-  - Install dependencies with `uv sync --extra dev`
+  - Setup Python environment with dev dependencies (via custom action)
   - Run mypy type checking with `uv run -m mypy .`
 
-### test
-- **Runner**: Ubuntu Latest
-- **Steps**:
+### pytest
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
-  - Install dependencies with `uv sync --extra dev`
-  - Run pytest with coverage report using `uv run -m pytest --cov-report html`
-  - Upload coverage report as artifact
+  - Setup Python environment with dev dependencies (via custom action)
+  - Run pytest with coverage (HTML and terminal reports) using `uv run -m pytest --cov-report html --cov-report term`
+  - Fails if coverage drops below 80% (configured in `pyproject.toml`)
+  - Upload HTML coverage report as artifact
+
+### bandit
+  - Checkout code
+  - Setup Python environment with dev dependencies (via custom action)
+  - Run security scanning with bandit on `example/` directory
+  - Generate JSON report for artifacts
+  - Fail if security vulnerabilities are found
+
+### pip-audit
+  - Checkout code
+  - Setup Python environment with dev dependencies (via custom action)
+  - Audit dependencies for known CVEs using `pip-audit --desc`
 
 ### frontend
-- **Runner**: Ubuntu Latest
-- **Working Directory**: `cyber-query-ai-frontend`
-- **Steps**:
   - Checkout code
   - Set up Node.js 18 with npm caching
   - Install dependencies with `npm ci`
@@ -45,13 +52,8 @@ It consists of the following jobs:
   - Run tests with `npm run test`
 
 ### version-check
-- **Runner**: Ubuntu Latest
-- **Steps**:
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
-  - Set up Node.js 18
-  - Install Python dependencies with `uv sync --extra dev`
+  - Setup Python environment with dev dependencies (via custom action)
   - Check version consistency across `pyproject.toml`, `uv.lock`, and `cyber-query-ai-frontend/package.json`
 
 ## Build Workflow
@@ -59,8 +61,6 @@ It consists of the following jobs:
 The Build workflow runs on pushes to the `main` branch and manual dispatch, consisting of the following jobs:
 
 ### build_wheel
-- **Runner**: Ubuntu Latest
-- **Steps**:
   - Checkout code
   - Install uv with caching
   - Set up Python from `.python-version`
@@ -69,8 +69,6 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
   - Upload wheel artifact
 
 ### build_frontend
-- **Runner**: Ubuntu Latest
-- **Steps**:
   - Checkout code
   - Set up Node.js 18 with npm caching
   - Install frontend dependencies with `npm ci` in `cyber-query-ai-frontend`
@@ -78,9 +76,6 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
   - Upload frontend build artifact
 
 ### create_installer
-- **Runner**: Ubuntu Latest
-- **Dependencies**: `build_wheel`, `build_frontend`
-- **Steps**:
   - Checkout code
   - Install uv with caching
   - Set up Python from `.python-version`
@@ -91,9 +86,6 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
   - Upload release tarball artifact
 
 ### check_installer
-- **Runner**: Ubuntu Latest
-- **Dependencies**: `create_installer`
-- **Steps**:
   - Checkout code
   - Install uv with caching
   - Set up Python from `.python-version`
