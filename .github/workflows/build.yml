@@ -160,8 +160,8 @@ jobs:
             exit 1
           fi
 
-          folders=(".venv" "static" "service")
-          files=("config.json" "README.md" "SECURITY.md" "LICENSE")
+          folders=(".venv" "configuration" "certs" "logs" "service" "static")
+          files=(".here" "LICENSE" "README.md" "SECURITY.md" "certs/cert.pem" "certs/key.pem" "configuration/config.json" "service/rpi-ai.service")
           scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh" "service/start_service.sh" "service/stop_service.sh")
 
           for folder in "${folders[@]}"; do

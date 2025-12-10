@@ -20,12 +20,13 @@ APP_README_FILE="README.md"
 SECURITY_FILE="SECURITY.md"
 LICENSE_FILE="LICENSE"
 
+LOGS_DIR="${WD}/logs"
 SERVICE_DIR="${WD}/service"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
 EXE_PATH="${WD}/${EXE_NAME}"
-LOG_PATH="${WD}/${LOG_FILE}"
+LOG_PATH="${LOGS_DIR}/${LOG_FILE}"
 SERVICE_PATH="${SERVICE_DIR}/${SERVICE_FILE}"
 CREATE_SERVICE_PATH="${SERVICE_DIR}/${CREATE_SERVICE_FILE}"
 STOP_SERVICE_PATH="${SERVICE_DIR}/${STOP_SERVICE_FILE}"
@@ -40,22 +41,26 @@ LICENSE_PATH="${WD}/${LICENSE_FILE}"
 echo "Creating virtual environment..."
 uv venv ${VENV_NAME}
 
+echo "${SEPARATOR}"
 echo "Installing from wheel..."
 WHEEL_FILE=$(find "${WD}" -name "${PACKAGE_NAME}-*-py3-none-any.whl")
 uv pip install "${WHEEL_FILE}"
 rm "${WHEEL_FILE}"
 
-echo ${SEPARATOR}
+echo "${SEPARATOR}"
 echo "Preparing root directory..."
+mkdir -p "${LOGS_DIR}"
 mkdir -p "${SERVICE_DIR}"
 
 SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
-mv "${SITE_PACKAGES_DIR}/${CONFIG_FILE}" "${CONFIG_PATH}"
+mv "${SITE_PACKAGES_DIR}/configuration/${CONFIG_FILE}" "${CONFIG_PATH}"
 mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
 mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
 mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
+mv "${SITE_PACKAGES_DIR}/.here" ".here"
 
-echo "Creating API executable..."
+echo "${SEPARATOR}"
+echo "Creating API executable: ${EXE_PATH}"
 cat > "${EXE_PATH}" << EOF
 #!/bin/bash
 export CYBER_QUERY_AI_ROOT_DIR=${WD}
@@ -63,7 +68,7 @@ ${BIN_DIR}/${EXE_NAME} "\$@"
 EOF
 chmod +x "${EXE_PATH}"
 
-echo "Creating service..."
+echo "Creating service: ${SERVICE_PATH}"
 cat > "${SERVICE_PATH}" << EOF
 [Unit]
 Description=CyberQueryAI Service
@@ -106,7 +111,7 @@ sudo systemctl status ${SERVICE_FILE}
 EOF
 chmod +x "${CREATE_SERVICE_PATH}"
 
-echo "Creating service stop script..."
+echo "Creating service stop script: ${STOP_SERVICE_PATH}"
 cat > "${STOP_SERVICE_PATH}" << EOF
 #!/bin/bash
 set -eu
@@ -125,7 +130,7 @@ fi
 EOF
 chmod +x "${STOP_SERVICE_PATH}"
 
-echo "Creating uninstall script..."
+echo "Creating uninstall script: ${UNINSTALL_PATH}"
 cat > "${UNINSTALL_PATH}" << EOF
 #!/bin/bash
 set -eu
@@ -134,6 +139,9 @@ rm -rf ${VENV_NAME}
 rm -rf *
 EOF
 chmod +x "${UNINSTALL_PATH}"
+
+echo "Generating self-signed SSL certificate..."
+${BIN_DIR}/generate-certificate --config="${CONFIG_PATH}"
 
 echo "${SEPARATOR}"
 echo "CyberQueryAI has been installed successfully."
