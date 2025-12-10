@@ -60,18 +60,18 @@ class TestConfigUtils:
     """Unit tests for the config utility methods."""
 
     @pytest.fixture
-    def mock_root_dir_env_var(self) -> Generator[None, None, None]:
+    def mock_root_dir_env_var(self) -> Generator[None]:
         """Fixture for mocking the CYBER_QUERY_AI_ROOT_DIR environment variable."""
         with patch.dict("os.environ", {"CYBER_QUERY_AI_ROOT_DIR": "/mock/path"}):
             yield
 
     @pytest.fixture
-    def mock_get_config_path(self) -> Generator[MagicMock, None, None]:
+    def mock_get_config_path(self) -> Generator[MagicMock]:
         """Fixture for mocking the get_config_path function."""
         with patch("cyber_query_ai.config.get_config_path") as mock_get_path:
             yield mock_get_path
 
-    def test_get_root_dir_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None, None, None]) -> None:
+    def test_get_root_dir_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None]) -> None:
         """Test get_root_dir using the mock fixture."""
         assert get_root_dir() == Path("/mock/path")
 
@@ -79,7 +79,7 @@ class TestConfigUtils:
         """Test get_root_dir without the environment variable."""
         assert get_root_dir() == Path(".")
 
-    def test_get_config_path_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None, None, None]) -> None:
+    def test_get_config_path_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None]) -> None:
         """Test get_config_path using the mock fixture."""
         assert get_config_path() == get_root_dir() / CONFIG_FILENAME
 
@@ -87,7 +87,7 @@ class TestConfigUtils:
         """Test get_config_path using the mock fixture."""
         assert get_config_path() == get_root_dir() / CONFIG_FILENAME
 
-    def test_get_pyproject_path_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None, None, None]) -> None:
+    def test_get_pyproject_path_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None]) -> None:
         """Test get_pyproject_path using the mock fixture."""
         assert get_pyproject_path() == get_root_dir() / PYPROJECT_FILENAME
 
@@ -95,7 +95,7 @@ class TestConfigUtils:
         """Test get_pyproject_path without the environment variable."""
         assert get_pyproject_path() == get_root_dir() / PYPROJECT_FILENAME
 
-    def test_get_tools_filepath_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None, None, None]) -> None:
+    def test_get_tools_filepath_with_root_dir_env_var(self, mock_root_dir_env_var: Generator[None]) -> None:
         """Test get_tools_filepath using the mock fixture."""
         assert get_tools_filepath() == get_root_dir() / "rag_data" / TOOLS_FILENAME
 

@@ -26,7 +26,7 @@ def mock_config() -> ConfigResponse:
 
 
 @pytest.fixture
-def mock_chatbot() -> Generator[MagicMock, None, None]:
+def mock_chatbot() -> Generator[MagicMock]:
     """Fixture to create a mock Chatbot class."""
     with patch("cyber_query_ai.main.Chatbot", autospec=True) as mock:
         chatbot_instance = mock.return_value
@@ -39,21 +39,21 @@ def mock_chatbot() -> Generator[MagicMock, None, None]:
 
 
 @pytest.fixture
-def mock_static_files() -> Generator[MagicMock, None, None]:
+def mock_static_files() -> Generator[MagicMock]:
     """Fixture to mock StaticFiles in main module."""
     with patch("cyber_query_ai.main.StaticFiles") as mock:
         yield mock
 
 
 @pytest.fixture
-def mock_get_static_dir() -> Generator[MagicMock, None, None]:
+def mock_get_static_dir() -> Generator[MagicMock]:
     """Fixture to mock get_static_dir function."""
     with patch("cyber_query_ai.main.get_static_dir") as mock:
         yield mock
 
 
 @pytest.fixture
-def mock_get_static_files() -> Generator[MagicMock, None, None]:
+def mock_get_static_files() -> Generator[MagicMock]:
     """Fixture to mock get_static_files function."""
     with patch("cyber_query_ai.main.get_static_files") as mock:
         yield mock
@@ -72,7 +72,7 @@ def mock_app(
 
 
 @pytest.fixture(autouse=True)
-def disable_limiter() -> Generator[None, None, None]:
+def disable_limiter() -> Generator[None]:
     """Disable the rate limiter for unit tests."""
     original_enabled = limiter.enabled
     limiter.enabled = False
@@ -216,19 +216,19 @@ class TestRun:
     """Unit tests for the run function."""
 
     @pytest.fixture
-    def mock_uvicorn_run(self) -> Generator[MagicMock, None, None]:
+    def mock_uvicorn_run(self) -> Generator[MagicMock]:
         """Fixture to mock uvicorn.run function."""
         with patch("cyber_query_ai.main.uvicorn.run") as mock:
             yield mock
 
     @pytest.fixture
-    def mock_load_config(self) -> Generator[MagicMock, None, None]:
+    def mock_load_config(self) -> Generator[MagicMock]:
         """Fixture to mock load_config function."""
         with patch("cyber_query_ai.main.load_config") as mock:
             yield mock
 
     @pytest.fixture
-    def mock_create_app(self) -> Generator[MagicMock, None, None]:
+    def mock_create_app(self) -> Generator[MagicMock]:
         """Fixture to mock create_app function."""
         with patch("cyber_query_ai.main.create_app") as mock:
             yield mock

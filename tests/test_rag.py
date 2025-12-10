@@ -117,13 +117,13 @@ class TestRAGSystem:
     """Unit tests for the RAGSystem class."""
 
     @pytest.fixture
-    def mock_ollama_embeddings(self) -> Generator[MagicMock, None, None]:
+    def mock_ollama_embeddings(self) -> Generator[MagicMock]:
         """Fixture to mock OllamaEmbeddings."""
         with patch("cyber_query_ai.rag.OllamaEmbeddings") as mock:
             yield mock
 
     @pytest.fixture
-    def mock_vector_store(self) -> Generator[MagicMock, None, None]:
+    def mock_vector_store(self) -> Generator[MagicMock]:
         """Fixture to mock InMemoryVectorStore."""
         with patch("cyber_query_ai.rag.InMemoryVectorStore") as mock:
             mock_instance = MagicMock()
@@ -131,13 +131,13 @@ class TestRAGSystem:
             yield mock_instance
 
     @pytest.fixture
-    def mock_text_loader(self) -> Generator[MagicMock, None, None]:
+    def mock_text_loader(self) -> Generator[MagicMock]:
         """Fixture to mock TextLoader."""
         with patch("cyber_query_ai.rag.TextLoader") as mock:
             yield mock
 
     @pytest.fixture
-    def temp_tools_file(self) -> Generator[Path, None, None]:
+    def temp_tools_file(self) -> Generator[Path]:
         """Fixture to create a temporary tools JSON file."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
             sample_data = {

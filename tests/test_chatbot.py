@@ -10,14 +10,14 @@ from cyber_query_ai.chatbot import Chatbot
 
 
 @pytest.fixture(autouse=True)
-def mock_ollama_llm() -> Generator[MagicMock, None, None]:
+def mock_ollama_llm() -> Generator[MagicMock]:
     """Fixture to mock the OllamaLLM."""
     with patch("cyber_query_ai.chatbot.OllamaLLM", autospec=True) as mock:
         yield mock
 
 
 @pytest.fixture(autouse=True)
-def mock_rag_system() -> Generator[MagicMock, None, None]:
+def mock_rag_system() -> Generator[MagicMock]:
     """Fixture to mock the RAGSystem."""
     with patch("cyber_query_ai.chatbot.RAGSystem.create", autospec=True) as mock:
         mock.return_value.generate_rag_content.return_value = "rag content"
