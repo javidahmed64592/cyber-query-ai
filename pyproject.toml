@@ -182,6 +182,3 @@ module = [
     "slowapi.*"
 ]
 ignore_missing_imports = true
-
-[dependency-groups]
-dev = []
