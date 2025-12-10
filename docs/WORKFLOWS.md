@@ -44,8 +44,7 @@ It consists of the following jobs:
 
 ### frontend
   - Checkout code
-  - Set up Node.js 18 with npm caching
-  - Install dependencies with `npm ci`
+  - Set up Node.js  and dependencies with npm caching (via custom action)
   - Run type checking with `npm run type-check`
   - Run linting with `npm run lint`
   - Run formatting check with `npm run format`
@@ -62,23 +61,18 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
 
 ### build_wheel
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
-  - Install dependencies with `uv sync --extra dev`
+  - Setup Python environment with dev dependencies (via custom action)
   - Build wheel with `uv build`
   - Upload wheel artifact
 
 ### build_frontend
   - Checkout code
-  - Set up Node.js 18 with npm caching
-  - Install frontend dependencies with `npm ci` in `cyber-query-ai-frontend`
-  - Build frontend with `npm run build` in `cyber-query-ai-frontend`
+  - Set up Node.js  and dependencies with npm caching (via custom action)
+  - Build frontend with `npm run build`
   - Upload frontend build artifact
 
 ### create_installer
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
   - Download backend wheel artifact
   - Download frontend build artifact
   - Prepare release directory (move wheel and static files, make scripts executable)
@@ -87,9 +81,9 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
 
 ### check_installer
   - Checkout code
-  - Install uv with caching
-  - Set up Python from `.python-version`
+  - Setup Python environment with core dependencies (via custom action)
   - Download release tarball artifact
   - Extract tarball
+  - Verify pre-installation directory structure
   - Run installer script
-  - Verify installation (check for virtual environment, static directory, service scripts, config file, README, executable, uninstall script)
+  - Verify post-installation directory structure
