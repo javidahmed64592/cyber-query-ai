@@ -23,14 +23,13 @@ jobs:
 
   build_frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cyber-query-ai-frontend
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
       - name: Build frontend
-        run: npm run build
+        run: |
+          cd cyber-query-ai-frontend
+          npm run build
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:

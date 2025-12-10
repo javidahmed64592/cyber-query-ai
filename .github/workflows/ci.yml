@@ -68,20 +68,25 @@ jobs:
           uv run pip-audit --desc
   frontend:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: cyber-query-ai-frontend
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-node
       - name: Run type checking
-        run: npm run type-check
+        run: |
+          cd cyber-query-ai-frontend
+          npm run type-check
       - name: Run linting
-        run: npm run lint
+        run: |
+          cd cyber-query-ai-frontend
+          npm run lint
       - name: Run formatting check
-        run: npm run format
+        run: |
+          cd cyber-query-ai-frontend
+          npm run format
       - name: Run tests
-        run: npm run test:coverage
+        run: |
+          cd cyber-query-ai-frontend
+          npm run test:coverage
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:
