@@ -55,7 +55,7 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
    - This makes these files easily accessible for configuration and reference.
 
 5. **Create API Executable**:
-   - Generates a bash script named `cyber-query-ai` that sets the `CYBER_QUERY_AI_ROOT_DIR` environment variable and runs the main application.
+   - Generates a bash script named `cyber-query-ai` that runs the main application.
    - Makes the script executable with `chmod +x`.
 
 6. **Create Uninstall Script**:
@@ -91,7 +91,6 @@ Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
 
 5. **Create Executable Launcher**:
    - Generates a batch script named `cyber-query-ai.bat` that:
-     - Sets the `CYBER_QUERY_AI_ROOT_DIR` environment variable.
      - Starts Ollama server in the background.
      - Runs the main CyberQueryAI application.
      - Stops the Ollama server after the application exits.

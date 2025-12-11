@@ -19,10 +19,10 @@ LICENSE_FILE="LICENSE"
 
 CONFIG_DIR="${WD}/configuration"
 LOGS_DIR="${WD}/logs"
+STATIC_DIR="${WD}/static"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
 
-CONFIG_PATH="${CONFIG_DIR}/${CONFIG_FILE}"
 EXE_PATH="${WD}/${EXE_NAME}"
 LOG_PATH="${LOGS_DIR}/${LOG_FILE}"
 UNINSTALL_PATH="${WD}/${UNINSTALL_FILE}"
@@ -47,7 +47,8 @@ mkdir -p "${CONFIG_DIR}"
 mkdir -p "${LOGS_DIR}"
 
 SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
-mv "${SITE_PACKAGES_DIR}/configuration/${CONFIG_FILE}" "${CONFIG_PATH}"
+mv "${SITE_PACKAGES_DIR}/configuration" "${CONFIG_DIR}"
+mv "${SITE_PACKAGES_DIR}/static" "${STATIC_DIR}"
 mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
 mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
 mv "${SITE_PACKAGES_DIR}/${LICENSE_FILE}" "${LICENSE_PATH}"
@@ -56,7 +57,6 @@ mv "${SITE_PACKAGES_DIR}/.here" ".here"
 echo "Creating API executable: ${EXE_PATH}"
 cat > "${EXE_PATH}" << EOF
 #!/bin/bash
-export CYBER_QUERY_AI_ROOT_DIR=${WD}
 ${BIN_DIR}/${EXE_NAME} "\$@"
 EOF
 chmod +x "${EXE_PATH}"
@@ -73,12 +73,12 @@ chmod +x "${UNINSTALL_PATH}"
 
 echo "${SEPARATOR}"
 echo "Generating self-signed SSL certificate..."
-${BIN_DIR}/generate-certificate --config="${CONFIG_PATH}"
+${BIN_DIR}/generate-certificate --config="${CONFIG_DIR}/${CONFIG_FILE}"
 
 echo "${SEPARATOR}"
 echo "CyberQueryAI has been installed successfully."
 echo "Run the application using: './${EXE_NAME}'"
-echo "Configure the application by editing: ${CONFIG_PATH}"
+echo "Configure the application by editing: ${CONFIG_DIR}/${CONFIG_FILE}"
 echo "To view the logs: 'cat ${LOG_FILE}'"
 echo "To uninstall, run: './${UNINSTALL_FILE}'"
 echo "${SEPARATOR}"

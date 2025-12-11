@@ -149,7 +149,7 @@ The build workflow creates a release package containing:
 1. Creates `.venv` using `uv venv`
 2. Installs wheel with `uv pip install`, then deletes wheel
 3. Extracts `config.json`, `README.md`, `SECURITY.md`, `LICENSE` from site-packages to root
-4. Generates `cyber-query-ai` bash executable that sets `CYBER_QUERY_AI_ROOT_DIR` and launches app
+4. Generates `cyber-query-ai` bash executable that launches app
 5. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
 6. Self-deletes installer files after completion
 
@@ -159,7 +159,6 @@ The build workflow creates a release package containing:
 2. Installs wheel with `uv pip install`, then deletes wheel
 3. Extracts config/docs from `Lib\site-packages` to root
 4. Generates `cyber-query-ai.bat` launcher that:
-   - Sets `CYBER_QUERY_AI_ROOT_DIR` environment variable
    - Starts Ollama server in background (`start /b ollama serve`)
    - Runs application
    - Kills Ollama process on exit (`taskkill /f /im ollama.exe`)
@@ -204,10 +203,6 @@ Users must:
 - Backend server reads it to configure host/port and model settings
 - `next.config.ts` reads it at build time to configure the development proxy
 - Available via `/api/config` endpoint returning `ConfigResponse` model
-
-### Environment variables
-
-- `CYBER_QUERY_AI_ROOT_DIR`: Points to application root
 
 ## Common Pitfalls
 
