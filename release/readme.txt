@@ -18,7 +18,6 @@ Prerequisites
 - For Linux/macOS: Bash shell and standard Unix tools (e.g., tput, chmod).
 - For Windows: Command Prompt (cmd.exe) and Windows batch scripting support.
 - Sufficient disk space for the virtual environment and application files.
-- Administrative privileges may be required for service creation on Linux/macOS.
 
 Ollama
 ------
@@ -40,7 +39,6 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
 
 1. **Setup Variables and Directories**:
    - Defines package name, virtual environment name, executable names, and file paths.
-   - Creates a `service` directory for service-related scripts.
 
 2. **Create Virtual Environment**:
    - Uses `uv venv` to create a new Python virtual environment named `.venv` in the current directory.
@@ -60,25 +58,15 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
    - Generates a bash script named `cyber-query-ai` that sets the `CYBER_QUERY_AI_ROOT_DIR` environment variable and runs the main application.
    - Makes the script executable with `chmod +x`.
 
-6. **Create Systemd Service**:
-   - Creates a systemd service file (`cyber_query_ai.service`) in the `service` directory.
-   - Configures the service to run the application as a background service, with automatic restarts on failure.
-   - Sets up logging to `cyber_query_ai.log`.
-
-7. **Create Service Management Scripts**:
-   - `start_service.sh`: Copies the service file to `/etc/systemd/system`, enables and starts the service.
-   - `stop_service.sh`: Stops the service and optionally disables/removes it.
-   - Makes both scripts executable.
-
-8. **Create Uninstall Script**:
+6. **Create Uninstall Script**:
    - Generates `uninstall_cyber_query_ai.sh` which removes all files in the current directory.
    - Makes the script executable.
 
-9. **Cleanup**:
+7. **Cleanup**:
    - Removes the installer scripts (`install_cyber_query_ai.sh` and `install_cyber_query_ai.bat`) and this file.
 
-10. **Display Success Message**:
-   - Prints instructions on how to run the application, configure it, manage the service, view logs, and uninstall.
+8. **Display Success Message**:
+   - Prints instructions on how to run the application, configure it, view logs, and uninstall.
 
 Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
 -------------------------------------------------------------------
@@ -124,14 +112,6 @@ Post-Installation Instructions
 - **Configuration**:
   - Edit `config.json` to customize the application's settings.
 
-- **Service Management (Linux/macOS only)**:
-  - To start as a system service: Run `./service/start_service.sh` (requires sudo).
-  - To stop the service: Run `./service/stop_service.sh` (requires sudo).
-
-- **Viewing Logs**:
-  - Linux/macOS: Check `cyber_query_ai.log` or use `journalctl -u cyber_query_ai.service`.
-  - Windows: Check `cyber_query_ai.log` in the installation directory.
-
 - **Uninstallation**:
   - Linux/macOS: Run `./uninstall_cyber_query_ai.sh` to remove all files.
   - Windows: Simply delete the entire installation directory.
@@ -139,10 +119,8 @@ Post-Installation Instructions
 Important Notes
 ---------------
 - The installer creates a virtual environment to avoid conflicts with your system Python.
-- On Linux/macOS, the service runs under your current user account.
 - The application requires Ollama to be installed and configured separately (the Windows installer starts Ollama automatically).
 - If you encounter permission issues, run the installer with appropriate privileges (e.g., sudo on Linux/macOS).
-- The installer modifies your system by creating service files (Linux/macOS) or starting background processes (Windows).
 - Review the generated scripts and configuration files before running them in production.
 
 For more information about CyberQueryAI, visit the project repository or consult the main README.md file.

@@ -160,9 +160,9 @@ jobs:
             exit 1
           fi
 
-          folders=(".venv" "configuration" "certs" "logs" "service" "static")
-          files=(".here" "LICENSE" "README.md" "SECURITY.md" "certs/cert.pem" "certs/key.pem" "configuration/config.json" "service/rpi-ai.service")
-          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh" "service/start_service.sh" "service/stop_service.sh")
+          folders=(".venv" "configuration" "certs" "logs" "static")
+          files=(".here" "LICENSE" "README.md" "SECURITY.md" "certs/cert.pem" "certs/key.pem" "configuration/config.json")
+          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh")
 
           for folder in "${folders[@]}"; do
             if [ ! -d "$folder" ]; then

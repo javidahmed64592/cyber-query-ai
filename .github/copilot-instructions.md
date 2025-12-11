@@ -128,7 +128,7 @@ The RAG system enhances prompts with relevant tool documentation:
 1. Build Python wheel (`uv build`)
 2. Build Next.js static export (`npm run build`)
 3. Package installer (`release/` with `.sh` and `.bat` scripts)
-4. Verify installer creates virtualenv, copies static files, generates service scripts
+4. Verify installer creates virtualenv, copies static files, and generates launchers
 
 ## Deployment & Installation
 
@@ -150,10 +150,8 @@ The build workflow creates a release package containing:
 2. Installs wheel with `uv pip install`, then deletes wheel
 3. Extracts `config.json`, `README.md`, `SECURITY.md`, `LICENSE` from site-packages to root
 4. Generates `cyber-query-ai` bash executable that sets `CYBER_QUERY_AI_ROOT_DIR` and launches app
-5. Creates systemd service file in `service/cyber_query_ai.service` with auto-restart on failure
-6. Generates `service/start_service.sh` and `service/stop_service.sh` for service management
-7. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
-8. Self-deletes installer files after completion
+5. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
+6. Self-deletes installer files after completion
 
 **Windows (`install_cyber_query_ai.bat`)**:
 
@@ -179,18 +177,6 @@ The application serves the Next.js static export using this priority:
 5. 404 if no match
 
 See `helpers.py:get_static_files()` for implementation.
-
-### Service Management (Linux/macOS)
-
-The generated systemd service includes:
-
-- **User context**: Runs as installing user (not root)
-- **Auto-restart**: Restarts on failure with 5s delay
-- **Rate limiting**: Max 5 restarts per 60s
-- **Logging**: Appends to `cyber_query_ai.log`
-- **Security**: `ProtectSystem=full` with read-write access only to install directory
-
-Service location: `/etc/systemd/system/cyber_query_ai.service`
 
 ### Post-Installation Configuration
 
