@@ -127,7 +127,7 @@ The RAG system enhances prompts with relevant tool documentation:
 
 1. Build Python wheel (`uv build`)
 2. Build Next.js static export (`npm run build`)
-3. Package installer (`release/` with `.sh` and `.bat` scripts)
+3. Package installer (`release/` with `.sh` script)
 4. Verify installer creates virtualenv, copies static files, and generates launchers
 
 ## Deployment & Installation
@@ -139,7 +139,6 @@ The build workflow creates a release package containing:
 - Python wheel (`cyber_query_ai-*.whl`)
 - Static frontend files in `static/` directory
 - `install_cyber_query_ai.sh` (Linux/macOS)
-- `install_cyber_query_ai.bat` (Windows)
 - `readme.txt` (comprehensive installation guide)
 
 ### Installer Script Behavior
@@ -152,18 +151,6 @@ The build workflow creates a release package containing:
 4. Generates `cyber-query-ai` bash executable that launches app
 5. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
 6. Self-deletes installer files after completion
-
-**Windows (`install_cyber_query_ai.bat`)**:
-
-1. Creates `.venv` using `uv venv`
-2. Installs wheel with `uv pip install`, then deletes wheel
-3. Extracts config/docs from `Lib\site-packages` to root
-4. Generates `cyber-query-ai.bat` launcher that:
-   - Starts Ollama server in background (`start /b ollama serve`)
-   - Runs application
-   - Kills Ollama process on exit (`taskkill /f /im ollama.exe`)
-5. Self-deletes installer files after completion
-6. **Note**: Windows installer automatically manages Ollama lifecycle; Linux/macOS requires manual Ollama setup
 
 ### Static File Serving Pattern
 

@@ -143,11 +143,6 @@ jobs:
             exit 1
           fi
 
-          if [ -f "install_cyber_query_ai.bat" ]; then
-            echo "Windows installer script not removed"
-            exit 1
-          fi
-
           if [ -f "readme.txt" ]; then
             echo "Installation README file not removed"
             exit 1
@@ -229,9 +224,9 @@ jobs:
           ### Quick Start
 
           1. Download and extract the tarball: `tar -xzf cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz`
-          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS) or `install_cyber_query_ai.bat` (Windows)
+          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS)
           3. Install Ollama from [ollama.ai](https://ollama.ai/) and pull models: `ollama pull mistral && ollama pull bge-m3`
-          4. Launch the app: `./cyber-query-ai` (Linux/macOS) or `cyber-query-ai.bat` (Windows)
+          4. Launch the app: `./cyber-query-ai` (Linux/macOS)
           5. Open your browser: `http://localhost:8000`
 
           ### Features

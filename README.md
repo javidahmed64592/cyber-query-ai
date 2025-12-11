@@ -171,9 +171,7 @@ Comprehensive information about the application, including:
 #### Option 1: Using Pre-built Release (Recommended)
 1. Download the latest release from [GitHub Releases](https://github.com/javidahmed64592/cyber-query-ai/releases)
 2. Extract the archive
-3. Run the installer:
-   - **Linux/macOS**: `./install_cyber_query_ai.sh`
-   - **Windows**: `install_cyber_query_ai.bat`
+3. Run the installer: `./install_cyber_query_ai.sh`
 
 #### Option 2: From Source
 ```bash
