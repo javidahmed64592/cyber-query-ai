@@ -59,6 +59,9 @@ include = [
   "LICENSE",
 ]
 
+[tool.hatch.build.force-include]
+"static" = "static"
+
 [tool.pytest.ini_options]
 addopts = [
     "-vv",
