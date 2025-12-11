@@ -5,11 +5,9 @@ Welcome to CyberQueryAI! This is an Ollama-powered web application designed to a
 
 URL: https://github.com/javidahmed64592/cyber-query-ai
 
-There are two installer scripts included:
-- `install_cyber_query_ai.sh` for Linux and macOS systems
-- `install_cyber_query_ai.bat` for Windows systems
+This package includes the installer script `install_cyber_query_ai.sh` for Linux and macOS systems.
 
-Please run the appropriate script for your operating system. Below is a detailed step-by-step breakdown of what each script does.
+Below is a detailed step-by-step breakdown of what the installer does.
 
 Prerequisites
 -------------
@@ -29,13 +27,12 @@ ollama pull mistral
 ollama pull bge-m3
 ```
 
-Which Script to Run?
---------------------
-- If you are on Linux or macOS, run `./install_cyber_query_ai.sh`
-- If you are on Windows, run `install_cyber_query_ai.bat` (double-click or run from Command Prompt)
+Running the Installer
+---------------------
+On Linux or macOS, run: `./install_cyber_query_ai.sh`
 
-Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
-------------------------------------------------------------------------
+Step-by-Step Breakdown
+----------------------
 
 1. **Setup Variables and Directories**:
    - Defines package name, virtual environment name, executable names, and file paths.
@@ -59,68 +56,37 @@ Step-by-Step Breakdown: Linux/macOS Installer (install_cyber_query_ai.sh)
    - Makes the script executable with `chmod +x`.
 
 6. **Create Uninstall Script**:
-   - Generates `uninstall_cyber_query_ai.sh` which removes all files in the current directory.
+   - Generates `uninstall_cyber_query_ai.sh` which removes the virtual environment and all files in the installation directory.
    - Makes the script executable.
 
-7. **Cleanup**:
-   - Removes the installer scripts (`install_cyber_query_ai.sh` and `install_cyber_query_ai.bat`) and this file.
+7. **Generate SSL Certificate**:
+   - Creates self-signed SSL certificate files (`cert.pem` and `key.pem`) in the `certs/` directory.
+   - Uses the configuration from `configuration/config.json`.
 
 8. **Display Success Message**:
    - Prints instructions on how to run the application, configure it, view logs, and uninstall.
 
-Step-by-Step Breakdown: Windows Installer (install_cyber_query_ai.bat)
--------------------------------------------------------------------
-
-1. **Setup Variables**:
-   - Defines package name, virtual environment name, executable names, and file paths.
-   - Sets paths for the script directory, virtual environment, and binary directory.
-
-2. **Create Virtual Environment**:
-   - Uses `uv venv` to create a new Python virtual environment named `.venv` in the current directory.
-   - This isolates the application's dependencies from your system Python.
-
-3. **Install from Wheel**:
-   - Finds the CyberQueryAI wheel file (`.whl`) in the current directory.
-   - Installs the package using `uv pip install`.
-   - Deletes the wheel file after installation to clean up.
-
-4. **Extract Application Files**:
-   - Locates the site-packages directory within the virtual environment.
-   - Moves configuration and documentation files (`config.json`, `README.md`, `SECURITY.md`, `LICENSE`) from the installed package to the root installation directory.
-   - This makes these files easily accessible for configuration and reference.
-
-5. **Create Executable Launcher**:
-   - Generates a batch script named `cyber-query-ai.bat` that:
-     - Starts Ollama server in the background.
-     - Runs the main CyberQueryAI application.
-     - Stops the Ollama server after the application exits.
-   - This launcher ensures Ollama is running when the application starts.
-
-6. **Display Success Message**:
-   - Prints instructions on how to run the application, configure it, view logs, and uninstall.
-
-7. **Cleanup**:
-   - Deletes the installer scripts (`install_cyber_query_ai.bat` and `install_cyber_query_ai.sh`) and this file.
+9. **Cleanup**:
+   - Removes the installer script and this readme file.
 
 Post-Installation Instructions
 ------------------------------
 - **Running the Application**:
-  - Linux/macOS: Run `./cyber-query-ai` from the installation directory.
-  - Windows: Run `cyber-query-ai.bat` from the installation directory.
+  - Run `./cyber-query-ai` from the installation directory.
 
 - **Configuration**:
-  - Edit `config.json` to customize the application's settings.
+  - Edit `configuration/config.json` to customize the application's settings (host, port, LLM model, embedding model).
 
 - **Uninstallation**:
-  - Linux/macOS: Run `./uninstall_cyber_query_ai.sh` to remove all files.
-  - Windows: Simply delete the entire installation directory.
+  - Run `./uninstall_cyber_query_ai.sh` to remove the virtual environment and all installation files.
 
 Important Notes
 ---------------
-- The installer creates a virtual environment to avoid conflicts with your system Python.
-- The application requires Ollama to be installed and configured separately (the Windows installer starts Ollama automatically).
-- If you encounter permission issues, run the installer with appropriate privileges (e.g., sudo on Linux/macOS).
-- Review the generated scripts and configuration files before running them in production.
+- The installer creates a virtual environment to isolate the application from your system Python.
+- Ollama must be installed and running separately before starting the application.
+- Ensure you've pulled the required models (`ollama pull mistral && ollama pull bge-m3`).
+- SSL certificates are auto-generated for HTTPS support; consider using proper certificates in production.
+- If you encounter permission issues, ensure the installer script is executable (`chmod +x install_cyber_query_ai.sh`).
 
 For more information about CyberQueryAI, visit the project repository or consult the main README.md file.
 

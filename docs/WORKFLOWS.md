@@ -59,31 +59,45 @@ It consists of the following jobs:
 
 The Build workflow runs on pushes to the `main` branch and manual dispatch, consisting of the following jobs:
 
-### build_wheel
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Build wheel with `uv build`
-  - Upload wheel artifact
-
 ### build_frontend
   - Checkout code
   - Set up Node.js  and dependencies with npm caching (via custom action)
   - Build frontend with `npm run build`
   - Upload frontend build artifact
 
-### create_installer
+### build_wheel
+  - Depends on `build_frontend` job
   - Checkout code
-  - Download backend wheel artifact
-  - Download frontend build artifact
-  - Prepare release directory (move wheel and static files, make scripts executable)
-  - Create release tarball
+  - Setup Python environment with core dependencies (via custom action)
+  - Download frontend build artifact to `static/` directory
+  - Build wheel with `uv build`
+  - Inspect wheel contents for verification
+  - Upload wheel artifact
+
+### create_installer
+  - Depends on `build_wheel` job
+  - Checkout code
+  - Download wheel artifact
+  - Prepare release directory:
+    - Move wheel to `release/` directory
+    - Make installer script executable
+    - Rename to versioned directory name
+  - Create compressed tarball of release package
   - Upload release tarball artifact
 
 ### check_installer
+  - Depends on `create_installer` job
   - Checkout code
   - Setup Python environment with core dependencies (via custom action)
   - Download release tarball artifact
   - Extract tarball
-  - Verify pre-installation directory structure
-  - Run installer script
-  - Verify post-installation directory structure
+  - Verify pre-installation directory structure:
+    - Check for wheel file, readme.txt, and executable installer script
+  - Run installer script (`install_cyber_query_ai.sh`)
+  - Verify post-installation directory structure:
+    - Ensure virtual environment (`.venv`) created
+    - Verify directories: `configuration/`, `static/`, `certs/`, `logs/`
+    - Check files: `.here`, `LICENSE`, `README.md`, `SECURITY.md`, `configuration/config.json`
+    - Verify SSL certificates: `certs/cert.pem`, `certs/key.pem`
+    - Check executables: `cyber-query-ai`, `uninstall_cyber_query_ai.sh`
+    - Ensure installer files cleaned up (wheel, readme.txt, install script removed)
