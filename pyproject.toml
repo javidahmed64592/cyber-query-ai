@@ -52,6 +52,7 @@ allow-direct-references = true
 include = [
   "cyber_query_ai/**",
   "configuration/**",
+  "static/**",
   ".here",
   "README.md",
   "SECURITY.md",
