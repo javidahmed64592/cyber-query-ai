@@ -24,7 +24,7 @@ jobs:
       - name: Inspect wheel contents
         run: |
           echo "Wheel contents:"
-          unzip -l dist/cyber_query_ai-*-py3-none-any.whl | grep -E "(static|configuration)" || echo "No static/configuration files found in wheel"
+          unzip -l dist/cyber_query_ai-*-py3-none-any.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
@@ -128,17 +128,7 @@ jobs:
           DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
 
           cd "$DIR_NAME"
-
-          echo "Before installation - checking wheel contents:"
-          unzip -l cyber_query_ai-*-py3-none-any.whl | head -50
-
           ./install_cyber_query_ai.sh
-
-          echo "After installation - checking site-packages:"
-          SITE_PACKAGES=$(find .venv/lib -name "site-packages" -type d | head -1)
-          echo "Site-packages location: $SITE_PACKAGES"
-          ls -la "$SITE_PACKAGES/" | head -30
-
       - name: Verify post-installation directory contents
         run: |
           TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
