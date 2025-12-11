@@ -18,6 +18,12 @@ jobs:
         with:
           name: cyber_query_ai_frontend
           path: static
+      - name: Verify static directory
+        run: |
+          echo "Contents of static directory:"
+          ls -la static/
+          echo "Repository root structure:"
+          tree -L 2 --dirsfirst -F
       - name: Create wheel
         run: |
           uv build
