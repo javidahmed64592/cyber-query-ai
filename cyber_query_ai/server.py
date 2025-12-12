@@ -267,7 +267,7 @@ class CyberQueryAIServer(TemplateServer):
                 explanation="",
             )
         except Exception:
-            msg = "Failed to search for exploits."
+            msg = "An unexpected error occurred during exploit search."
             logger.exception(msg)
             return PostExploitSearchResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
