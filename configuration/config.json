@@ -1,6 +1,31 @@
 {
-  "model": "mistral",
-  "embedding_model": "bge-m3",
-  "host": "localhost",
-  "port": 8000
+  "server": {
+    "host": "localhost",
+    "port": 443
+  },
+  "security": {
+    "hsts_max_age": 31536000,
+    "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+  },
+  "rate_limit": {
+    "enabled": true,
+    "rate_limit": "100/minute",
+    "storage_uri": ""
+  },
+  "certificate": {
+    "directory": "certs",
+    "ssl_keyfile": "key.pem",
+    "ssl_certfile": "cert.pem",
+    "days_valid": 365
+  },
+  "json_response": {
+    "ensure_ascii": false,
+    "allow_nan": false,
+    "indent": null,
+    "media_type": "application/json; charset=utf-8"
+  },
+  "model": {
+    "model": "mistral",
+    "embedding_model": "bge-m3"
+  }
 }
