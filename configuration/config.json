@@ -9,7 +9,7 @@
   },
   "rate_limit": {
     "enabled": true,
-    "rate_limit": "100/minute",
+    "rate_limit": "10/minute",
     "storage_uri": ""
   },
   "certificate": {
