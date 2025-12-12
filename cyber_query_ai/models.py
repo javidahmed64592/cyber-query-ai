@@ -28,7 +28,7 @@ class RoleType(StrEnum):
     ASSISTANT = auto()
 
 
-class ChatMessage(BaseModel):
+class ChatMessageModel(BaseModel):
     """Chat message model for conversation history."""
 
     role: RoleType
@@ -39,7 +39,7 @@ class PostChatRequest(BaseModel):
     """Request model for chat endpoint."""
 
     message: str
-    history: list[ChatMessage] = []
+    history: list[ChatMessageModel] = []
 
 
 class PostPromptRequest(BaseModel):
@@ -67,7 +67,7 @@ class PostCodeGenerationResponse(BaseResponse):
 
     generated_code: str
     explanation: str
-    language: str = "bash"
+    language: str
 
 
 class PostCodeExplanationResponse(BaseResponse):
@@ -76,8 +76,8 @@ class PostCodeExplanationResponse(BaseResponse):
     explanation: str
 
 
-class Exploit(BaseModel):
-    """Response model for exploit endpoint."""
+class ExploitModel(BaseModel):
+    """Exploit model for cybersecurity exploits."""
 
     title: str
     link: str
@@ -88,5 +88,5 @@ class Exploit(BaseModel):
 class PostExploitSearchResponse(BaseResponse):
     """Response model for exploit search endpoint."""
 
-    exploits: list[Exploit]
+    exploits: list[ExploitModel]
     explanation: str
