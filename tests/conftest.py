@@ -1,6 +1,9 @@
 """Pytest fixtures for the CyberQueryAI unit tests."""
 
+from collections.abc import Generator
+
 import pytest
+from prometheus_client import REGISTRY
 from python_template_server.models import ResponseCode
 
 from cyber_query_ai.models import (
@@ -17,6 +20,21 @@ from cyber_query_ai.models import (
     PostPromptRequest,
     RoleType,
 )
+
+
+# General fixtures
+@pytest.fixture(autouse=True)
+def clear_prometheus_registry() -> Generator[None]:
+    """Clear Prometheus registry before each test to avoid duplicate metric errors."""
+    # Clear all collectors from the registry
+    collectors = list(REGISTRY._collector_to_names.keys())
+    for collector in collectors:
+        REGISTRY.unregister(collector)
+    yield
+    # Clear again after the test
+    collectors = list(REGISTRY._collector_to_names.keys())
+    for collector in collectors:
+        REGISTRY.unregister(collector)
 
 
 # Application Server Configuration Models
