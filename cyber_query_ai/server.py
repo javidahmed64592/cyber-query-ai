@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from python_template_server.constants import ROOT_DIR
-from python_template_server.models import ResponseCode
+from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
 from cyber_query_ai.chatbot import Chatbot
@@ -26,6 +26,10 @@ from cyber_query_ai.models import (
 )
 
 logger = logging.getLogger(__name__)
+
+CODE_GENERATE_FIELDS = PostCodeGenerationResponse.model_fields.keys() - BaseResponse.model_fields.keys()
+CODE_EXPLAIN_FIELDS = PostCodeExplanationResponse.model_fields.keys() - BaseResponse.model_fields.keys()
+EXPLOIT_SEARCH_FIELDS = PostExploitSearchResponse.model_fields.keys() - BaseResponse.model_fields.keys()
 
 
 class CyberQueryAIServer(TemplateServer):
@@ -139,7 +143,7 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(response_text)
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := set(PostCodeGenerationResponse.model_fields) - parsed.keys():
+            if missing_keys := CODE_GENERATE_FIELDS - parsed.keys():
                 msg = f"Missing required keys in LLM response: {missing_keys}"
                 logger.error(msg)
                 return PostCodeGenerationResponse(
@@ -155,7 +159,7 @@ class CyberQueryAIServer(TemplateServer):
                 code=ResponseCode.OK,
                 message="Successfully generated code.",
                 timestamp=PostCodeGenerationResponse.current_timestamp(),
-                generated_code=parsed["code"],
+                generated_code=parsed["generated_code"],
                 explanation=parsed["explanation"],
                 language=parsed["language"],
             )
@@ -194,7 +198,7 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(response_text)
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := set(PostCodeExplanationResponse.model_fields) - parsed.keys():
+            if missing_keys := CODE_EXPLAIN_FIELDS - parsed.keys():
                 msg = f"Missing required keys in LLM response: {missing_keys}"
                 logger.error(msg)
                 return PostCodeExplanationResponse(
@@ -241,7 +245,7 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(response_text)
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := set(PostExploitSearchResponse.model_fields) - parsed.keys():
+            if missing_keys := EXPLOIT_SEARCH_FIELDS - parsed.keys():
                 msg = f"Missing required keys in LLM response: {missing_keys}"
                 logger.error(msg)
                 return PostExploitSearchResponse(
