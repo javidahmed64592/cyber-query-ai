@@ -17,6 +17,7 @@ from cyber_query_ai.models import (
     PostCodeExplanationResponse,
     PostCodeGenerationResponse,
     PostExploitSearchResponse,
+    PostLoginResponse,
     PostPromptRequest,
     RoleType,
 )
@@ -118,6 +119,16 @@ def mock_post_prompt_request(
 
 # Response schemas
 @pytest.fixture
+def mock_post_login_response_dict() -> dict:
+    """Fixture for PostLoginResponse as a dictionary."""
+    return {
+        "code": ResponseCode.OK,
+        "message": "Login successful.",
+        "timestamp": PostLoginResponse.current_timestamp(),
+    }
+
+
+@pytest.fixture
 def mock_get_api_config_response_dict(
     mock_cyber_query_ai_model_config_dict: dict,
 ) -> dict:
@@ -189,6 +200,14 @@ def mock_post_exploit_search_response_dict(
         "exploits": [mock_exploit_model_dict],
         "explanation": "Found 1 exploit related to the query.",
     }
+
+
+@pytest.fixture
+def mock_post_login_response(
+    mock_post_login_response_dict: dict,
+) -> PostLoginResponse:
+    """Fixture for PostLoginResponse model."""
+    return PostLoginResponse.model_validate(mock_post_login_response_dict)  # type: ignore[no-any-return]
 
 
 @pytest.fixture

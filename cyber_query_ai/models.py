@@ -49,6 +49,10 @@ class PostPromptRequest(BaseModel):
 
 
 # Response schemas
+class PostLoginResponse(BaseResponse):
+    """Response model for login endpoint."""
+
+
 class GetApiConfigResponse(BaseResponse):
     """Response model for API config endpoint."""
 
