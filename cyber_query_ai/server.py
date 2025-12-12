@@ -82,13 +82,6 @@ class CyberQueryAIServer(TemplateServer):
         )
         self.add_unauthenticated_route("/{full_path:path}", self.serve_spa, None, methods=["GET"])
 
-    async def serve_spa(self, request: Request, full_path: str) -> FileResponse:
-        """Serve the SPA for all non-API routes."""
-        if static_files := get_static_files(full_path, self.static_dir):
-            return static_files
-
-        raise HTTPException(status_code=404, detail="File not found")
-
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
         """Get the API configuration including model configuration and version."""
         logger.info("Received request for API configuration.")
@@ -283,3 +276,10 @@ class CyberQueryAIServer(TemplateServer):
                 exploits=[],
                 explanation="",
             )
+
+    async def serve_spa(self, request: Request, full_path: str) -> FileResponse:
+        """Serve the SPA for all non-API routes."""
+        if static_files := get_static_files(full_path, self.static_dir):
+            return static_files
+
+        raise HTTPException(status_code=404, detail="File not found")
