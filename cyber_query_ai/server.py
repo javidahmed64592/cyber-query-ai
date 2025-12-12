@@ -69,6 +69,7 @@ class CyberQueryAIServer(TemplateServer):
     def setup_routes(self) -> None:
         """Set up API routes."""
         super().setup_routes()
+        self.add_authenticated_route("/login", self.post_login, BaseResponse, methods=["POST"])
         self.add_authenticated_route("/config", self.get_api_config, GetApiConfigResponse, methods=["GET"])
         self.add_authenticated_route("/model/chat", self.post_chat, PostChatResponse, methods=["POST"])
         self.add_authenticated_route(
@@ -81,6 +82,15 @@ class CyberQueryAIServer(TemplateServer):
             "/exploit/search", self.post_exploit_search, PostExploitSearchResponse, methods=["POST"]
         )
         self.add_unauthenticated_route("/{full_path:path}", self.serve_spa, None, methods=["GET"])
+
+    async def post_login(self, request: Request) -> BaseResponse:
+        """Handle user login and return a success response."""
+        logger.info("User login successful.")
+        return BaseResponse(
+            code=ResponseCode.OK,
+            message="Login successful.",
+            timestamp=BaseResponse.current_timestamp(),
+        )
 
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
         """Get the API configuration including model configuration and version."""
