@@ -2,24 +2,28 @@
 
 ## Project Overview
 
-CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system combines FastAPI (Python 3.13+) with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
+CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system extends python-template-server (FastAPI-based with built-in authentication, rate limiting, and observability) and combines it with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
 
 ## Architecture Patterns
 
-### Backend: FastAPI + LangChain + Ollama
+### Backend: TemplateServer + LangChain + Ollama
 
-- **Single chatbot instance**: Created once in `main.create_app()` and stored on `app.state.chatbot` for all routes to share
-- **Configuration on app.state**: Config loaded from `config.json` and stored on `app.state.config` for app-wide access
-- **Async LLM calls**: Always wrap `chatbot.llm()` with `run_in_threadpool()` to prevent blocking the event loop
+- **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting authentication (X-API-KEY), rate limiting (10/min), security headers, request logging, and Prometheus metrics
+- **Single chatbot instance**: Created during `CyberQueryAIServer.__init__()` and stored as `self.chatbot` for all routes to access
+- **Configuration**: Config loaded from `configuration/config.json` using `CyberQueryAIConfig.load_from_file()` which extends `TemplateServerConfig`
+- **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
 - **JSON-only LLM contract**: All prompts enforce strict JSON responses; use `clean_json_response()` before `json.loads()` to handle LLM formatting quirks (code blocks, single quotes, trailing commas)
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
+- **HTTPS-only**: Server runs on port 443 with SSL certificates from `certs/` directory (auto-generated or via `uv run generate-certificate`)
 
-### Frontend: Next.js App Router + Static Export
+### Frontend: Next.js App Router + Static Export + Authentication
 
-- **Dual deployment modes**: Dev uses Next.js rewrites to proxy `/api` requests; production serves static build from `static/` with same-origin API calls
-- **Single source of truth**: `config.json` is read by `next.config.ts` at build time to configure the dev proxy URL
-- **Error mapping in api.ts**: All backend calls flow through `src/lib/api.ts` which standardizes error handling and timeouts (30s for LLM responses)
-- **Type safety**: Keep `src/lib/types.ts` interfaces synchronized with backend Pydantic models in `cyber_query_ai/models.py`
+- **Dual deployment modes**: Dev uses Next.js HTTPS proxy to backend; production serves static build from `static/` with same-origin API calls
+- **Single source of truth**: `configuration/config.json` is read by `next.config.ts` at build time to configure the dev proxy URL (HTTPS with self-signed cert support)
+- **Authentication**: X-API-KEY header authentication managed via `AuthContext` with localStorage persistence; automatic redirect to `/login/` for unauthenticated users
+- **API client with interceptors**: `src/lib/api.ts` adds X-API-KEY header to all requests and handles 401 redirects
+- **Error notifications**: Portal-based toast notifications using `createPortal(component, document.body)` for proper z-index stacking
+- **Type safety**: Keep `src/lib/types.ts` interfaces synchronized with backend Pydantic models in `cyber_query_ai/models.py` (all response types extend `BaseResponse`)
 - **Executing commands**: Always `cd` into the fully resolved `cyber-query-ai-frontend` directory before running npm commands to avoid context issues
 
 ## Critical Development Workflows
@@ -27,14 +31,20 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ### Building & Running
 
 ```bash
+# Backend prerequisites
+ollama serve  # Ensure Ollama is running
+ollama pull mistral && ollama pull bge-m3  # Pull required models
+uv run generate-new-token  # Generate API authentication token
+uv run generate-certificate  # Generate SSL certificate (optional, auto-generated)
+
 # Backend only
 uv sync --extra dev
-cyber-query-ai  # Runs on localhost:8000 by default
+cyber-query-ai  # Runs on https://localhost:443 by default
 
-# Frontend dev (proxies to backend)
+# Frontend dev (proxies to HTTPS backend)
 cd cyber-query-ai-frontend
 npm install
-npm run dev  # http://localhost:3000
+npm run dev  # http://localhost:3000 (proxies /api to https://localhost:443)
 
 # Production build
 npm run build:static  # Outputs to ../static/
@@ -60,6 +70,14 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ## Security & Sanitization Requirements
 
+### Authentication
+
+- **X-API-KEY header**: All authenticated endpoints require this header with a SHA-256 hashed token
+- **Token generation**: Use `uv run generate-new-token` to create tokens (hash stored in `.env` file)
+- **Frontend storage**: API key stored in localStorage via `src/lib/auth.ts` (saveApiKey, getApiKey, removeApiKey, isAuthenticated)
+- **Route protection**: `AuthContext` wraps app and redirects unauthenticated users to `/login/` using `useRef` to prevent redirect loops
+- **Unauthenticated endpoints**: `/api/health`, `/api/config`, and static file serving do not require authentication
+
 ### Input/Output Sanitization
 
 - **Backend**: All user prompts and LLM responses pass through `sanitize_text()` (uses `bleach` to strip HTML/scripts)
@@ -68,42 +86,50 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ### Rate Limiting
 
-- **5 requests/minute per IP** on all LLM endpoints using SlowAPI
-- Disable in tests with `limiter.enabled = False` (see `tests/test_api.py`)
+- **10 requests/minute per IP** on authenticated LLM endpoints (configurable in `configuration/config.json`)
+- Provided by python-template-server using SlowAPI with in-memory storage (supports Redis/Memcached)
+- Disable in tests with `limiter.enabled = False`
 
 ## Code Conventions
 
 ### Python (Ruff + mypy enforced)
 
 - **120 char lines**, strict type hints, comprehensive docstrings (D203/D213 style)
-- **Error responses**: Use `get_server_error()` helper to return structured errors with `error`, `details`, and `raw` (LLM text) fields
-- **Pydantic everywhere**: Models in `models.py` for request/response validation
-- **Mock threadpool in tests**: Use `@patch("cyber_query_ai.api.run_in_threadpool")` fixture to avoid actual LLM calls
+- **BaseResponse structure**: All response models extend `BaseResponse` from python-template-server (code: int, message: str, timestamp: str)
+- **Pydantic everywhere**: Models in `models.py` for request/response validation; `CyberQueryAIConfig` extends `TemplateServerConfig`
+- **Mock threadpool in tests**: Use `@patch("cyber_query_ai.server.run_in_threadpool")` fixture to avoid actual LLM calls
+- **Error handling**: LLM endpoints return valid response models even on errors (with `code: 500` and empty data fields)
 
 ### TypeScript (ESLint + Prettier enforced)
 
-- **No async clipboard without try/catch**: Always wrap `navigator.clipboard.writeText()` (see `CommandBox.tsx`)
+- **BaseResponse everywhere**: All response interfaces extend `BaseResponse: { code: number, message: string, timestamp: string }`
 - **DOMPurify for LLM content**: Never render LLM text without sanitization
-- **Axios error handling**: Check `axios.isAxiosError()` → `error.response` → `error.request` → fallback (see `api.ts` pattern)
+- **Axios interceptors**: Request interceptor adds X-API-KEY header from `getApiKey()`; response interceptor handles 401 redirects
+- **Portal for notifications**: Use `createPortal(component, document.body)` for toast notifications to avoid z-index issues
+- **Auth context**: Use `useAuth()` hook for login/logout functionality and `isAuthenticated` state
 
 ## Key Files & Their Roles
 
 ### Backend
 
-- `api.py`: Route definitions including `/api/config` and `/api/chat` endpoints; all LLM calls wrapped in `run_in_threadpool()` + `clean_json_response()` + model validation
-- `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection; includes `prompt_chat()` for conversational interface
-- `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `tools.json`
-- `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas)
-- `models.py`: All Pydantic models including `ConfigResponse`, `ChatMessage`, `ChatRequest`, and `ChatResponse` used throughout the application
-- `config.py`: Loads `config.json` and returns `ConfigResponse` model from `models.py`
+- `server.py`: `CyberQueryAIServer` class extending `TemplateServer`; overrides `validate_config()` and `setup_routes()` to register domain-specific endpoints; creates `Chatbot` instance during `__init__()`; handles static file serving with SPA fallback
+- `main.py`: Entry point that creates `CyberQueryAIServer()` and calls `server.run()`
+- `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection; includes `prompt_chat()` for conversational interface, `prompt_code_generation()`, `prompt_code_explanation()`, and `prompt_exploit_search()`
+- `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `rag_data/tools.json`; semantic search using `bge-m3` embeddings
+- `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas); `sanitize_text()` uses bleach; `get_static_files()` handles SPA routing
+- `models.py`: All Pydantic models including `CyberQueryAIConfig`, `CyberQueryAIModelConfig`, `PostChatRequest`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`, `GetApiConfigResponse`, `PostLoginResponse`; all response models extend `BaseResponse`
 
 ### Frontend
 
-- `src/lib/api.ts`: Single source for all backend communication including `getConfig()` and `sendChatMessage()`; 30s timeout, error normalization
-- `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models, including `ConfigResponse`, `ChatMessage`, `ChatRequest`, and `ChatResponse`
+- `src/lib/api.ts`: Single source for all backend communication; axios instance with request interceptor (adds X-API-KEY) and response interceptor (handles 401); includes `loginWithApiKey()`, `sendChatMessage()`, `generateCode()`, `explainCode()`, `searchExploits()`, `getConfig()`, `getHealth()`; 30s timeout, error normalization
+- `src/lib/auth.ts`: localStorage management for API key (saveApiKey, getApiKey, removeApiKey, isAuthenticated)
+- `src/contexts/AuthContext.tsx`: Global authentication state with `login()`, `logout()`, redirect logic using `useRef` to prevent loops; wraps app in `layout.tsx`
+- `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models; all extend `BaseResponse: { code: number, message: string, timestamp: string }`
 - `src/lib/sanitization.ts`: DOMPurify wrapper + command safety checker
-- `src/components/`: Presentational components including `ChatWindow.tsx` and `ChatMessage.tsx` for conversational interface; keep business logic in `api.ts`
-- `next.config.ts`: Reads `config.json` at build time to configure dev proxy; uses `ConfigResponse` type
+- `src/components/ErrorNotification.tsx`: Portal-based toast notifications using `createPortal(component, document.body)` with z-index 9999; `useErrorNotification()` hook
+- `src/components/`: Presentational components including `ChatWindow.tsx`, `ChatMessage.tsx`, `Navigation.tsx` (with logout), `Footer.tsx`, `HealthIndicator.tsx`; keep business logic in `api.ts`
+- `src/app/login/page.tsx`: API key authentication page with form validation
+- `next.config.ts`: Reads `configuration/config.json` at build time; HTTPS proxy with custom agent (`rejectUnauthorized: false`) for self-signed certs; `NODE_TLS_REJECT_UNAUTHORIZED=0`
 
 ## RAG System Details
 
@@ -170,38 +196,71 @@ See `helpers.py:get_static_files()` for implementation.
 Users must:
 
 1. Pull required Ollama models: `ollama pull mistral && ollama pull bge-m3`
-2. Edit `config.json` to customize model, host, port
-3. Ensure Ollama is running (Linux/macOS) or trust Windows launcher to start it
+2. Generate API authentication token: `uv run generate-new-token` (save the displayed token!)
+3. Generate SSL certificate: `uv run generate-certificate` (or auto-generated on first run)
+4. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
+5. Ensure Ollama is running: `ollama serve`
+6. Access application at `https://localhost:443` and login with API token
 
 ## Configuration
 
-### `config.json` (required at runtime)
+### `configuration/config.json` (required at runtime)
 
 ```json
 {
-  "model": "mistral", // Ollama LLM model
-  "embedding_model": "bge-m3", // For RAG embeddings
-  "host": "localhost",
-  "port": 8000
+  "server": {
+    "host": "0.0.0.0",
+    "port": 443
+  },
+  "security": {
+    "hsts_max_age": 31536000,
+    "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+  },
+  "rate_limit": {
+    "enabled": true,
+    "rate_limit": "10/minute",
+    "storage_uri": ""
+  },
+  "certificate": {
+    "directory": "certs",
+    "ssl_keyfile": "key.pem",
+    "ssl_certfile": "cert.pem",
+    "days_valid": 365
+  },
+  "json_response": {
+    "ensure_ascii": false,
+    "allow_nan": false,
+    "indent": null,
+    "media_type": "application/json; charset=utf-8"
+  },
+  "model": {
+    "model": "mistral",
+    "embedding_model": "bge-m3"
+  }
 }
 ```
 
-**Note:** `config.json` is the single source of truth for all configuration:
+**Note:** `configuration/config.json` is the single source of truth for all configuration:
 
-- Backend server reads it to configure host/port and model settings
+- Backend server reads it via `CyberQueryAIConfig.load_from_file()` (extends `TemplateServerConfig`)
 - `next.config.ts` reads it at build time to configure the development proxy
-- Available via `/api/config` endpoint returning `ConfigResponse` model
+- Available via `/api/config` endpoint returning `GetApiConfigResponse` with model config and version
+- The `model` section is specific to CyberQueryAI; other sections are inherited from TemplateServerConfig
 
 ## Common Pitfalls
 
 1. **Forgetting `run_in_threadpool()`**: LLM calls block the event loop → use async wrapper
 2. **Not cleaning LLM JSON**: Always use `clean_json_response()` before parsing
-3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together (especially `ConfigResponse`)
+3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together; ensure all response types extend `BaseResponse`
 4. **Missing sanitization**: All user input and LLM output must be sanitized
-5. **Config model location**: `ConfigResponse` is defined in `models.py` (not `config.py`) and imported by `config.load_config()`
-6. **Breaking version checks**: Update all 3 files when bumping versions
-7. **Ollama not running**: Application requires local Ollama server at runtime
-8. **Directory context in terminal commands**: Check the current working directory before using `cd` commands; if already in the target directory, omit the `cd` command to avoid errors
+5. **Wrong config path**: Configuration is in `configuration/config.json` (not root `config.json`)
+6. **Missing authentication**: Most endpoints require X-API-KEY header; generate token with `uv run generate-new-token`
+7. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
+8. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime
+9. **HTTPS certificate warnings**: Self-signed certificates cause browser warnings in dev; this is expected
+10. **Redirect loops**: Use `useRef` in AuthContext to track redirect state and prevent infinite loops
+11. **Z-index stacking**: Use `createPortal(component, document.body)` for notifications to avoid stacking context issues
+12. **Directory context in terminal commands**: Check the current working directory before using `cd` commands; if already in the target directory, omit the `cd` command to avoid errors
 
 ## Terminal Command Best Practices
 
