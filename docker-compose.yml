@@ -1,0 +1,87 @@
+services:
+  cyberqueryai:
+    image: cyberqueryai:${ENV:-dev}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: ${ENV:-dev}
+        PORT: 443
+    container_name: cyberqueryai
+    ports:
+      - "${HOST_PORT:-443}:443"
+    environment:
+      - ENV=${ENV:-dev}
+      # Load API token hash from .env file (optional - will be generated if missing)
+      - API_TOKEN_HASH=${API_TOKEN_HASH:-}
+      # Ollama connection (if running on host, use host.docker.internal on Mac/Windows)
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+    volumes:
+      # Persist certificates, logs, and configuration
+      - ./certs:/app/certs
+      - ./logs:/app/logs
+      - ./configuration:/app/configuration
+    networks:
+      - monitoring
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:443/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Prometheus for metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - cyberqueryai-prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - cyberqueryai
+
+  # Grafana for metrics visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - cyberqueryai-grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  cyberqueryai-prometheus-data:
+  cyberqueryai-grafana-data:
