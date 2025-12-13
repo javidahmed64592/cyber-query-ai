@@ -101,3 +101,25 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
     - Verify SSL certificates: `certs/cert.pem`, `certs/key.pem`
     - Check executables: `cyber-query-ai`, `uninstall_cyber_query_ai.sh`
     - Ensure installer files cleaned up (wheel, readme.txt, install script removed)
+
+## Docker Workflow
+
+The Docker workflow runs on pushes and pull requests to the `main` branch.
+It consists of the following jobs:
+
+### docker-development
+- Checkout code
+- Setup Python environment with core dependencies (via custom action)
+- Build and start services with docker compose
+- Show server logs
+- **Health check** using reusable composite action `.github/actions/docker-check-containers` that checks CyberQueryAI, Prometheus, Grafana, and Ollama
+- Stop services
+
+### docker-production
+- Checkout code
+- Setup Python environment with core dependencies (via custom action)
+- Build production image
+- Start services with docker compose
+- Show server logs
+- **Health check** using reusable composite action `.github/actions/docker-check-containers` that checks Python Template Server, Prometheus, Grafana, and Ollama
+- Stop services
