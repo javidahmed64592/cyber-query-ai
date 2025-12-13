@@ -94,11 +94,9 @@ describe("ErrorNotification", () => {
     });
 
     it("has proper styling classes", () => {
-      const { container } = render(
-        <ErrorNotification message="Test error" onClose={jest.fn()} />
-      );
+      render(<ErrorNotification message="Test error" onClose={jest.fn()} />);
 
-      const notification = container.querySelector(".fixed.top-4.right-4");
+      const notification = document.body.querySelector(".fixed.top-4.right-4");
       expect(notification).toBeInTheDocument();
     });
   });
