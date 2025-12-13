@@ -30,13 +30,12 @@ This document outlines how to configure and setup a development environment to w
 
 ```
 cyber_query_ai/
-├── api.py          # FastAPI endpoints
-├── chatbot.py      # LLM integration
-├── config.py       # Configuration management
-├── helpers.py      # Utility functions
+├── server.py       # CyberQueryAIServer class (extends TemplateServer)
+├── chatbot.py      # LLM integration with RAG support
+├── helpers.py      # Utility functions (sanitization, JSON cleaning, static file serving)
 ├── main.py         # Application entry point
-├── models.py       # Pydantic models
-└── rag.py          # RAG system
+├── models.py       # Pydantic models (requests, responses, config)
+└── rag.py          # RAG system with semantic search
 ```
 
 ### Installing Dependencies
@@ -69,13 +68,54 @@ After installing dev dependencies, set up pre-commit hooks:
 
 ### Running the Backend
 
-Start the FastAPI server:
+**Prerequisites:**
+1. Ensure Ollama is running:
+   ```sh
+   ollama serve
+   ```
 
+2. Pull required models:
+   ```sh
+   ollama pull mistral
+   ollama pull bge-m3
+   ```
+
+3. Generate API authentication token:
+   ```sh
+   uv run generate-new-token
+   # Save the displayed token for authentication!
+   ```
+
+4. Generate SSL certificate (optional, auto-generated on first run):
+   ```sh
+   uv run generate-certificate
+   ```
+
+**Configuration:**
+Edit `configuration/config.json` to customize server settings:
+```json
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 443
+  },
+  "model": {
+    "model": "mistral",
+    "embedding_model": "bge-m3"
+  },
+  "rate_limit": {
+    "enabled": true,
+    "rate_limit": "10/minute"
+  }
+}
+```
+
+**Start the server:**
 ```sh
 uv run cyber-query-ai
 ```
 
-The backend will be available at `http://localhost:8000` by default.
+The backend will be available at `https://localhost:443` by default (HTTPS only).
 
 ### Testing, Linting, and Type Checking
 
@@ -105,33 +145,38 @@ cyber-query-ai-frontend/
 ├── src/
 │   ├── app/
 │   │   ├── about/               # About page
-│   │   ├── assistant/           # AI assistant interface
 │   │   ├── code-explanation/    # Code explanation interface
 │   │   ├── code-generation/     # Code generation interface
 │   │   ├── exploit-search/      # Exploit search interface
+│   │   ├── login/               # Login page for API key authentication
+│   │   ├── 404/                 # Custom 404 page
 │   │   ├── globals.css          # UI style configuration
-│   │   ├── layout.tsx           # Root layout with navigation
+│   │   ├── layout.tsx           # Root layout with AuthProvider and navigation
 │   │   ├── not-found.tsx        # Not found page
-│   │   └── page.tsx             # Homepage (AI Assistant with chat)
+│   │   └── page.tsx             # Homepage (AI Assistant with conversational chat)
 │   ├── components/
-│   │   ├── ChatMessage.tsx      # Individual message rendering
+│   │   ├── ChatMessage.tsx      # Individual message rendering with code blocks
 │   │   ├── ChatWindow.tsx       # Conversational chat interface
+│   │   ├── ErrorNotification.tsx # Portal-based error notifications
 │   │   ├── ExplanationBox.tsx   # AI explanation display
 │   │   ├── ExploitList.tsx      # Exploit references display
-│   │   ├── Footer.tsx           # App footer
+│   │   ├── Footer.tsx           # App footer with version info
 │   │   ├── HealthIndicator.tsx  # Server health status indicator
-│   │   ├── Navigation.tsx       # Main navigation bar
+│   │   ├── Navigation.tsx       # Main navigation bar with logout
 │   │   ├── ScriptBox.tsx        # Generated code display
 │   │   └── TextInput.tsx        # Text input component
+│   ├── contexts/
+│   │   └── AuthContext.tsx      # Authentication context and route protection
 │   ├── lib/
-│   │   ├── api.ts               # API communication functions
-│   │   ├── sanitization.ts      # Input sanitization utilities
-│   │   └── types.ts             # TypeScript type definitions
+│   │   ├── api.ts               # API client with authentication interceptors
+│   │   ├── auth.ts              # localStorage API key management
+│   │   ├── sanitization.ts      # Input/output sanitization utilities
+│   │   └── types.ts             # TypeScript type definitions (matches backend models)
 ├── jest.config.js               # Jest configuration for testing
 ├── jest.setup.js                # Jest setup for mocking and environment
 ├── next.config.ts               # Next.js configuration
 ├── package.json                 # Dependencies and scripts
-└── postcss.config.js            # Tailwind CSS configuration
+└── postcss.config.mjs           # Tailwind CSS configuration
 ```
 
 ### Installing Dependencies
@@ -144,13 +189,28 @@ npm install
 
 ### Running the Frontend
 
-Start the development server:
+**Prerequisites:**
+Ensure the backend server is running (see [Running the Backend](#running-the-backend))
 
+**Start the development server:**
 ```bash
+cd cyber-query-ai-frontend
 npm run dev
 ```
 
 The frontend will be available at `http://localhost:3000`.
+
+**Authentication in Development:**
+- The development server proxies `/api` requests to the HTTPS backend (`https://localhost:443`)
+- On first visit, you'll be redirected to `/login/`
+- Enter the API token generated via `uv run generate-new-token`
+- The token is stored in localStorage and included in all API requests via the `X-API-KEY` header
+
+**Building for Production:**
+```bash
+npm run build        # Standard Next.js build
+npm run build:static # Static export to ../static/ directory
+```
 
 ### Testing, Linting, and Type Checking
 
