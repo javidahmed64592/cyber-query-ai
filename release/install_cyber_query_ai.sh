@@ -19,6 +19,7 @@ LICENSE_FILE="LICENSE"
 
 CONFIG_DIR="${WD}/configuration"
 LOGS_DIR="${WD}/logs"
+RAG_DATA_DIR="${WD}/rag_data"
 STATIC_DIR="${WD}/static"
 FULL_VENV_PATH="${WD}/${VENV_NAME}"
 BIN_DIR="${FULL_VENV_PATH}/bin"
@@ -47,6 +48,7 @@ mkdir -p "${LOGS_DIR}"
 
 SITE_PACKAGES_DIR=$(find "${FULL_VENV_PATH}/lib" -name "site-packages" -type d | head -1)
 mv "${SITE_PACKAGES_DIR}/configuration" "${CONFIG_DIR}"
+mv "${SITE_PACKAGES_DIR}/rag_data" "${RAG_DATA_DIR}"
 mv "${SITE_PACKAGES_DIR}/static" "${STATIC_DIR}"
 mv "${SITE_PACKAGES_DIR}/${APP_README_FILE}" "${APP_README_PATH}"
 mv "${SITE_PACKAGES_DIR}/${SECURITY_FILE}" "${SECURITY_PATH}"
