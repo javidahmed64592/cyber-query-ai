@@ -1,12 +1,12 @@
 services:
   # Ollama LLM service with GPU support
-  cyberqueryai-ollama:
+  cyber-query-ai-ollama:
     image: ollama/ollama:latest
-    container_name: cyberqueryai-ollama
+    container_name: cyber-query-ai-ollama
     ports:
       - "11434:11434"
     volumes:
-      - cyberqueryai-ollama-data:/root/.ollama
+      - cyber-query-ai-ollama-data:/root/.ollama
     networks:
       - monitoring
     restart: unless-stopped
@@ -25,29 +25,30 @@ services:
       start_period: 10s
 
   # CyberQueryAI application service
-  cyberqueryai:
-    image: cyberqueryai:${ENV:-dev}
+  cyber-query-ai:
+    image: cyber-query-ai:${ENV:-dev}
     build:
       context: .
       dockerfile: Dockerfile
       args:
         PORT: 443
-    container_name: cyberqueryai
+    container_name: cyber-query-ai
     ports:
       - "443:443"
     environment:
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
-      - OLLAMA_HOST=http://cyberqueryai-ollama:11434
+      - OLLAMA_HOST=http://cyber-query-ai-ollama:11434
     volumes:
       - ./configuration:/app/configuration
       - ./certs:/app/certs
       - ./logs:/app/logs
+      - ./rag_data:/app/rag_data
     networks:
       - monitoring
     restart: unless-stopped
     depends_on:
-      cyberqueryai-ollama:
+      cyber-query-ai-ollama:
         condition: service_healthy
     healthcheck:
       test:
@@ -63,14 +64,14 @@ services:
       start_period: 10s
 
   # Prometheus for metrics collection
-  cyberqueryai-prometheus:
+  cyber-query-ai-prometheus:
     image: prom/prometheus:latest
-    container_name: cyberqueryai-prometheus
+    container_name: cyber-query-ai-prometheus
     ports:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - cyberqueryai-prometheus-data:/prometheus
+      - cyber-query-ai-prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -81,12 +82,12 @@ services:
       - monitoring
     restart: unless-stopped
     depends_on:
-      - cyberqueryai
+      - cyber-query-ai
 
   # Grafana for metrics visualization
-  cyberqueryai-grafana:
+  cyber-query-ai-grafana:
     image: grafana/grafana:latest
-    container_name: cyberqueryai-grafana
+    container_name: cyber-query-ai-grafana
     ports:
       - "3000:3000"
     environment:
@@ -96,18 +97,18 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - cyberqueryai-grafana-data:/var/lib/grafana
+      - cyber-query-ai-grafana-data:/var/lib/grafana
     networks:
       - monitoring
     restart: unless-stopped
     depends_on:
-      - cyberqueryai-prometheus
+      - cyber-query-ai-prometheus
 
 networks:
   monitoring:
     driver: bridge
 
 volumes:
-  cyberqueryai-ollama-data:
-  cyberqueryai-prometheus-data:
-  cyberqueryai-grafana-data:
+  cyber-query-ai-ollama-data:
+  cyber-query-ai-prometheus-data:
+  cyber-query-ai-grafana-data:

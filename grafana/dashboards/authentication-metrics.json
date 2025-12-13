@@ -355,7 +355,7 @@
   "refresh": "5s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["cyberqueryai", "authentication", "security"],
+  "tags": ["cyber-query-ai", "authentication", "security"],
   "templating": {
     "list": []
   },

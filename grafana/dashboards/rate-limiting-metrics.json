@@ -375,7 +375,7 @@
   "refresh": "5s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["cyberqueryai", "rate-limiting", "performance"],
+  "tags": ["cyber-query-ai", "rate-limiting", "performance"],
   "templating": {
     "list": []
   },

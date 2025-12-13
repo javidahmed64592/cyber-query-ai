@@ -6,14 +6,14 @@ global:
 
 # Scrape configurations
 scrape_configs:
-  - job_name: 'cyberqueryai'
+  - job_name: 'cyber-query-ai'
     scheme: https
     tls_config:
       insecure_skip_verify: true
     static_configs:
-      - targets: ['cyberqueryai:443']
+      - targets: ['cyber-query-ai:443']
         labels:
-          service: 'cyberqueryai-storage'
+          service: 'cyber-query-ai-storage'
           environment: 'prod'
 
     metrics_path: '/metrics'

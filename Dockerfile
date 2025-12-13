@@ -115,11 +115,11 @@ RUN echo '#!/bin/sh\n\
     \n\
     # Check models from configuration file\n\
     if ! echo "$MODELS_JSON" | grep -q "${CONFIG_MODEL}:latest"; then\n\
-    echo "⚠ Model $CONFIG_MODEL not found. Pull with: docker exec cyberqueryai-ollama ollama pull $CONFIG_MODEL"\n\
+    echo "⚠ Model $CONFIG_MODEL not found. Pull with: docker exec cyber-query-ai-ollama ollama pull $CONFIG_MODEL"\n\
     fi\n\
     \n\
     if ! echo "$MODELS_JSON" | grep -q "${CONFIG_EMBEDDING_MODEL}:latest"; then\n\
-    echo "⚠ Model $CONFIG_EMBEDDING_MODEL not found. Pull with: docker exec cyberqueryai-ollama ollama pull $CONFIG_EMBEDDING_MODEL"\n\
+    echo "⚠ Model $CONFIG_EMBEDDING_MODEL not found. Pull with: docker exec cyber-query-ai-ollama ollama pull $CONFIG_EMBEDDING_MODEL"\n\
     fi\n\
     fi\n\
     \n\

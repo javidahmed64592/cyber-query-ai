@@ -22,7 +22,7 @@ jobs:
           sleep 5  # Wait for services to start
 
       - name: Show server logs
-        run: docker compose logs cyberqueryai
+        run: docker compose logs cyber-query-ai
 
       - uses: ./.github/actions/docker-check-containers
         with:
@@ -40,7 +40,7 @@ jobs:
 
       - name: Build production image
         run: |
-          docker build --build-arg PORT=443 -t cyberqueryai:prod .
+          docker build --build-arg PORT=443 -t cyber-query-ai:prod .
 
       - name: Start services with docker compose
         env:
@@ -51,7 +51,7 @@ jobs:
           sleep 5  # Wait for container to start
 
       - name: Show server logs
-        run: docker logs cyberqueryai
+        run: docker logs cyber-query-ai
 
       - uses: ./.github/actions/docker-check-containers
         with:

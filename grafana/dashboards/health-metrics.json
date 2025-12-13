@@ -467,7 +467,7 @@
   "refresh": "5s",
   "schemaVersion": 27,
   "style": "dark",
-  "tags": ["cyberqueryai", "health", "monitoring"],
+  "tags": ["cyber-query-ai", "health", "monitoring"],
   "templating": {
     "list": []
   },
