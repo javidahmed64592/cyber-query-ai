@@ -48,8 +48,8 @@ ARG PORT=443
 
 WORKDIR /app
 
-# Install Git for dependency resolution
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+# Install Git and wget for dependency resolution and model checking
+RUN apt-get update && apt-get install -y git wget && rm -rf /var/lib/apt/lists/*
 
 # Install uv in runtime stage
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -74,17 +74,57 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
     cp "${SITE_PACKAGES_DIR}/README.md" /app/README.md && \
     cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md
 
-# Create startup script
+# Create startup script with Ollama model checking
 RUN echo '#!/bin/sh\n\
+    set -e\n\
+    \n\
+    # Generate API token if needed\n\
     if [ ! -f .env ]; then\n\
     echo "Generating new token..."\n\
     generate-new-token\n\
     export $(grep -v "^#" .env | xargs)\n\
     fi\n\
+    \n\
+    # Generate certificates if needed\n\
     if [ ! -f certs/cert.pem ] || [ ! -f certs/key.pem ]; then\n\
     echo "Generating self-signed certificates..."\n\
     generate-certificate\n\
     fi\n\
+    \n\
+    # Check and pull required Ollama models\n\
+    OLLAMA_HOST="${OLLAMA_HOST:-http://cyberqueryai-ollama:11434}"\n\
+    REQUIRED_MODELS="mistral bge-m3"\n\
+    \n\
+    echo "Checking Ollama connection at $OLLAMA_HOST..."\n\
+    MAX_RETRIES=30\n\
+    RETRY_COUNT=0\n\
+    \n\
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do\n\
+    if wget -q -O- "$OLLAMA_HOST/api/tags" > /dev/null 2>&1; then\n\
+    echo "Ollama is ready"\n\
+    break\n\
+    fi\n\
+    echo "Waiting for Ollama... ($((RETRY_COUNT + 1))/$MAX_RETRIES)"\n\
+    sleep 2\n\
+    RETRY_COUNT=$((RETRY_COUNT + 1))\n\
+    done\n\
+    \n\
+    if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then\n\
+    echo "WARNING: Could not connect to Ollama. Application will start but may not function properly."\n\
+    else\n\
+    # Pull required models\n\
+    for model in $REQUIRED_MODELS; do\n\
+    echo "Checking model: $model"\n\
+    if ! wget -q -O- "$OLLAMA_HOST/api/tags" | grep -q "\"name\":\"$model"; then\n\
+    echo "Pulling model: $model (this may take several minutes)..."\n\
+    wget -q -O- --post-data="{\"name\":\"$model\"}" \\\n\
+    --header="Content-Type: application/json" \\\n\
+    "$OLLAMA_HOST/api/pull" > /dev/null 2>&1 || echo "Note: Model pull initiated"\n\
+    echo "Model $model pull completed"\n\
+    fi\n\
+    done\n\
+    fi\n\
+    \n\
     exec cyber-query-ai' > /app/start.sh && \
     chmod +x /app/start.sh
 

@@ -62,3 +62,41 @@ runs:
           fi
         done
       shell: bash
+
+    - name: Check Ollama is running
+      run: |
+        for i in {1..${{ inputs.num-retries }}}; do
+          if curl http://localhost:11434/api/tags; then
+            echo "Ollama health check passed"
+            break
+          else
+            echo "Ollama health check failed, attempt $i/${{ inputs.num-retries }}"
+            if [ $i -eq ${{ inputs.num-retries }} ]; then
+              exit 1
+            fi
+            sleep ${{ inputs.timeout-seconds }}
+          fi
+        done
+      shell: bash
+
+    - name: Check required Ollama models are available
+      run: |
+        echo "Checking for required models: mistral, bge-m3"
+        MODELS=$(curl -s http://localhost:11434/api/tags)
+
+        if echo "$MODELS" | grep -q '"name":"mistral'; then
+          echo "✓ Model 'mistral' is available"
+        else
+          echo "✗ Model 'mistral' is missing"
+          exit 1
+        fi
+
+        if echo "$MODELS" | grep -q '"name":"bge-m3'; then
+          echo "✓ Model 'bge-m3' is available"
+        else
+          echo "✗ Model 'bge-m3' is missing"
+          exit 1
+        fi
+
+        echo "All required models are available"
+      shell: bash

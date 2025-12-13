@@ -1,4 +1,30 @@
 services:
+  # Ollama LLM service with GPU support
+  cyberqueryai-ollama:
+    image: ollama/ollama:latest
+    container_name: cyberqueryai-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - cyberqueryai-ollama-data:/root/.ollama
+    networks:
+      - monitoring
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # CyberQueryAI application service
   cyberqueryai:
     image: cyberqueryai:${ENV:-dev}
     build:
@@ -14,8 +40,8 @@ services:
       - ENV=${ENV:-dev}
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
-      # Ollama connection (if running on host, use host.docker.internal on Mac/Windows)
-      - OLLAMA_HOST=${OLLAMA_HOST:-http://host.docker.internal:11434}
+      # Ollama connection (use Ollama container)
+      - OLLAMA_HOST=${OLLAMA_HOST:-http://cyberqueryai-ollama:11434}
     volumes:
       # Persist certificates, logs, and configuration
       - ./certs:/app/certs
@@ -24,6 +50,9 @@ services:
     networks:
       - monitoring
     restart: unless-stopped
+    depends_on:
+      cyberqueryai-ollama:
+        condition: service_healthy
     healthcheck:
       test:
         [
@@ -83,5 +112,6 @@ networks:
     driver: bridge
 
 volumes:
+  cyberqueryai-ollama-data:
   cyberqueryai-prometheus-data:
   cyberqueryai-grafana-data:
