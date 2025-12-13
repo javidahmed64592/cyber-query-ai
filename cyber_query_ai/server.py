@@ -28,6 +28,7 @@ from cyber_query_ai.models import (
 
 logger = logging.getLogger(__name__)
 
+CHAT_FIELDS = PostChatResponse.model_fields.keys() - BaseResponse.model_fields.keys()
 CODE_GENERATE_FIELDS = PostCodeGenerationResponse.model_fields.keys() - BaseResponse.model_fields.keys()
 CODE_EXPLAIN_FIELDS = PostCodeExplanationResponse.model_fields.keys() - BaseResponse.model_fields.keys()
 EXPLOIT_SEARCH_FIELDS = PostExploitSearchResponse.model_fields.keys() - BaseResponse.model_fields.keys()
@@ -118,21 +119,43 @@ class CyberQueryAIServer(TemplateServer):
             history_text += f"{msg.role}: {msg.content}\n"
 
         formatted_prompt = sanitize_text(self.chatbot.prompt_chat(message, history_text))
-        response_text = None
 
         try:
-            response_text = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
+            response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
+            cleaned_response = clean_json_response(str(response.content))
+            parsed = json.loads(cleaned_response)
+
+            if missing_keys := CHAT_FIELDS - parsed.keys():
+                error_msg = f"Missing required keys in LLM response: {missing_keys}"
+                logger.error(error_msg)
+                return PostChatResponse(
+                    code=ResponseCode.INTERNAL_SERVER_ERROR,
+                    message=error_msg,
+                    timestamp=PostChatResponse.current_timestamp(),
+                    model_message="",
+                )
+
             return PostChatResponse(
                 code=ResponseCode.OK,
                 message="Successfully generated chat response.",
                 timestamp=PostChatResponse.current_timestamp(),
-                model_message=sanitize_text(response_text),
+                model_message=parsed["model_message"],
             )
-        except Exception:
-            logger.exception("Failed to generate chat response")
+        except json.JSONDecodeError:
+            error_msg = f"Invalid JSON response from LLM: {response.content}"
+            logger.exception(error_msg)
             return PostChatResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message="Failed to generate chat response.",
+                message=error_msg,
+                timestamp=PostChatResponse.current_timestamp(),
+                model_message="",
+            )
+        except Exception:
+            error_msg = "An unexpected error occurred during chat."
+            logger.exception(error_msg)
+            return PostChatResponse(
+                code=ResponseCode.INTERNAL_SERVER_ERROR,
+                message=error_msg,
                 timestamp=PostChatResponse.current_timestamp(),
                 model_message="",
             )
@@ -142,19 +165,18 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Received code generation request.")
         prompt_request = PostPromptRequest.model_validate(await request.json())
         formatted_prompt = sanitize_text(self.chatbot.prompt_code_generation(prompt_request.prompt))
-        response_text = None
 
         try:
-            response_text = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(response_text)
+            response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
+            cleaned_response = clean_json_response(str(response.content))
             parsed = json.loads(cleaned_response)
 
             if missing_keys := CODE_GENERATE_FIELDS - parsed.keys():
-                msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(msg)
+                error_msg = f"Missing required keys in LLM response: {missing_keys}"
+                logger.error(error_msg)
                 return PostCodeGenerationResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=msg,
+                    message=error_msg,
                     timestamp=PostCodeGenerationResponse.current_timestamp(),
                     generated_code="",
                     explanation="",
@@ -170,22 +192,22 @@ class CyberQueryAIServer(TemplateServer):
                 language=parsed["language"],
             )
         except json.JSONDecodeError:
-            msg = f"Invalid JSON response from LLM: {response_text}"
-            logger.exception(msg)
+            error_msg = f"Invalid JSON response from LLM: {response.content}"
+            logger.exception(error_msg)
             return PostCodeGenerationResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostCodeGenerationResponse.current_timestamp(),
                 generated_code="",
                 explanation="",
                 language="",
             )
         except Exception:
-            msg = "An unexpected error occurred during code generation."
-            logger.exception(msg)
+            error_msg = "An unexpected error occurred during code generation."
+            logger.exception(error_msg)
             return PostCodeGenerationResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostCodeGenerationResponse.current_timestamp(),
                 generated_code="",
                 explanation="",
@@ -197,19 +219,18 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Received code explanation request.")
         prompt_request = PostPromptRequest.model_validate(await request.json())
         formatted_prompt = sanitize_text(self.chatbot.prompt_code_explanation(prompt_request.prompt))
-        response_text = None
 
         try:
-            response_text = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(response_text)
+            response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
+            cleaned_response = clean_json_response(str(response.content))
             parsed = json.loads(cleaned_response)
 
             if missing_keys := CODE_EXPLAIN_FIELDS - parsed.keys():
-                msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(msg)
+                error_msg = f"Missing required keys in LLM response: {missing_keys}"
+                logger.error(error_msg)
                 return PostCodeExplanationResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=msg,
+                    message=error_msg,
                     timestamp=PostCodeExplanationResponse.current_timestamp(),
                     explanation="",
                 )
@@ -221,20 +242,20 @@ class CyberQueryAIServer(TemplateServer):
                 explanation=parsed["explanation"],
             )
         except json.JSONDecodeError:
-            msg = f"Invalid JSON response from LLM: {response_text}"
-            logger.exception(msg)
+            error_msg = f"Invalid JSON response from LLM: {response.content}"
+            logger.exception(error_msg)
             return PostCodeExplanationResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostCodeExplanationResponse.current_timestamp(),
                 explanation="",
             )
         except Exception:
-            msg = "An unexpected error occurred during code explanation."
-            logger.exception(msg)
+            error_msg = "An unexpected error occurred during code explanation."
+            logger.exception(error_msg)
             return PostCodeExplanationResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostCodeExplanationResponse.current_timestamp(),
                 explanation="",
             )
@@ -244,19 +265,18 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Received exploit search request.")
         prompt_request = PostPromptRequest.model_validate(await request.json())
         formatted_prompt = sanitize_text(self.chatbot.prompt_exploit_search(prompt_request.prompt))
-        response_text = None
 
         try:
-            response_text = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(response_text)
+            response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
+            cleaned_response = clean_json_response(str(response.content))
             parsed = json.loads(cleaned_response)
 
             if missing_keys := EXPLOIT_SEARCH_FIELDS - parsed.keys():
-                msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(msg)
+                error_msg = f"Missing required keys in LLM response: {missing_keys}"
+                logger.error(error_msg)
                 return PostExploitSearchResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=msg,
+                    message=error_msg,
                     timestamp=PostExploitSearchResponse.current_timestamp(),
                     exploits=[],
                     explanation="",
@@ -270,21 +290,21 @@ class CyberQueryAIServer(TemplateServer):
                 explanation=parsed["explanation"],
             )
         except json.JSONDecodeError:
-            msg = f"Invalid JSON response from LLM: {response_text}"
-            logger.exception(msg)
+            error_msg = f"Invalid JSON response from LLM: {response.content}"
+            logger.exception(error_msg)
             return PostExploitSearchResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostExploitSearchResponse.current_timestamp(),
                 exploits=[],
                 explanation="",
             )
         except Exception:
-            msg = "An unexpected error occurred during exploit search."
-            logger.exception(msg)
+            error_msg = "An unexpected error occurred during exploit search."
+            logger.exception(error_msg)
             return PostExploitSearchResponse(
                 code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=msg,
+                message=error_msg,
                 timestamp=PostExploitSearchResponse.current_timestamp(),
                 exploits=[],
                 explanation="",

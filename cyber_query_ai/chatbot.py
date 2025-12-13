@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from langchain_core.prompts import PromptTemplate
-from langchain_ollama import OllamaLLM
+from langchain_ollama import ChatOllama
 
 from cyber_query_ai.rag import RAGSystem
 
@@ -22,12 +22,6 @@ STRING_FORMATTING_RULES = (
     '- Escape any quotes within strings using backslash (\\")\n'
 )
 
-# Common code formatting rules (for code generation endpoint)
-CODE_FIELD_RULES = (
-    "- ENSURE you DO NOT include markdown code blocks in the code field\n"
-    "- The code should be plain text without formatting\n"
-)
-
 
 class Chatbot:
     """Chatbot class for LLM queries with RAG support."""
@@ -35,7 +29,7 @@ class Chatbot:
     def __init__(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
-        self.llm = OllamaLLM(model=self.model)
+        self.llm = ChatOllama(model=self.model, format="json")
         self.rag_system = RAGSystem.create(
             model=self.model, embedding_model=embedding_model, tools_json_filepath=tools_json_filepath
         )
@@ -91,11 +85,19 @@ class Chatbot:
             "- Inline reference: Use the `nmap` command to scan networks.\n\n"
             "Keep responses concise and actionable.\n\n"
             "Previous conversation:\n{history}\n\n"
-            "User: {message}\n"
-            "Assistant:"
+            "User: {message}\n\n"
+        )
+        json_instructions = self._build_json_instructions(
+            response_format='{"model_message": "..."}',
+            example=(
+                '{"model_message": "To scan the network, use:\\n```bash\\nnmap -sn 192.168.1.0/24\\n```\\n'
+                'This performs a ping scan to discover live hosts."}'
+            ),
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
-        return PromptTemplate(input_variables=["history", "message"], template=f"{base_template}{rag_content}")
+        return PromptTemplate(
+            input_variables=["history", "message"], template=f"{base_template}{json_instructions}{rag_content}"
+        )
 
     @property
     def pt_code_generation(self) -> PromptTemplate:
@@ -123,6 +125,8 @@ class Chatbot:
             "The 'code' field should contain executable code ready to run on Kali Linux.\n"
             "The 'explanation' should describe what the code does, why it's used, and any important context.\n"
             "The 'language' should be the programming/scripting language (bash, python, powershell, etc.).\n\n"
+            "ENSURE you DO NOT include markdown code blocks in the code field.\n"
+            "The code should be plain text without formatting.\n"
         )
         json_instructions = self._build_json_instructions(
             response_format='{"generated_code": "...", "explanation": "...", "language": "..."}',
@@ -133,9 +137,7 @@ class Chatbot:
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
 
-        return PromptTemplate(
-            input_variables=["prompt"], template=f"{base_template}{CODE_FIELD_RULES}{json_instructions}{rag_content}"
-        )
+        return PromptTemplate(input_variables=["prompt"], template=f"{base_template}{json_instructions}{rag_content}")
 
     @property
     def pt_code_explanation(self) -> PromptTemplate:
