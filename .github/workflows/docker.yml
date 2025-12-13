@@ -40,12 +40,9 @@ jobs:
 
       - name: Build production image
         run: |
-          docker build --build-arg PORT=443 -t cyber-query-ai:prod .
+          docker build -t cyber-query-ai:prod .
 
       - name: Start services with docker compose
-        env:
-          ENV: prod
-          PORT: 443
         run: |
           docker compose --profile cpu up -d
           sleep 5  # Wait for container to start
