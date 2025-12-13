@@ -18,7 +18,7 @@ jobs:
 
       - name: Build and start services with docker compose
         run: |
-          docker compose up --build -d
+          docker compose --profile cpu up --build -d
           sleep 5  # Wait for services to start
 
       - name: Show server logs
@@ -47,7 +47,7 @@ jobs:
           ENV: prod
           PORT: 443
         run: |
-          docker compose up -d
+          docker compose --profile cpu up -d
           sleep 5  # Wait for container to start
 
       - name: Show server logs
