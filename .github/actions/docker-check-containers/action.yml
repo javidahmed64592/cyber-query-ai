@@ -1,0 +1,64 @@
+name: Check Docker Containers
+description: Checks the status of Docker containers
+
+inputs:
+  port:
+    description: Port to check
+    required: true
+  num-retries:
+    description: Number of retries for health check
+    required: false
+    default: "5"
+  timeout-seconds:
+    description: Timeout in seconds between retries
+    required: false
+    default: "5"
+runs:
+  using: composite
+  steps:
+    - name: Check server is running
+      run: |
+        for i in {1..${{ inputs.num-retries }}}; do
+          if curl -k https://localhost:${{ inputs.port }}/api/health; then
+            echo "Health check passed"
+            break
+          else
+            echo "Health check failed, attempt $i/${{ inputs.num-retries }}"
+            if [ $i -eq ${{ inputs.num-retries }} ]; then
+              exit 1
+            fi
+            sleep ${{ inputs.timeout-seconds }}
+          fi
+        done
+      shell: bash
+    - name: Check Prometheus is running
+      run: |
+        for i in {1..${{ inputs.num-retries }}}; do
+          if curl http://localhost:9090; then
+            echo "Health check passed"
+            break
+          else
+            echo "Health check failed, attempt $i/${{ inputs.num-retries }}"
+            if [ $i -eq ${{ inputs.num-retries }} ]; then
+              exit 1
+            fi
+            sleep ${{ inputs.timeout-seconds }}
+          fi
+        done
+      shell: bash
+
+    - name: Check Grafana is running
+      run: |
+        for i in {1..${{ inputs.num-retries }}}; do
+          if curl http://localhost:3000; then
+            echo "Health check passed"
+            break
+          else
+            echo "Health check failed, attempt $i/${{ inputs.num-retries }}"
+            if [ $i -eq ${{ inputs.num-retries }} ]; then
+              exit 1
+            fi
+            sleep ${{ inputs.timeout-seconds }}
+          fi
+        done
+      shell: bash

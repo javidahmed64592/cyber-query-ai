@@ -1,0 +1,73 @@
+name: Docker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docker-development:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-core
+
+      - name: Create directories with proper permissions
+        run: |
+          mkdir -p certs logs
+          chmod 777 certs logs
+          sudo chown -R 1000:1000 certs logs
+
+      - name: Build and start services with docker compose
+        run: |
+          docker compose up --build -d
+          sleep 5  # Wait for services to start
+
+      - name: Show server logs
+        run: docker compose logs cyberqueryai
+
+      - uses: ./.github/actions/docker-check-containers
+        with:
+          port: 443
+
+      - name: Stop services
+        run: docker compose down
+
+  docker-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-core
+
+      - name: Create directories with proper permissions
+        run: |
+          mkdir -p certs logs
+          chmod 777 certs logs
+          sudo chown -R 1000:1000 certs logs
+
+      - name: Build production image
+        run: |
+          docker build --build-arg ENV=prod --build-arg PORT=443 -t cyberqueryai:prod .
+
+      - name: Start services with docker compose
+        env:
+          ENV: prod
+          PORT: 443
+        run: |
+          docker compose up -d
+          sleep 5  # Wait for container to start
+
+      - name: Show server logs
+        run: docker logs cyberqueryai
+
+      - uses: ./.github/actions/docker-check-containers
+        with:
+          port: 443
+
+      - name: Stop services
+        run: docker compose down
