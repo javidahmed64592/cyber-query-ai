@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export interface ErrorNotificationProps {
   message: string;
@@ -30,9 +31,12 @@ export default function ErrorNotification({
     setTimeout(onClose, 300); // Wait for fade out animation
   };
 
-  return (
+  // Only render on client-side (portal requires document.body)
+  if (typeof window === "undefined") return null;
+
+  return createPortal(
     <div
-      className={`fixed top-4 right-4 z-50 max-w-md transition-all duration-300 ${
+      className={`fixed top-4 right-4 z-[9999] max-w-md transition-all duration-300 ${
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
       }`}
     >
@@ -71,7 +75,8 @@ export default function ErrorNotification({
           </svg>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

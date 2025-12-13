@@ -188,11 +188,6 @@ const ChatWindow = () => {
 
       {/* Input */}
       <div className="p-4 border-t border-[var(--terminal-border)] bg-[var(--background-secondary)]">
-        {error && (
-          <div className="mb-3 p-3 bg-red-900/20 border border-red-500 rounded text-red-400 text-sm">
-            {error}
-          </div>
-        )}
         <div className="flex items-end space-x-3">
           <textarea
             ref={textareaRef}
