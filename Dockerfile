@@ -109,14 +109,17 @@ RUN echo '#!/bin/sh\n\
     else\n\
     MODELS_JSON=$(wget -q -O- "$OLLAMA_HOST/api/tags")\n\
     \n\
-    # Check mistral\n\
-    if ! echo "$MODELS_JSON" | grep -q "mistral:latest"; then\n\
-    echo "⚠ Model mistral not found. Pull with: docker exec cyberqueryai-ollama ollama pull mistral"\n\
+    # Extract model names from configuration file\n\
+    CONFIG_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''model'\''])")\n\
+    CONFIG_EMBEDDING_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''embedding_model'\''])")\n\
+    \n\
+    # Check models from configuration file\n\
+    if ! echo "$MODELS_JSON" | grep -q "${CONFIG_MODEL}:latest"; then\n\
+    echo "⚠ Model $CONFIG_MODEL not found. Pull with: docker exec cyberqueryai-ollama ollama pull $CONFIG_MODEL"\n\
     fi\n\
     \n\
-    # Check bge-m3\n\
-    if ! echo "$MODELS_JSON" | grep -q "bge-m3:latest"; then\n\
-    echo "⚠ Model bge-m3 not found. Pull with: docker exec cyberqueryai-ollama ollama pull bge-m3"\n\
+    if ! echo "$MODELS_JSON" | grep -q "${CONFIG_EMBEDDING_MODEL}:latest"; then\n\
+    echo "⚠ Model $CONFIG_EMBEDDING_MODEL not found. Pull with: docker exec cyberqueryai-ollama ollama pull $CONFIG_EMBEDDING_MODEL"\n\
     fi\n\
     fi\n\
     \n\
