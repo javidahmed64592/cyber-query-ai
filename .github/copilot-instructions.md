@@ -20,6 +20,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 - **Single source of truth**: `config.json` is read by `next.config.ts` at build time to configure the dev proxy URL
 - **Error mapping in api.ts**: All backend calls flow through `src/lib/api.ts` which standardizes error handling and timeouts (30s for LLM responses)
 - **Type safety**: Keep `src/lib/types.ts` interfaces synchronized with backend Pydantic models in `cyber_query_ai/models.py`
+- **Executing commands**: Always `cd` into the fully resolved `cyber-query-ai-frontend` directory before running npm commands to avoid context issues
 
 ## Critical Development Workflows
 
