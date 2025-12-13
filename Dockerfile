@@ -91,8 +91,8 @@ RUN echo '#!/bin/sh\n\
     generate-certificate\n\
     fi\n\
     \n\
-    # Check and pull required Ollama models\n\
-    OLLAMA_HOST="${OLLAMA_HOST:-http://cyberqueryai-ollama:11434}"\n\
+    # Check required Ollama models\n\
+    OLLAMA_HOST="http://cyberqueryai-ollama:11434"\n\
     REQUIRED_MODELS="mistral bge-m3"\n\
     \n\
     echo "Checking Ollama connection at $OLLAMA_HOST..."\n\
@@ -112,17 +112,17 @@ RUN echo '#!/bin/sh\n\
     if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then\n\
     echo "WARNING: Could not connect to Ollama. Application will start but may not function properly."\n\
     else\n\
-    # Pull required models\n\
-    for model in $REQUIRED_MODELS; do\n\
-    echo "Checking model: $model"\n\
-    if ! wget -q -O- "$OLLAMA_HOST/api/tags" | grep -q "\"name\":\"$model"; then\n\
-    echo "Pulling model: $model (this may take several minutes)..."\n\
-    wget -q -O- --post-data="{\"name\":\"$model\"}" \\\n\
-    --header="Content-Type: application/json" \\\n\
-    "$OLLAMA_HOST/api/pull" > /dev/null 2>&1 || echo "Note: Model pull initiated"\n\
-    echo "Model $model pull completed"\n\
+    MODELS_JSON=$(wget -q -O- "$OLLAMA_HOST/api/tags")\n\
+    \n\
+    # Check mistral\n\
+    if ! echo "$MODELS_JSON" | grep -q "mistral:latest"; then\n\
+    echo "⚠ Model mistral not found. Pull with: docker exec cyberqueryai-ollama ollama pull mistral"\n\
     fi\n\
-    done\n\
+    \n\
+    # Check bge-m3\n\
+    if ! echo "$MODELS_JSON" | grep -q "bge-m3:latest"; then\n\
+    echo "⚠ Model bge-m3 not found. Pull with: docker exec cyberqueryai-ollama ollama pull bge-m3"\n\
+    fi\n\
     fi\n\
     \n\
     exec cyber-query-ai' > /app/start.sh && \
