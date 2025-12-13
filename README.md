@@ -102,9 +102,11 @@ Whether you're conducting authorized penetration tests, participating in CTF com
 - Severity ratings and impact assessments
 
 ### **Security & Sanitization**
+- X-API-KEY header authentication with SHA-256 hashed tokens
+- HTTPS-only communication with self-signed certificate support
 - All inputs and outputs are sanitized using `bleach` to prevent injection attacks
-- Rate limiting prevents abuse and ensures fair usage
-- CORS protection and secure API design
+- Rate limiting (10 requests/minute) prevents abuse and ensures fair usage
+- Security headers (HSTS, CSP, X-Frame-Options) automatically applied
 - Clear ethical guidelines and usage policies
 
 ## Web Application Pages
@@ -171,9 +173,7 @@ Comprehensive information about the application, including:
 #### Option 1: Using Pre-built Release (Recommended)
 1. Download the latest release from [GitHub Releases](https://github.com/javidahmed64592/cyber-query-ai/releases)
 2. Extract the archive
-3. Run the installer:
-   - **Linux/macOS**: `./install_cyber_query_ai.sh`
-   - **Windows**: `install_cyber_query_ai.bat`
+3. Run the installer: `./install_cyber_query_ai.sh`
 
 #### Option 2: From Source
 ```bash
@@ -200,46 +200,74 @@ npm run dev
    ollama serve
    ```
 
-2. **Configure the model**: Edit `config.json` to specify your preferred AI model:
+2. **Pull required models**: Download the AI models:
+   ```bash
+   ollama pull mistral
+   ollama pull bge-m3
+   ```
+
+3. **Generate API token**: Create an authentication token:
+   ```bash
+   uv run generate-new-token
+   # Save the displayed token - you'll need it to log in!
+   ```
+
+4. **Generate SSL certificate** (optional, auto-generated on first run):
+   ```bash
+   uv run generate-certificate
+   ```
+
+5. **Configure the application**: Edit `configuration/config.json` to customize settings:
    ```json
    {
-     "model": "mistral",
-     "embedding_model": "bge-m3",
-     "host": "localhost",
-     "port": 8000
+     "server": {
+       "host": "0.0.0.0",
+       "port": 443
+     },
+     "model": {
+       "model": "mistral",
+       "embedding_model": "bge-m3"
+     },
+     "rate_limit": {
+       "enabled": true,
+       "rate_limit": "10/minute"
+     }
    }
    ```
 
-   **Note:** This `config.json` file is the single source of truth for all configuration settings, including server host/port and AI model selection.
+   **Note:** This `configuration/config.json` file is the single source of truth for all configuration settings.
 
-3. **Launch the application**:
+6. **Launch the application**:
    ```bash
    cyber-query-ai
    ```
 
-4. **Access the web interface**: Open your browser to `http://localhost:8000`
+7. **Access the web interface**: Open your browser to `https://localhost:443`
+   - **First-time setup**: Enter the API token from step 3 on the login page
+   - Your browser will warn about the self-signed certificate - this is expected for local development
 
 ## Technology Stack
 
 ### Backend (Python)
-- **FastAPI**: High-performance async web framework with automatic API documentation
+- **python-template-server**: Production-ready FastAPI server base with authentication, rate limiting, and observability
+- **FastAPI**: High-performance async web framework
 - **LangChain**: LLM integration and prompt management
 - **Ollama**: Local AI model hosting and inference
 - **Pydantic**: Data validation and serialization
-- **SlowAPI**: Rate limiting for responsible usage
 - **Bleach**: Input/output sanitization for security
 
 ### Frontend (TypeScript/React)
-- **Next.js 16**: Modern React framework with App Router
+- **Next.js 16**: Modern React framework with App Router and static export
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first styling framework
-- **Framer Motion**: Smooth animations and transitions
 - **DOMPurify**: Client-side sanitization
+- **Axios**: HTTP client with interceptors
 
 ### Development & Operations
-- **pytest**: Comprehensive backend testing
+- **pytest**: Comprehensive backend testing with coverage
 - **Jest**: Frontend unit testing
 - **Ruff**: Python code formatting and linting
+- **mypy**: Python static type checking
 - **ESLint/Prettier**: JavaScript/TypeScript code quality
 - **GitHub Actions**: Automated CI/CD pipeline
 - **uv**: Fast Python package management

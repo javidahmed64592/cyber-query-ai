@@ -1,15 +1,17 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+import { getApiKey } from "@/lib/auth";
 import type {
   PromptRequest,
   CodeGenerationResponse,
   CodeExplanationResponse,
   ExploitSearchResponse,
-  ConfigResponse,
+  ApiConfigResponse,
   HealthResponse,
   ChatRequest,
   ChatResponse,
+  LoginResponse,
 } from "@/lib/types";
 
 // Determine the base URL based on environment
@@ -34,8 +36,54 @@ const api = axios.create({
   },
 });
 
+// Add request interceptor to include API key
+api.interceptors.request.use(
+  config => {
+    const apiKey = getApiKey();
+    if (apiKey) {
+      config.headers["X-API-KEY"] = apiKey;
+    }
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  }
+);
+
 // Health status type
 export type HealthStatus = "online" | "offline" | "checking";
+
+const extractErrorMessage = (error: unknown): string => {
+  if (axios.isAxiosError(error)) {
+    if (error.response) {
+      const errorData = error.response.data;
+
+      // Check for BaseResponse format with message field
+      if (errorData?.message) {
+        return errorData.message;
+      }
+
+      // Check for detail field (common in FastAPI errors)
+      if (errorData?.detail) {
+        return typeof errorData.detail === "string"
+          ? errorData.detail
+          : JSON.stringify(errorData.detail);
+      }
+
+      // Fallback to generic server error
+      return `Server error: ${error.response.status} ${error.response.statusText}`;
+    } else if (error.request) {
+      return "No response from server. Please check if the backend is running.";
+    } else {
+      return `Request failed: ${error.message}`;
+    }
+  }
+  return "An unexpected error occurred";
+};
+
+const isSuccessResponse = (data: { code?: number }): boolean => {
+  return data.code !== undefined && data.code >= 200 && data.code < 300;
+};
 
 // API functions
 export const getHealth = async (): Promise<HealthResponse> => {
@@ -43,68 +91,45 @@ export const getHealth = async (): Promise<HealthResponse> => {
     const response = await api.get<HealthResponse>("/health");
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
-    }
-    throw new Error("An unexpected error occurred");
+    throw new Error(extractErrorMessage(error));
   }
 };
 
-export const getConfig = async (): Promise<ConfigResponse> => {
+export const getConfig = async (): Promise<ApiConfigResponse> => {
   try {
-    const response = await api.get<ConfigResponse>("/config");
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
+    const response = await api.get<ApiConfigResponse>("/config");
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Failed to get configuration");
     }
-    throw new Error("An unexpected error occurred");
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
+  }
+};
+
+export const login = async (apiKey: string): Promise<LoginResponse> => {
+  try {
+    const response = await api.post<LoginResponse>(
+      "/login",
+      {},
+      {
+        headers: {
+          "X-API-KEY": apiKey,
+        },
+      }
+    );
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Login failed");
+    }
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
   }
 };
 
@@ -116,36 +141,16 @@ export const sendChatMessage = async (
   const request: ChatRequest = { message, history };
 
   try {
-    const response = await api.post<ChatResponse>("/chat", request);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
+    const response = await api.post<ChatResponse>("/model/chat", request);
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Failed to send chat message");
     }
-    throw new Error("An unexpected error occurred");
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
   }
 };
 
@@ -157,42 +162,18 @@ export const generateCode = async (
 
   try {
     const response = await api.post<CodeGenerationResponse>(
-      "/generate-code",
+      "/code/generate",
       request
     );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      // Handle different types of errors more specifically
-      if (error.response) {
-        // Server responded with error status
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        // Request was made but no response received
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        // Something else happened
-        throw new Error(`Request failed: ${error.message}`);
-      }
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Failed to generate code");
     }
-    throw new Error("An unexpected error occurred");
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
   }
 };
 
@@ -204,38 +185,18 @@ export const explainCode = async (
 
   try {
     const response = await api.post<CodeExplanationResponse>(
-      "/explain-code",
+      "/code/explain",
       request
     );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Failed to explain code");
     }
-    throw new Error("An unexpected error occurred");
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
   }
 };
 
@@ -247,38 +208,18 @@ export const searchExploits = async (
 
   try {
     const response = await api.post<ExploitSearchResponse>(
-      "/search-exploits",
+      "/exploit/search",
       request
     );
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        const errorData = error.response.data;
-        if (typeof errorData === "string") {
-          throw new Error(errorData);
-        } else if (errorData?.detail) {
-          throw new Error(
-            typeof errorData.detail === "string"
-              ? errorData.detail
-              : JSON.stringify(errorData.detail)
-          );
-        } else if (errorData?.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(
-            `Server error: ${error.response.status} ${error.response.statusText}`
-          );
-        }
-      } else if (error.request) {
-        throw new Error(
-          "No response from server. Please check if the backend is running."
-        );
-      } else {
-        throw new Error(`Request failed: ${error.message}`);
-      }
+    const data = response.data;
+
+    if (!isSuccessResponse(data)) {
+      throw new Error(data.message || "Failed to search exploits");
     }
-    throw new Error("An unexpected error occurred");
+
+    return data;
+  } catch (error) {
+    throw new Error(extractErrorMessage(error));
   }
 };
 

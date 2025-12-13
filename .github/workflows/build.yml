@@ -9,12 +9,22 @@ on:
 jobs:
   build_wheel:
     runs-on: ubuntu-latest
+    needs: build_frontend
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-python-core
+      - name: Download frontend build
+        uses: actions/download-artifact@v4
+        with:
+          name: cyber_query_ai_frontend
+          path: static
       - name: Create wheel
         run: |
           uv build
+      - name: Inspect wheel contents
+        run: |
+          echo "Wheel contents:"
+          unzip -l dist/cyber_query_ai-*-py3-none-any.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
@@ -38,18 +48,13 @@ jobs:
 
   create_installer:
     runs-on: ubuntu-latest
-    needs: [build_wheel, build_frontend]
+    needs: build_wheel
     steps:
       - uses: actions/checkout@v4
       - name: Download backend artifact
         uses: actions/download-artifact@v4
         with:
           name: cyber_query_ai_wheel
-      - name: Download frontend build
-        uses: actions/download-artifact@v4
-        with:
-          name: cyber_query_ai_frontend
-          path: static
       - name: Prepare release directory
         run: |
           PACKAGE_NAME="cyber_query_ai"
@@ -57,7 +62,6 @@ jobs:
           PACKAGE_VERSION=$(echo "$WHEEL_FILE" | sed -n "s/.*${PACKAGE_NAME}-\(.*\)-py3-none-any\.whl/\1/p")
 
           mv "$WHEEL_FILE" release/
-          mv static release/
           chmod +x release/install_cyber_query_ai.sh
           mv release ${PACKAGE_NAME}_${PACKAGE_VERSION}
 
@@ -118,11 +122,6 @@ jobs:
               exit 1
             fi
           done
-
-          if [ ! -d "static" ]; then
-            echo "Static directory not found"
-            exit 1
-          fi
       - name: Run installer script
         run: |
           TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
@@ -130,7 +129,6 @@ jobs:
 
           cd "$DIR_NAME"
           ./install_cyber_query_ai.sh
-
       - name: Verify post-installation directory contents
         run: |
           TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
@@ -145,11 +143,6 @@ jobs:
             exit 1
           fi
 
-          if [ -f "install_cyber_query_ai.bat" ]; then
-            echo "Windows installer script not removed"
-            exit 1
-          fi
-
           if [ -f "readme.txt" ]; then
             echo "Installation README file not removed"
             exit 1
@@ -160,9 +153,9 @@ jobs:
             exit 1
           fi
 
-          folders=(".venv" "static" "service")
-          files=("config.json" "README.md" "SECURITY.md" "LICENSE")
-          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh" "service/start_service.sh" "service/stop_service.sh")
+          folders=(".venv" "configuration" "certs" "logs" "static")
+          files=(".here" "LICENSE" "README.md" "SECURITY.md" "certs/cert.pem" "certs/key.pem" "configuration/config.json")
+          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh")
 
           for folder in "${folders[@]}"; do
             if [ ! -d "$folder" ]; then
@@ -231,9 +224,9 @@ jobs:
           ### Quick Start
 
           1. Download and extract the tarball: `tar -xzf cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz`
-          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS) or `install_cyber_query_ai.bat` (Windows)
+          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS)
           3. Install Ollama from [ollama.ai](https://ollama.ai/) and pull models: `ollama pull mistral && ollama pull bge-m3`
-          4. Launch the app: `./cyber-query-ai` (Linux/macOS) or `cyber-query-ai.bat` (Windows)
+          4. Launch the app: `./cyber-query-ai` (Linux/macOS)
           5. Open your browser: `http://localhost:8000`
 
           ### Features

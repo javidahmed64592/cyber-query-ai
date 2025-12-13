@@ -19,12 +19,11 @@ classifiers = [
 ]
 dependencies = [
     "bleach>=6.2.0",
-    "fastapi[standard]>=0.120.0",
+    "python-template-server @ git+https://github.com/javidahmed64592/python-template-server.git",
     "langchain>=1.0.2",
     "langchain-community>=0.4.0",
     "langchain-ollama>=1.0.0",
     "langchain-text-splitters>=1.0.0",
-    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]
@@ -46,14 +45,22 @@ repository = "https://github.com/javidahmed64592/cyber-query-ai"
 [project.scripts]
 cyber-query-ai = "cyber_query_ai.main:run"
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [tool.hatch.build]
 include = [
   "cyber_query_ai/**",
-  "config.json",
+  "configuration/**",
+  "static/**",
+  ".here",
   "README.md",
   "SECURITY.md",
   "LICENSE",
 ]
+
+[tool.hatch.build.force-include]
+"static" = "static"
 
 [tool.pytest.ini_options]
 addopts = [
@@ -177,6 +184,7 @@ pretty = true
 module = [
     "bleach.*",
     "fastapi.*",
+    "python_template_server.*",
     "langchain.*",
     "langchain-ollama.*",
     "slowapi.*"

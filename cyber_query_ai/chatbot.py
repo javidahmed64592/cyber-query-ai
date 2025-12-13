@@ -125,9 +125,10 @@ class Chatbot:
             "The 'language' should be the programming/scripting language (bash, python, powershell, etc.).\n\n"
         )
         json_instructions = self._build_json_instructions(
-            response_format='{"code": "...", "explanation": "...", "language": "..."}',
+            response_format='{"generated_code": "...", "explanation": "...", "language": "..."}',
             example=(
-                '{"code": "nmap -sn 192.168.1.0/24", "explanation": "This performs a ping scan...", "language": "bash"}'
+                '{"generated_code": "nmap -sn 192.168.1.0/24", "explanation": "This performs a ping scan...", '
+                '"language": "bash"}'
             ),
         )
         rag_content = self.rag_system.generate_rag_content(base_template)
@@ -167,8 +168,8 @@ class Chatbot:
         )
         json_instructions = self._build_json_instructions(
             response_format=(
-                '{"exploits": [{"title": "...", "link": "...", '
-                '"severity": "...", "description": "..."}], "explanation": "..."}'
+                '{"exploits": [{"title": "...", "link": "...", "severity": "...", "description": "..."}], '
+                '"explanation": "..."}'
             ),
             example=(
                 '{"exploits": [{"title": "CVE-2021-1234", "link": "https://...", '

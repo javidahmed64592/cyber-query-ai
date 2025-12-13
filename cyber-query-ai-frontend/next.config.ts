@@ -1,20 +1,32 @@
 import type { NextConfig } from "next";
 import fs from "fs";
 import path from "path";
-import { ConfigResponse } from "@/lib/types";
+
+// Type for reading the backend config.json
+interface BackendConfig {
+  server: {
+    host: string;
+    port: number;
+  };
+}
 
 // Read backend config to get host and port
 const getBackendURL = () => {
   try {
-    const configPath = path.resolve(__dirname, "..", "config.json");
+    const configPath = path.resolve(
+      __dirname,
+      "..",
+      "configuration",
+      "config.json"
+    );
     const configData = fs.readFileSync(configPath, "utf-8");
-    const config: ConfigResponse = JSON.parse(configData);
-    return `http://${config.host}:${config.port}`;
+    const config: BackendConfig = JSON.parse(configData);
+    return `https://${config.server.host}:${config.server.port}`;
   } catch (error) {
     console.warn(
-      "Failed to read config.json, falling back to http://localhost:8000"
+      "Failed to read config.json, falling back to https://localhost:443"
     );
-    return "http://localhost:8000";
+    return "https://localhost:443";
   }
 };
 

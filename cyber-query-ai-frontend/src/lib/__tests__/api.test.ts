@@ -7,6 +7,7 @@ import {
   getConfig,
   getHealth,
   sendChatMessage,
+  login,
   useHealthStatus,
   type HealthStatus,
 } from "@/lib/api";
@@ -14,9 +15,10 @@ import type {
   CodeGenerationResponse,
   CodeExplanationResponse,
   ExploitSearchResponse,
-  ConfigResponse,
+  ApiConfigResponse,
   HealthResponse,
   ChatResponse,
+  LoginResponse,
 } from "@/lib/types";
 
 jest.mock("../api", () => {
@@ -29,6 +31,7 @@ jest.mock("../api", () => {
     explainCode: jest.fn(),
     searchExploits: jest.fn(),
     sendChatMessage: jest.fn(),
+    login: jest.fn(),
   };
 });
 
@@ -47,6 +50,7 @@ const mockGetHealth = getHealth as jest.MockedFunction<typeof getHealth>;
 const mockSendChatMessage = sendChatMessage as jest.MockedFunction<
   typeof sendChatMessage
 >;
+const mockLogin = login as jest.MockedFunction<typeof login>;
 
 describe("API Tests", () => {
   beforeEach(() => {
@@ -56,8 +60,10 @@ describe("API Tests", () => {
   describe("health", () => {
     it("should fetch health status successfully", async () => {
       const mockHealth: HealthResponse = {
-        status: "healthy",
+        code: 200,
+        message: "Server is healthy",
         timestamp: "2023-01-01T00:00:00Z",
+        status: "healthy",
       };
 
       mockGetHealth.mockResolvedValue(mockHealth);
@@ -87,11 +93,14 @@ describe("API Tests", () => {
 
   describe("config", () => {
     it("should fetch config successfully", async () => {
-      const mockConfig: ConfigResponse = {
-        model: "mistral",
-        embedding_model: "bge-m3",
-        host: "localhost",
-        port: 8000,
+      const mockConfig: ApiConfigResponse = {
+        code: 200,
+        message: "Successfully retrieved chatbot configuration.",
+        timestamp: "2023-01-01T00:00:00Z",
+        model: {
+          model: "mistral",
+          embedding_model: "bge-m3",
+        },
         version: "x.y.z",
       };
 
@@ -101,10 +110,8 @@ describe("API Tests", () => {
 
       expect(mockGetConfig).toHaveBeenCalledTimes(1);
       expect(config).toEqual(mockConfig);
-      expect(config.model).toBe("mistral");
-      expect(config.embedding_model).toBe("bge-m3");
-      expect(config.host).toBe("localhost");
-      expect(config.port).toBe(8000);
+      expect(config.model.model).toBe("mistral");
+      expect(config.model.embedding_model).toBe("bge-m3");
     });
 
     it("should handle config fetch error", async () => {
@@ -125,7 +132,10 @@ describe("API Tests", () => {
 
   describe("sendChatMessage", () => {
     const mockResponse: ChatResponse = {
-      message: "Here's how to use nmap for network scanning...",
+      code: 200,
+      message: "Successfully generated chat response.",
+      timestamp: "2023-01-01T00:00:00Z",
+      model_message: "Here's how to use nmap for network scanning...",
     };
 
     it("should successfully send chat message with empty history", async () => {
@@ -185,7 +195,10 @@ describe("API Tests", () => {
 
     it("should handle empty message", async () => {
       const emptyMessageResponse: ChatResponse = {
-        message: "I need more information to help you.",
+        code: 200,
+        message: "Successfully generated chat response.",
+        timestamp: "2023-01-01T00:00:00Z",
+        model_message: "I need more information to help you.",
       };
       mockSendChatMessage.mockResolvedValue(emptyMessageResponse);
 
@@ -299,7 +312,10 @@ And check service versions`;
 
   describe("generateCode", () => {
     const mockResponse: CodeGenerationResponse = {
-      code: "nmap -sV -p 80,443 target.com",
+      code: 200,
+      message: "Successfully generated code.",
+      timestamp: "2023-01-01T00:00:00Z",
+      generated_code: "nmap -sV -p 80,443 target.com",
       explanation:
         "This command scans the target for open ports 80 and 443 with service version detection.",
       language: "bash",
@@ -318,7 +334,11 @@ And check service versions`;
 
     it("should handle code generation for scripts", async () => {
       const scriptResponse: CodeGenerationResponse = {
-        code: 'import socket\n\ndef port_scan():\n    print("Scanning ports")',
+        code: 200,
+        message: "Successfully generated code.",
+        timestamp: "2023-01-01T00:00:00Z",
+        generated_code:
+          'import socket\n\ndef port_scan():\n    print("Scanning ports")',
         explanation: "This Python script scans for open ports on a target.",
         language: "python",
       };
@@ -399,6 +419,9 @@ And check service versions`;
 
   describe("explainCode", () => {
     const mockResponse: CodeExplanationResponse = {
+      code: 200,
+      message: "Successfully explained code.",
+      timestamp: "2023-01-01T00:00:00Z",
       explanation:
         "This nmap command performs a SYN scan (-sS) on all ports (-p-) of the target.",
     };
@@ -414,6 +437,9 @@ And check service versions`;
 
     it("should successfully explain a script", async () => {
       const scriptResponse: CodeExplanationResponse = {
+        code: 200,
+        message: "Successfully explained code.",
+        timestamp: "2023-01-01T00:00:00Z",
         explanation:
           "This Python script imports the socket library and defines a function to scan ports.",
       };
@@ -447,6 +473,9 @@ And check service versions`;
 
   describe("searchExploits", () => {
     const mockResponse: ExploitSearchResponse = {
+      code: 200,
+      message: "Successfully searched for exploits.",
+      timestamp: "2023-01-01T00:00:00Z",
       exploits: [
         {
           title: "CVE-2021-44228 Log4j RCE",
@@ -481,6 +510,9 @@ And check service versions`;
 
     it("should handle empty exploits response", async () => {
       const emptyResponse: ExploitSearchResponse = {
+        code: 200,
+        message: "Successfully searched for exploits.",
+        timestamp: "2023-01-01T00:00:00Z",
         exploits: [],
         explanation: "No known exploits found for this target.",
       };
@@ -500,6 +532,45 @@ And check service versions`;
       await expect(searchExploits("Apache server")).rejects.toThrow(
         errorMessage
       );
+    });
+  });
+
+  describe("login", () => {
+    it("should successfully login with valid API key", async () => {
+      const mockResponse: LoginResponse = {
+        code: 200,
+        message: "Login successful.",
+        timestamp: "2023-01-01T00:00:00Z",
+      };
+
+      mockLogin.mockResolvedValue(mockResponse);
+
+      const result = await login("valid-api-key-123");
+
+      expect(result).toEqual(mockResponse);
+      expect(mockLogin).toHaveBeenCalledWith("valid-api-key-123");
+    });
+
+    it("should reject with error for invalid API key", async () => {
+      const errorMessage = "Invalid API key";
+      mockLogin.mockRejectedValue(new Error(errorMessage));
+
+      await expect(login("invalid-key")).rejects.toThrow(errorMessage);
+    });
+
+    it("should reject with unauthorized error", async () => {
+      const errorMessage = "Missing API key";
+      mockLogin.mockRejectedValue(new Error(errorMessage));
+
+      await expect(login("")).rejects.toThrow(errorMessage);
+    });
+
+    it("should handle network error", async () => {
+      const errorMessage =
+        "No response from server. Please check if the backend is running.";
+      mockLogin.mockRejectedValue(new Error(errorMessage));
+
+      await expect(login("test-key")).rejects.toThrow(errorMessage);
     });
   });
 

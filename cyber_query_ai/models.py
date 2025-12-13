@@ -1,69 +1,87 @@
 """Data classes for the CyberQueryAI application."""
 
-from pydantic import BaseModel
+from enum import StrEnum, auto
+
+from pydantic import BaseModel, Field
+from python_template_server.models import BaseResponse, TemplateServerConfig
+
+
+# Application Server Configuration Models
+class CyberQueryAIModelConfig(BaseModel):
+    """Model configuration for the CyberQueryAI application."""
+
+    model: str = Field(default="mistral", description="AI model to use for queries")
+    embedding_model: str = Field(default="bge-m3", description="Embedding model to use")
+
+
+class CyberQueryAIConfig(TemplateServerConfig):
+    """Configuration settings for the CyberQueryAI application."""
+
+    model: CyberQueryAIModelConfig = Field(default_factory=CyberQueryAIModelConfig, description="Model configuration")
 
 
 # Request schemas
-class ChatMessage(BaseModel):
+class RoleType(StrEnum):
+    """Role types for chat messages."""
+
+    USER = auto()
+    ASSISTANT = auto()
+
+
+class ChatMessageModel(BaseModel):
     """Chat message model for conversation history."""
 
-    role: str  # "user" or "assistant"
+    role: RoleType
     content: str
 
 
-class ChatRequest(BaseModel):
+class PostChatRequest(BaseModel):
     """Request model for chat endpoint."""
 
     message: str
-    history: list[ChatMessage] = []
+    history: list[ChatMessageModel] = []
 
 
-class PromptRequest(BaseModel):
+class PostPromptRequest(BaseModel):
     """Request model with prompt."""
 
     prompt: str
 
 
 # Response schemas
-class HealthResponse(BaseModel):
-    """Response model for health check endpoint."""
-
-    status: str
-    timestamp: str
+class PostLoginResponse(BaseResponse):
+    """Response model for login endpoint."""
 
 
-class ConfigResponse(BaseModel):
-    """Configuration settings for the CyberQueryAI application."""
+class GetApiConfigResponse(BaseResponse):
+    """Response model for API config endpoint."""
 
-    model: str
-    embedding_model: str
-    host: str
-    port: int
+    model: CyberQueryAIModelConfig
     version: str
 
 
-class ChatResponse(BaseModel):
+class PostChatResponse(BaseResponse):
     """Response model for chat endpoint."""
 
-    message: str
+    model_message: str
 
 
-class CodeGenerationResponse(BaseModel):
+class PostCodeGenerationResponse(BaseResponse):
     """Response model for code generation."""
 
-    code: str
+    generated_code: str
     explanation: str
-    language: str = "bash"
+    language: str
 
 
-class CodeExplanationResponse(BaseModel):
+class PostCodeExplanationResponse(BaseResponse):
     """Response model for code explanation endpoint."""
 
     explanation: str
 
 
-class Exploit(BaseModel):
-    """Response model for exploit endpoint."""
+class ExploitModel(BaseModel):
+    """Exploit model for cybersecurity exploits."""
 
     title: str
     link: str
@@ -71,8 +89,8 @@ class Exploit(BaseModel):
     description: str
 
 
-class ExploitSearchResponse(BaseModel):
+class PostExploitSearchResponse(BaseResponse):
     """Response model for exploit search endpoint."""
 
-    exploits: list[Exploit]
+    exploits: list[ExploitModel]
     explanation: str

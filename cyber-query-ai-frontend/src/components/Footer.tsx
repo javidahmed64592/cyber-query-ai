@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 
 import { getConfig } from "@/lib/api";
-import type { ConfigResponse } from "@/lib/types";
+import type { ApiConfigResponse } from "@/lib/types";
 
 const Footer = () => {
-  const [config, setConfig] = useState<ConfigResponse | null>(null);
+  const [config, setConfig] = useState<ApiConfigResponse | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -35,9 +35,9 @@ const Footer = () => {
             <>
               <span>--version v{config.version}</span>
               <span className="text-[var(--terminal-border)]">|</span>
-              <span>--model {config.model}</span>
+              <span>--model {config.model.model}</span>
               <span className="text-[var(--terminal-border)]">|</span>
-              <span>--rag_model {config.embedding_model}</span>
+              <span>--rag_model {config.model.embedding_model}</span>
             </>
           ) : (
             <span>--loading...</span>

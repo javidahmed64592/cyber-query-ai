@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+import ErrorNotification, {
+  useErrorNotification,
+} from "@/components/ErrorNotification";
 import ExplanationBox from "@/components/ExplanationBox";
 import ScriptBox from "@/components/ScriptBox";
 import TextInput from "@/components/TextInput";
@@ -13,19 +16,18 @@ export default function CodeGeneration() {
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<CodeGenerationResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { error, showError, clearError } = useErrorNotification();
 
   const handleSubmit = async () => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const result = await generateCode(sanitizeInput(prompt));
       setResponse(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      showError(err instanceof Error ? err.message : "An error occurred");
       setResponse(null);
     } finally {
       setIsLoading(false);
@@ -34,6 +36,9 @@ export default function CodeGeneration() {
 
   return (
     <div className="space-y-8">
+      {/* Error Notification */}
+      {error && <ErrorNotification message={error} onClose={clearError} />}
+
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
@@ -63,22 +68,13 @@ export default function CodeGeneration() {
       </div>
 
       {/* Results Section */}
-      {(isLoading || response || error) && (
+      {(isLoading || response) && (
         <div className="max-w-4xl mx-auto space-y-6">
           <hr className="border-[var(--terminal-border)]" />
 
-          {/* Error Display */}
-          {error && (
-            <div className="terminal-border rounded-lg p-4 border-[var(--neon-red)]">
-              <div className="text-[var(--neon-red)] font-medium">
-                ❌ Error: {error}
-              </div>
-            </div>
-          )}
-
           {/* Code Output */}
           <ScriptBox
-            script={response?.code || ""}
+            script={response?.generated_code || ""}
             language={response?.language || "bash"}
             isLoading={isLoading}
           />
@@ -92,7 +88,7 @@ export default function CodeGeneration() {
       )}
 
       {/* Welcome Message */}
-      {!isLoading && !response && !error && (
+      {!isLoading && !response && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <div className="text-[var(--text-muted)] text-lg">
             Welcome to CyberQueryAI! 🚀
