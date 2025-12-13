@@ -12,7 +12,6 @@ RUN npm ci
 
 # Copy frontend source
 COPY cyber-query-ai-frontend/ ./
-COPY configuration/config.json ../configuration/config.json
 
 # Build static export
 RUN npm run build
@@ -49,10 +48,6 @@ ARG PORT=443
 
 WORKDIR /app
 
-# Create non-root user for security
-RUN useradd -m -u 1000 cyberqueryai_user && \
-    chown -R cyberqueryai_user:cyberqueryai_user /app
-
 # Install Git for dependency resolution
 RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 
@@ -77,8 +72,7 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
     cp "${SITE_PACKAGES_DIR}/LICENSE" /app/LICENSE && \
     cp "${SITE_PACKAGES_DIR}/README.md" /app/README.md && \
-    cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md && \
-    chown -R cyberqueryai_user:cyberqueryai_user /app
+    cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md
 
 # Create startup script
 RUN echo '#!/bin/sh\n\
@@ -92,11 +86,7 @@ RUN echo '#!/bin/sh\n\
     generate-certificate\n\
     fi\n\
     exec cyber-query-ai' > /app/start.sh && \
-    chmod +x /app/start.sh && \
-    chown cyberqueryai_user:cyberqueryai_user /app/start.sh
-
-# Switch to non-root user
-USER cyberqueryai_user
+    chmod +x /app/start.sh
 
 # Expose HTTPS port
 EXPOSE $PORT
