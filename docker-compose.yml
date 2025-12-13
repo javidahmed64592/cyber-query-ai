@@ -38,9 +38,9 @@ services:
       start_period: 10s
 
   # Prometheus for metrics collection
-  prometheus:
+  cyberqueryai-prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus
+    container_name: cyberqueryai-prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -59,9 +59,9 @@ services:
       - cyberqueryai
 
   # Grafana for metrics visualization
-  grafana:
+  cyberqueryai-grafana:
     image: grafana/grafana:latest
-    container_name: grafana
+    container_name: cyberqueryai-grafana
     ports:
       - "3000:3000"
     environment:
@@ -76,7 +76,7 @@ services:
       - monitoring
     restart: unless-stopped
     depends_on:
-      - prometheus
+      - cyberqueryai-prometheus
 
 networks:
   monitoring:
