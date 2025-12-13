@@ -40,7 +40,7 @@ jobs:
 
       - name: Build production image
         run: |
-          docker build --build-arg ENV=prod --build-arg PORT=443 -t cyberqueryai:prod .
+          docker build --build-arg PORT=443 -t cyberqueryai:prod .
 
       - name: Start services with docker compose
         env:

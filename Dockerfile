@@ -42,10 +42,6 @@ RUN uv build --wheel
 # Stage 3: Runtime stage
 FROM python:3.13-slim
 
-# Build arguments for environment-specific config
-ARG ENV=dev
-ARG PORT=443
-
 WORKDIR /app
 
 # Install Git and wget for dependency resolution and model checking
@@ -66,10 +62,10 @@ RUN mkdir -p /app/configuration /app/logs /app/certs
 
 # Copy included files from installed wheel to app directory
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
-    cp "${SITE_PACKAGES_DIR}/.here" /app/.here && \
     cp -r "${SITE_PACKAGES_DIR}/configuration" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/static" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
+    cp "${SITE_PACKAGES_DIR}/.here" /app/.here && \
     cp "${SITE_PACKAGES_DIR}/LICENSE" /app/LICENSE && \
     cp "${SITE_PACKAGES_DIR}/README.md" /app/README.md && \
     cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md
@@ -79,7 +75,7 @@ RUN echo '#!/bin/sh\n\
     set -e\n\
     \n\
     # Generate API token if needed\n\
-    if [ ! -f .env ]; then\n\
+    if [ -z "$API_TOKEN_HASH" ]; then\n\
     echo "Generating new token..."\n\
     generate-new-token\n\
     export $(grep -v "^#" .env | xargs)\n\
@@ -92,7 +88,6 @@ RUN echo '#!/bin/sh\n\
     fi\n\
     \n\
     # Check required Ollama models\n\
-    OLLAMA_HOST="http://cyberqueryai-ollama:11434"\n\
     REQUIRED_MODELS="mistral bge-m3"\n\
     \n\
     echo "Checking Ollama connection at $OLLAMA_HOST..."\n\

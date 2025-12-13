@@ -31,22 +31,18 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        ENV: ${ENV:-dev}
         PORT: 443
     container_name: cyberqueryai
     ports:
-      - "${HOST_PORT:-443}:443"
+      - "443:443"
     environment:
-      - ENV=${ENV:-dev}
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
-      # Ollama connection (use Ollama container)
-      - OLLAMA_HOST=${OLLAMA_HOST:-http://cyberqueryai-ollama:11434}
+      - OLLAMA_HOST=http://cyberqueryai-ollama:11434
     volumes:
-      # Persist certificates, logs, and configuration
+      - ./configuration:/app/configuration
       - ./certs:/app/certs
       - ./logs:/app/logs
-      - ./configuration:/app/configuration
     networks:
       - monitoring
     restart: unless-stopped
