@@ -37,10 +37,9 @@ const ChatWindow = () => {
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
-    const sanitizedInput = sanitizeInput(input);
     const userMessage: ChatMessageType = {
       role: "user",
-      content: sanitizedInput,
+      content: input,
     };
 
     // Add user message immediately
@@ -49,8 +48,8 @@ const ChatWindow = () => {
     setIsLoading(true);
 
     try {
-      // Send message with conversation history
-      const response = await sendChatMessage(sanitizedInput, messages);
+      // Send sanitized message with conversation history
+      const response = await sendChatMessage(sanitizeInput(input), messages);
 
       // Add assistant response
       const assistantMessage: ChatMessageType = {
