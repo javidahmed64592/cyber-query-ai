@@ -67,8 +67,7 @@ RUN uv pip install --system --no-cache /tmp/*.whl && \
     rm /tmp/*.whl
 
 # Create required directories
-RUN mkdir -p /app/configuration /app/logs /app/certs && \
-    chown -R cyberqueryai_user:cyberqueryai_user /app/configuration /app/logs /app/certs
+RUN mkdir -p /app/configuration /app/logs /app/certs
 
 # Copy included files from installed wheel to app directory
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
@@ -78,7 +77,8 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
     cp "${SITE_PACKAGES_DIR}/LICENSE" /app/LICENSE && \
     cp "${SITE_PACKAGES_DIR}/README.md" /app/README.md && \
-    cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md
+    cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md && \
+    chown -R cyberqueryai_user:cyberqueryai_user /app
 
 # Create startup script
 RUN echo '#!/bin/sh\n\
