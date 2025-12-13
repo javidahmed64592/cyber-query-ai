@@ -3,6 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 import ChatMessage from "@/components/ChatMessage";
+import ErrorNotification, {
+  useErrorNotification,
+} from "@/components/ErrorNotification";
 import { sendChatMessage } from "@/lib/api";
 import { sanitizeInput } from "@/lib/sanitization";
 import type { ChatMessage as ChatMessageType } from "@/lib/types";
@@ -11,7 +14,7 @@ const ChatWindow = () => {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, showError, clearError } = useErrorNotification();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -44,7 +47,6 @@ const ChatWindow = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
-    setError(null);
 
     try {
       // Send message with conversation history
@@ -53,13 +55,13 @@ const ChatWindow = () => {
       // Add assistant response
       const assistantMessage: ChatMessageType = {
         role: "assistant",
-        content: response.message,
+        content: response.model_message,
       };
       setMessages(prev => [...prev, assistantMessage]);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to send message";
-      setError(errorMessage);
+      showError(errorMessage);
 
       // Add error message to chat
       const errorChatMessage: ChatMessageType = {
@@ -81,11 +83,13 @@ const ChatWindow = () => {
 
   const handleClear = () => {
     setMessages([]);
-    setError(null);
   };
 
   return (
     <div className="flex flex-col h-full">
+      {/* Error Notification */}
+      {error && <ErrorNotification message={error} onClose={clearError} />}
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 ? (

@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+import ErrorNotification, {
+  useErrorNotification,
+} from "@/components/ErrorNotification";
 import ExplanationBox from "@/components/ExplanationBox";
 import TextInput from "@/components/TextInput";
 import { explainCode } from "@/lib/api";
@@ -14,19 +17,18 @@ export default function CodeExplanation() {
   const [response, setResponse] = useState<CodeExplanationResponse | null>(
     null
   );
-  const [error, setError] = useState<string | null>(null);
+  const { error, showError, clearError } = useErrorNotification();
 
   const handleSubmit = async () => {
     if (!code.trim()) return;
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const result = await explainCode(sanitizeInput(code));
       setResponse(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      showError(err instanceof Error ? err.message : "An error occurred");
       setResponse(null);
     } finally {
       setIsLoading(false);
@@ -35,6 +37,9 @@ export default function CodeExplanation() {
 
   return (
     <div className="space-y-8">
+      {/* Error Notification */}
+      {error && <ErrorNotification message={error} onClose={clearError} />}
+
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
@@ -64,18 +69,9 @@ export default function CodeExplanation() {
       </div>
 
       {/* Results Section */}
-      {(isLoading || response || error) && (
+      {(isLoading || response) && (
         <div className="max-w-4xl mx-auto space-y-6">
           <hr className="border-[var(--terminal-border)]" />
-
-          {/* Error Display */}
-          {error && (
-            <div className="terminal-border rounded-lg p-4 border-[var(--neon-red)]">
-              <div className="text-[var(--neon-red)] font-medium">
-                ❌ Error: {error}
-              </div>
-            </div>
-          )}
 
           {/* Explanation */}
           <ExplanationBox
@@ -86,7 +82,7 @@ export default function CodeExplanation() {
       )}
 
       {/* Welcome Message */}
-      {!isLoading && !response && !error && (
+      {!isLoading && !response && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
           <div className="text-[var(--text-muted)] text-lg">
             Understand any cybersecurity code! 🔍

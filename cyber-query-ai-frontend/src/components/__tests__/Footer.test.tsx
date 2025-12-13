@@ -12,19 +12,24 @@ const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
 
 const TEST_VERSION = "x.y.z";
 
+const createMockConfig = () => ({
+  code: 200,
+  message: "Successfully retrieved chatbot configuration.",
+  timestamp: "2023-01-01T00:00:00Z",
+  model: {
+    model: "mistral",
+    embedding_model: "bge-m3",
+  },
+  version: TEST_VERSION,
+});
+
 describe("Footer", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("renders the footer component", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -33,13 +38,7 @@ describe("Footer", () => {
   });
 
   it("displays the terminal prompt", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -47,13 +46,7 @@ describe("Footer", () => {
   });
 
   it("displays the version information from config", async () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -65,13 +58,7 @@ describe("Footer", () => {
   });
 
   it("displays the LLM model when config is loaded", async () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -81,13 +68,7 @@ describe("Footer", () => {
   });
 
   it("displays the RAG model when config is loaded", async () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -97,13 +78,7 @@ describe("Footer", () => {
   });
 
   it("displays pipe separators between config values", async () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -130,13 +105,7 @@ describe("Footer", () => {
   });
 
   it("has fixed positioning at the bottom", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -145,13 +114,7 @@ describe("Footer", () => {
   });
 
   it("has proper z-index for overlay", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -160,13 +123,7 @@ describe("Footer", () => {
   });
 
   it("has terminal styling", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -179,13 +136,7 @@ describe("Footer", () => {
   });
 
   it("has responsive layout with flexbox", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -200,13 +151,7 @@ describe("Footer", () => {
   });
 
   it("has monospace font styling", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -215,13 +160,7 @@ describe("Footer", () => {
   });
 
   it("has neon green color for terminal prompt", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -230,13 +169,7 @@ describe("Footer", () => {
   });
 
   it("has proper container constraints", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -247,13 +180,7 @@ describe("Footer", () => {
   });
 
   it("renders with semantic footer element", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -262,13 +189,7 @@ describe("Footer", () => {
   });
 
   it("includes version from config API", async () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 
@@ -280,13 +201,7 @@ describe("Footer", () => {
   });
 
   it("fetches config on mount", () => {
-    mockGetConfig.mockResolvedValue({
-      model: "mistral",
-      embedding_model: "bge-m3",
-      host: "localhost",
-      port: 8000,
-      version: TEST_VERSION,
-    });
+    mockGetConfig.mockResolvedValue(createMockConfig());
 
     render(<Footer />);
 

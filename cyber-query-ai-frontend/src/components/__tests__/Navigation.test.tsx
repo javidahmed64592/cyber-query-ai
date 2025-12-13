@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import React from "react";
 
 import Navigation from "@/components/Navigation";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { useHealthStatus } from "@/lib/api";
 
 // Mock Next.js Link component
@@ -27,12 +28,20 @@ jest.mock("next/link", () => {
 // Mock Next.js usePathname hook
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+  })),
 }));
 
 // Mock the useHealthStatus hook
 jest.mock("../../lib/api", () => ({
   useHealthStatus: jest.fn(),
 }));
+
+// Helper function to render components with AuthProvider
+const renderWithAuth = (ui: React.ReactElement) => {
+  return render(<AuthProvider>{ui}</AuthProvider>);
+};
 
 const mockUseHealthStatus = useHealthStatus as jest.MockedFunction<
   typeof useHealthStatus
@@ -45,14 +54,16 @@ describe("Navigation", () => {
     jest.clearAllMocks();
     mockUseHealthStatus.mockReturnValue("online");
     mockUsePathname.mockReturnValue("/");
+    // Mock localStorage
+    Storage.prototype.getItem = jest.fn(() => "test-api-key");
   });
   it("renders the CyberQueryAI logo", () => {
-    render(<Navigation />);
+    renderWithAuth(<Navigation />);
     expect(screen.getByText("CyberQueryAI")).toBeInTheDocument();
   });
 
   it("renders all navigation items", () => {
-    render(<Navigation />);
+    renderWithAuth(<Navigation />);
     // Check that navigation items exist (they appear in both desktop and mobile)
     expect(screen.getAllByText("AI Assistant")).toHaveLength(2);
     expect(screen.getAllByText("Code Generation")).toHaveLength(2);
@@ -62,7 +73,7 @@ describe("Navigation", () => {
   });
 
   it("renders navigation links with correct hrefs", () => {
-    render(<Navigation />);
+    renderWithAuth(<Navigation />);
     // Get desktop navigation links (first occurrence)
     const aiAssistantLinks = screen.getAllByRole("link", {
       name: /AI Assistant/,
@@ -91,7 +102,7 @@ describe("Navigation", () => {
   it("applies active styling to current page", () => {
     mockUsePathname.mockReturnValue("/code-generation");
 
-    render(<Navigation />);
+    renderWithAuth(<Navigation />);
     const codeGenLinks = screen.getAllByRole("link", {
       name: /Code Generation/,
     });
@@ -102,13 +113,13 @@ describe("Navigation", () => {
 
   describe("Mobile Navigation", () => {
     it("renders mobile menu button", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
       expect(menuButton).toBeInTheDocument();
     });
 
     it("toggles mobile menu when button is clicked", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
 
       // Find all elements with lg:hidden class and get the second one (the mobile menu content)
@@ -133,7 +144,7 @@ describe("Navigation", () => {
     });
 
     it("shows hamburger icon when menu is closed", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const hamburgerIcon = screen
         .getByRole("button", { name: /Open main menu/ })
         .querySelector('svg[class*="block"]');
@@ -141,7 +152,7 @@ describe("Navigation", () => {
     });
 
     it("shows close icon when menu is open", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
 
       fireEvent.click(menuButton);
@@ -153,7 +164,7 @@ describe("Navigation", () => {
     });
 
     it("closes mobile menu when navigation link is clicked", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
 
       // Open menu
@@ -181,7 +192,7 @@ describe("Navigation", () => {
     });
 
     it("renders all navigation items in mobile menu", () => {
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
 
       fireEvent.click(menuButton);
@@ -197,7 +208,7 @@ describe("Navigation", () => {
     it("applies active styling to current page in mobile menu", () => {
       mockUsePathname.mockReturnValue("/about");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
       const menuButton = screen.getByRole("button", { name: /Open main menu/ });
 
       fireEvent.click(menuButton);
@@ -212,7 +223,7 @@ describe("Navigation", () => {
     it("renders HealthIndicator in the navigation", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       // The HealthIndicator should render a circular indicator
       const indicators = screen
@@ -224,7 +235,7 @@ describe("Navigation", () => {
     it("displays online status indicator when server is online", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       const indicator = screen.getByTitle("Server: ONLINE");
       expect(indicator).toBeInTheDocument();
@@ -234,7 +245,7 @@ describe("Navigation", () => {
     it("displays offline status indicator when server is offline", () => {
       mockUseHealthStatus.mockReturnValue("offline");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       const indicator = screen.getByTitle("Server: OFFLINE");
       expect(indicator).toBeInTheDocument();
@@ -244,7 +255,7 @@ describe("Navigation", () => {
     it("displays checking status indicator when status is being checked", () => {
       mockUseHealthStatus.mockReturnValue("checking");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       const indicator = screen.getByTitle("Server: CHECKING");
       expect(indicator).toBeInTheDocument();
@@ -255,7 +266,7 @@ describe("Navigation", () => {
     it("positions HealthIndicator next to the logo", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       // Check that both the logo and health indicator are present
       expect(screen.getByText("CyberQueryAI")).toBeInTheDocument();
@@ -270,7 +281,7 @@ describe("Navigation", () => {
     it("includes tooltip with status information", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       const healthIndicator = screen.getByTitle("Server: ONLINE");
       expect(healthIndicator).toHaveAttribute("title", "Server: ONLINE");
@@ -279,7 +290,7 @@ describe("Navigation", () => {
     it("calls useHealthStatus hook when Navigation is rendered", () => {
       mockUseHealthStatus.mockReturnValue("online");
 
-      render(<Navigation />);
+      renderWithAuth(<Navigation />);
 
       expect(mockUseHealthStatus).toHaveBeenCalledTimes(1);
     });

@@ -1,5 +1,12 @@
 // TypeScript types matching FastAPI Pydantic models
 
+// Base response types
+export interface BaseResponse {
+  code: number;
+  message: string;
+  timestamp: string;
+}
+
 // Request types
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -15,31 +22,42 @@ export interface PromptRequest {
   prompt: string;
 }
 
-// Response types
-export interface HealthResponse {
-  status: string;
-  timestamp: string;
+// Authentication types
+export interface LoginResponse extends BaseResponse {}
+
+export interface AuthContextType {
+  apiKey: string | null;
+  isAuthenticated: boolean;
+  login: (apiKey: string) => Promise<void>;
+  logout: () => void;
 }
 
-export interface ConfigResponse {
+// Response types
+export interface HealthResponse extends BaseResponse {
+  status: string;
+}
+
+export interface ModelConfig {
   model: string;
   embedding_model: string;
-  host: string;
-  port: number;
+}
+
+export interface ApiConfigResponse extends BaseResponse {
+  model: ModelConfig;
   version: string;
 }
 
-export interface ChatResponse {
-  message: string;
+export interface ChatResponse extends BaseResponse {
+  model_message: string;
 }
 
-export interface CodeGenerationResponse {
-  code: string;
+export interface CodeGenerationResponse extends BaseResponse {
+  generated_code: string;
   explanation: string;
   language: string;
 }
 
-export interface CodeExplanationResponse {
+export interface CodeExplanationResponse extends BaseResponse {
   explanation: string;
 }
 
@@ -50,7 +68,7 @@ export interface Exploit {
   description: string;
 }
 
-export interface ExploitSearchResponse {
+export interface ExploitSearchResponse extends BaseResponse {
   exploits: Exploit[];
   explanation: string;
 }
