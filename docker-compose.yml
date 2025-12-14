@@ -7,9 +7,11 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - cyber-query-ai-ollama-data:/root/.ollama
+      - ollama-data:/root/.ollama
     networks:
-      - monitoring
+      monitoring:
+        aliases:
+          - ollama
     restart: unless-stopped
     deploy:
       resources:
@@ -28,14 +30,16 @@ services:
   # CPU-only Ollama variant (for CI/CD or systems without GPU)
   cyber-query-ai-ollama-cpu:
     image: ollama/ollama:latest
-    container_name: cyber-query-ai-ollama
+    container_name: cyber-query-ai-ollama-cpu
     profiles: ["cpu"]
     ports:
       - "11434:11434"
     volumes:
-      - cyber-query-ai-ollama-data:/root/.ollama
+      - ollama-data:/root/.ollama
     networks:
-      - monitoring
+      monitoring:
+        aliases:
+          - ollama
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "ollama", "list"]
@@ -58,7 +62,7 @@ services:
     environment:
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
-      - OLLAMA_HOST=http://cyber-query-ai-ollama:11434
+      - OLLAMA_HOST=http://ollama:11434
     volumes:
       - ./configuration:/app/configuration
       - ./certs:/app/certs
@@ -70,6 +74,10 @@ services:
     depends_on:
       cyber-query-ai-ollama:
         condition: service_healthy
+        required: false
+      cyber-query-ai-ollama-cpu:
+        condition: service_healthy
+        required: false
     healthcheck:
       test:
         [
@@ -91,7 +99,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - cyber-query-ai-prometheus-data:/prometheus
+      - prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
@@ -117,7 +125,7 @@ services:
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - cyber-query-ai-grafana-data:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
     networks:
       - monitoring
     restart: unless-stopped
@@ -129,6 +137,6 @@ networks:
     driver: bridge
 
 volumes:
-  cyber-query-ai-ollama-data:
-  cyber-query-ai-prometheus-data:
-  cyber-query-ai-grafana-data:
+  ollama-data:
+  prometheus-data:
+  grafana-data:
