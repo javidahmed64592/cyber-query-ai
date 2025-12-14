@@ -1,9 +1,11 @@
 services:
-  # Ollama LLM service with GPU support (default)
-  # For systems without GPU, use: docker compose --profile cpu up -d
+  # Ollama LLM service with GPU support
+  # Use (GPU): docker compose --profile gpu up -d
+  # Use (CPU): docker compose --profile cpu up -d
   cyber-query-ai-ollama:
     image: ollama/ollama:latest
     container_name: cyber-query-ai-ollama
+    profiles: ["gpu"]
     ports:
       - "11434:11434"
     volumes:
