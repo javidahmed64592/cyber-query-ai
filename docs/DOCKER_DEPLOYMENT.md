@@ -5,26 +5,25 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 
 <!-- omit from toc -->
 ## Table of Contents
-- [Prerequisites](#prerequisites)
-- [Quick Start](#quick-start)
-- [Docker Compose Services](#docker-compose-services)
-- [Ollama Integration](#ollama-integration)
-  - [GPU Support (Default)](#gpu-support-default)
-  - [CPU-Only Mode](#cpu-only-mode)
-  - [Model Management](#model-management)
-  - [Health Checks](#health-checks)
-- [Multi-Stage Build Process](#multi-stage-build-process)
-- [RAG System Integration](#rag-system-integration)
-- [Accessing CyberQueryAI](#accessing-cyberqueryai)
-  - [Web Interface](#web-interface)
-  - [API Endpoints](#api-endpoints)
-- [Troubleshooting](#troubleshooting)
-  - [Ollama Connection Issues](#ollama-connection-issues)
-  - [Missing Models](#missing-models)
-  - [GPU Not Available](#gpu-not-available)
-  - [Frontend Not Loading](#frontend-not-loading)
-  - [RAG System Errors](#rag-system-errors)
-  - [LLM Responses Slow or Timeout](#llm-responses-slow-or-timeout)
+- [The CPU variant uses the same image but without GPU reservations](#the-cpu-variant-uses-the-same-image-but-without-gpu-reservations)
+    - [Health Checks](#health-checks)
+  - [Multi-Stage Build Process](#multi-stage-build-process)
+  - [RAG System Integration](#rag-system-integration)
+  - [Accessing CyberQueryAI](#accessing-cyberqueryai)
+    - [Web Interface](#web-interface)
+    - [API Endpoints](#api-endpoints)
+  - [GitHub Container Registry](#github-container-registry)
+    - [Available Images](#available-images)
+    - [Pulling Images](#pulling-images)
+    - [Using with Docker Compose](#using-with-docker-compose)
+    - [Building vs. Pulling](#building-vs-pulling)
+  - [Troubleshooting](#troubleshooting)
+    - [Ollama Connection Issues](#ollama-connection-issues)
+    - [Missing Models](#missing-models)
+    - [GPU Not Available](#gpu-not-available)
+    - [Frontend Not Loading](#frontend-not-loading)
+    - [RAG System Errors](#rag-system-errors)
+    - [LLM Responses Slow or Timeout](#llm-responses-slow-or-timeout)
 
 ## Prerequisites
 
@@ -35,27 +34,66 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 
 ## Quick Start
 
-```bash
-# Generate API token (if not already done)
-uv sync
-uv run generate-new-token
+### Using Pre-built Image (Recommended)
 
-# Start all services (CyberQueryAI, Ollama, Prometheus, Grafana)
+CyberQueryAI releases are automatically published to GitHub Container Registry as multi-platform Docker images:
+
+```bash
+# Pull the latest release
+docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
+
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/javidahmed64592/cyber-query-ai/main/docker-compose.yml
+
+# Start all services (uses GPU by default if available)
 docker compose up -d
+
+# For CPU-only systems, use the cpu profile
+# docker compose --profile cpu up -d
 
 # View logs
 docker compose logs -f cyber-query-ai
 
-# Pull required models (in separate terminal)
+# Pull required Ollama models (in a separate terminal)
 docker exec cyber-query-ai-ollama ollama pull mistral
 docker exec cyber-query-ai-ollama ollama pull bge-m3
 
-# Access the application
-# Open https://localhost:443 in your browser
+# Access the application at https://localhost:443
+```
+
+**Note:**
+- The container automatically generates an API token and SSL certificates on first run if the `API_TOKEN_HASH` environment variable has not been set.
+- The Ollama service does not automatically pull models - you must manually pull the required models (`mistral` and `bge-m3`) as shown above.
+
+### Building from Source
+
+For development or customization:
+
+```bash
+# Clone the repository
+git clone https://github.com/javidahmed64592/cyber-query-ai.git
+cd cyber-query-ai
+
+# (Optional) Generate persistent API token for development
+# If skipped, Docker will auto-generate a new token on each restart
+uv sync
+uv run generate-new-token
+
+# Build and start all services
+docker compose up --build -d
+
+# View logs
+docker compose logs -f cyber-query-ai
+
+# Pull required Ollama models
+docker exec cyber-query-ai-ollama ollama pull mistral
+docker exec cyber-query-ai-ollama ollama pull bge-m3
+
+# Access the application at https://localhost:443
 # Login with the API token generated earlier
 
 # Stop services
-docker compose down
+docker compose down --volumes --remove-orphans
 ```
 
 ## Docker Compose Services
@@ -86,7 +124,14 @@ CyberQueryAI extends the template server with four services:
 
 ### GPU Support (Default)
 
-By default, Ollama uses GPU acceleration via NVIDIA Container Toolkit:
+By default, Ollama uses GPU acceleration if NVIDIA GPU and Container Toolkit are available:
+
+```bash
+# Default behavior (uses GPU if available)
+docker compose up -d
+```
+
+This configuration uses:
 
 ```yaml
 services:
@@ -100,23 +145,26 @@ services:
               capabilities: [gpu]
 ```
 
-**Verify GPU access:**
+### CPU-Only Mode
+
+For systems without NVIDIA GPU or in CI/CD environments, explicitly use the `cpu` profile:
+
+```bash
+# Use CPU profile for systems without GPU
+docker compose --profile cpu up -d
+```
+
+**Verify GPU access (GPU mode only):**
 ```bash
 docker exec cyber-query-ai-ollama nvidia-smi
 ```
-
-### CPU-Only Mode
-
-For systems without GPU or CI/CD environments:
-
-```bash
-# Start with CPU profile
-docker compose --profile cpu up -d
 
 # The CPU variant uses the same image but without GPU reservations
 ```
 
 ### Model Management
+
+**Required models must be manually pulled.** The application will not function without these models:
 
 **Required models** (configured in `configuration/config.json`):
 - **LLM**: `mistral` (default, used for chat, code generation, explanations)
@@ -124,7 +172,7 @@ docker compose --profile cpu up -d
 
 **Pull models:**
 ```bash
-# After starting containers
+# After starting containers, pull required models
 docker exec cyber-query-ai-ollama ollama pull mistral
 docker exec cyber-query-ai-ollama ollama pull bge-m3
 
@@ -214,6 +262,68 @@ All endpoints require `X-API-Key` header except where noted:
 
 **Authenticated:**
 - `POST /api/chat` - Chat with LLM (RAG-enhanced)
+
+## GitHub Container Registry
+
+CyberQueryAI Docker images are automatically published to GitHub Container Registry on every release.
+
+### Available Images
+
+**Registry:** `ghcr.io/javidahmed64592/cyber-query-ai`
+
+**Tags:**
+- `latest` - Most recent stable release (recommended)
+- `v1.2.3` - Specific semantic version
+- `1.2` - Major.minor version (receives patch updates)
+- `1` - Major version only (receives minor and patch updates)
+
+**Platforms:**
+- `linux/amd64` (Intel/AMD 64-bit)
+- `linux/arm64` (ARM 64-bit, e.g., Apple Silicon, Raspberry Pi)
+
+### Pulling Images
+
+```bash
+# Pull latest release
+docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
+
+# Pull specific version
+docker pull ghcr.io/javidahmed64592/cyber-query-ai:v0.1.0
+
+# Pull major version (gets updates automatically)
+docker pull ghcr.io/javidahmed64592/cyber-query-ai:0
+```
+
+### Using with Docker Compose
+
+The `docker-compose.yml` file in the repository already references the published image:
+
+```yaml
+services:
+  cyber-query-ai:
+    image: ghcr.io/javidahmed64592/cyber-query-ai:latest
+    # ... other configuration
+```
+
+To use a specific version, edit `docker-compose.yml`:
+
+```yaml
+services:
+  cyber-query-ai:
+    image: ghcr.io/javidahmed64592/cyber-query-ai:v0.1.0
+```
+
+### Building vs. Pulling
+
+**Pull pre-built image (faster):**
+```bash
+docker compose --profile cpu up -d
+```
+
+**Build from source (for development):**
+```bash
+docker compose --profile cpu up --build -d
+```
 - `POST /api/code-generation` - Generate security scripts
 - `POST /api/code-explanation` - Explain security code
 - `POST /api/exploit-search` - Search vulnerability information

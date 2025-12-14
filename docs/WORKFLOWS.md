@@ -57,13 +57,14 @@ It consists of the following jobs:
 
 ## Build Workflow
 
-The Build workflow runs on pushes to the `main` branch and manual dispatch, consisting of the following jobs:
+The Build workflow runs on pushes and pull requests to the `main` branch.
+It consists of the following jobs:
 
 ### build_frontend
   - Checkout code
-  - Set up Node.js  and dependencies with npm caching (via custom action)
+  - Set up Node.js and dependencies with npm caching (via custom action)
   - Build frontend with `npm run build`
-  - Upload frontend build artifact
+  - Upload frontend build artifact (`cyber_query_ai_frontend`)
 
 ### build_wheel
   - Depends on `build_frontend` job
@@ -72,54 +73,65 @@ The Build workflow runs on pushes to the `main` branch and manual dispatch, cons
   - Download frontend build artifact to `static/` directory
   - Build wheel with `uv build`
   - Inspect wheel contents for verification
-  - Upload wheel artifact
+  - Upload wheel artifact (`cyber_query_ai_wheel`)
 
-### create_installer
+### verify_structure
   - Depends on `build_wheel` job
   - Checkout code
-  - Download wheel artifact
-  - Prepare release directory:
-    - Move wheel to `release/` directory
-    - Make installer script executable
-    - Rename to versioned directory name
-  - Create compressed tarball of release package
-  - Upload release tarball artifact
-
-### check_installer
-  - Depends on `create_installer` job
-  - Checkout code
   - Setup Python environment with core dependencies (via custom action)
-  - Download release tarball artifact
-  - Extract tarball
-  - Verify pre-installation directory structure:
-    - Check for wheel file, readme.txt, and executable installer script
-  - Run installer script (`install_cyber_query_ai.sh`)
-  - Verify post-installation directory structure:
-    - Ensure virtual environment (`.venv`) created
-    - Verify directories: `configuration/`, `static/`, `certs/`, `logs/`
-    - Check files: `.here`, `LICENSE`, `README.md`, `SECURITY.md`, `configuration/config.json`
-    - Verify SSL certificates: `certs/cert.pem`, `certs/key.pem`
-    - Check executables: `cyber-query-ai`, `uninstall_cyber_query_ai.sh`
-    - Ensure installer files cleaned up (wheel, readme.txt, install script removed)
+  - Download wheel artifact
+  - Install wheel using `uv pip install`
+  - Verify installed package structure in site-packages:
+    - Check for required directories: `cyber_query_ai/`, `configuration/`, `rag_data/`, `static/`
+    - Verify Python modules: `__init__.py`, `main.py`, `server.py`, `chatbot.py`, `models.py`, `helpers.py`, `rag.py`
+    - Check configuration and data files: `configuration/config.json`, `rag_data/tools.json`
+    - Verify static build: `static/index.html`, `static/_next/`
+    - Check documentation: `README.md`, `SECURITY.md`, `LICENSE`, `.here`
+  - Verify required binaries are installed:
+    - `cyber-query-ai` - Main application executable
+    - `generate-certificate` - SSL certificate generator
+    - `generate-new-token` - API token generator
+  - Display directory structure with tree views for verification
 
 ## Docker Workflow
 
-The Docker workflow runs on pushes and pull requests to the `main` branch.
+The Docker workflow runs on pushes, pull requests to the `main` branch, and manual dispatch.
 It consists of the following jobs:
 
-### docker-development
-- Checkout code
-- Setup Python environment with core dependencies (via custom action)
-- Build and start services with docker compose
-- Show server logs
-- **Health check** using reusable composite action `.github/actions/docker-check-containers` that checks CyberQueryAI, Prometheus, Grafana, and Ollama
-- Stop services
+### build
+  - Checkout code
+  - Setup Python environment with core dependencies (via custom action)
+  - Build and start services with `docker compose --profile cpu up --build -d`
+  - Wait for services to start (5 seconds)
+  - Show server logs from `cyber-query-ai` container
+  - **Health check** using reusable composite action `.github/actions/docker-check-containers`:
+    - Verifies CyberQueryAI is running on port 443
+    - Checks Prometheus and Grafana services
+    - Validates Ollama integration
+  - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
 
-### docker-production
-- Checkout code
-- Setup Python environment with core dependencies (via custom action)
-- Build production image
-- Start services with docker compose
-- Show server logs
-- **Health check** using reusable composite action `.github/actions/docker-check-containers` that checks Python Template Server, Prometheus, Grafana, and Ollama
-- Stop services
+### publish-release
+  - Depends on `build` job
+  - Only runs on push to `main` branch (not PRs)
+  - Requires `contents: write` and `packages: write` permissions
+  - Checkout code
+  - Setup Python environment with dev dependencies (via custom action)
+  - Extract version from `pyproject.toml` using Python's `tomllib`
+  - Check if Git tag already exists (skip if duplicate)
+  - Set up Docker Buildx for multi-platform builds
+  - Log in to GitHub Container Registry (ghcr.io)
+  - Extract Docker metadata with semantic versioning tags:
+    - `v1.2.3` - Exact version
+    - `1.2` - Major.minor
+    - `1` - Major only
+    - `latest` - Latest stable release
+  - Build and push multi-platform Docker images:
+    - Platforms: `linux/amd64`, `linux/arm64`
+    - Registry: `ghcr.io/<owner>/<repo>`
+    - Uses GitHub Actions cache for layer caching
+  - Generate release notes with Docker-focused instructions:
+    - Quick start with docker compose
+    - Standalone Docker run command
+    - Feature highlights
+    - Available tags and documentation links
+  - Create GitHub Release with version tag and release notes
