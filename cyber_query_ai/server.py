@@ -68,6 +68,19 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Serving static files from: %s", self.static_dir)
         self.app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
 
+    @staticmethod
+    def validate_keys(required_keys: set[str], response_dict: dict) -> list[str]:
+        """Validate that all required keys are present in the response dictionary.
+
+        :param set[str] required_keys: Set of required keys
+        :param dict response_dict: Response dictionary to validate
+        :return list[str]: List of missing keys, empty if all required keys are present
+        """
+        missing_keys = list(required_keys - response_dict.keys())
+        if missing_keys:
+            logger.error("Missing required keys in LLM response: %s", missing_keys)
+        return missing_keys
+
     def validate_config(self, config_data: dict) -> CyberQueryAIConfig:
         """Validate and parse the configuration data into a CyberQueryAIConfig.
 
@@ -135,12 +148,10 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(str(model_response.content))
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := CHAT_FIELDS - parsed.keys():
-                error_msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(error_msg)
+            if missing_keys := self.validate_keys(CHAT_FIELDS, parsed):
                 return PostChatResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=error_msg,
+                    message=f"Missing required keys in LLM response: {missing_keys}",
                     timestamp=PostChatResponse.current_timestamp(),
                     model_message="",
                 )
@@ -182,12 +193,10 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(str(model_response.content))
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := CODE_GENERATE_FIELDS - parsed.keys():
-                error_msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(error_msg)
+            if missing_keys := self.validate_keys(CODE_GENERATE_FIELDS, parsed):
                 return PostCodeGenerationResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=error_msg,
+                    message=f"Missing required keys in LLM response: {missing_keys}",
                     timestamp=PostCodeGenerationResponse.current_timestamp(),
                     generated_code="",
                     explanation="",
@@ -237,12 +246,10 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(str(model_response.content))
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := CODE_EXPLAIN_FIELDS - parsed.keys():
-                error_msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(error_msg)
+            if missing_keys := self.validate_keys(CODE_EXPLAIN_FIELDS, parsed):
                 return PostCodeExplanationResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=error_msg,
+                    message=f"Missing required keys in LLM response: {missing_keys}",
                     timestamp=PostCodeExplanationResponse.current_timestamp(),
                     explanation="",
                 )
@@ -284,12 +291,10 @@ class CyberQueryAIServer(TemplateServer):
             cleaned_response = clean_json_response(str(model_response.content))
             parsed = json.loads(cleaned_response)
 
-            if missing_keys := EXPLOIT_SEARCH_FIELDS - parsed.keys():
-                error_msg = f"Missing required keys in LLM response: {missing_keys}"
-                logger.error(error_msg)
+            if missing_keys := self.validate_keys(EXPLOIT_SEARCH_FIELDS, parsed):
                 return PostExploitSearchResponse(
                     code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=error_msg,
+                    message=f"Missing required keys in LLM response: {missing_keys}",
                     timestamp=PostExploitSearchResponse.current_timestamp(),
                     exploits=[],
                     explanation="",
