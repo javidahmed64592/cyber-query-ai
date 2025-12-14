@@ -19,6 +19,7 @@ jobs:
 
       - name: Build and start services with docker compose
         run: |
+          docker compose down --volumes --remove-orphans
           docker compose --profile cpu up --build -d
           sleep 5  # Wait for services to start
 
