@@ -18,7 +18,7 @@ jobs:
 
       - name: Build and start services with docker compose
         run: |
-          docker compose down --volumes --remove-orphans
+          docker compose --profile cpu down --volumes --remove-orphans
           docker compose --profile cpu up --build -d
           sleep 5  # Wait for services to start
 
@@ -30,7 +30,7 @@ jobs:
           port: 443
 
       - name: Stop services
-        run: docker compose down --volumes --remove-orphans
+        run: docker compose --profile cpu down --volumes --remove-orphans
 
   publish-release:
     runs-on: ubuntu-latest
