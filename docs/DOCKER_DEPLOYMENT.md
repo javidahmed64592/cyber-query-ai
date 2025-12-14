@@ -45,16 +45,18 @@ docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
 # Download docker-compose.yml
 curl -O https://raw.githubusercontent.com/javidahmed64592/cyber-query-ai/main/docker-compose.yml
 
-# Start all services (uses GPU by default if available)
-docker compose up -d
+# Start all services
+# For GPU systems:
+docker compose --profile gpu up -d
 
-# For CPU-only systems, use the cpu profile
-# docker compose --profile cpu up -d
+# For CPU-only systems:
+docker compose --profile cpu up -d
 
 # View logs
 docker compose logs -f cyber-query-ai
 
 # Pull required Ollama models (in a separate terminal)
+# Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
 docker exec cyber-query-ai-ollama ollama pull mistral
 docker exec cyber-query-ai-ollama ollama pull bge-m3
 
@@ -80,20 +82,27 @@ uv sync
 uv run generate-new-token
 
 # Build and start all services
-docker compose up --build -d
+# For GPU systems:
+docker compose --profile gpu up --build -d
+
+# For CPU-only systems:
+docker compose --profile cpu up --build -d
 
 # View logs
 docker compose logs -f cyber-query-ai
 
 # Pull required Ollama models
+# Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
 docker exec cyber-query-ai-ollama ollama pull mistral
 docker exec cyber-query-ai-ollama ollama pull bge-m3
 
 # Access the application at https://localhost:443
 # Login with the API token generated earlier
 
-# Stop services
-docker compose down --volumes --remove-orphans
+# Stop services (include the profile used)
+docker compose --profile gpu down --volumes --remove-orphans
+# or for CPU:
+# docker compose --profile cpu down --volumes --remove-orphans
 ```
 
 ## Docker Compose Services
@@ -122,13 +131,13 @@ CyberQueryAI extends the template server with four services:
 
 ## Ollama Integration
 
-### GPU Support (Default)
+### GPU Support
 
-By default, Ollama uses GPU acceleration if NVIDIA GPU and Container Toolkit are available:
+For systems with NVIDIA GPU and Container Toolkit, use the `gpu` profile:
 
 ```bash
-# Default behavior (uses GPU if available)
-docker compose up -d
+# Use GPU profile for NVIDIA GPU acceleration
+docker compose --profile gpu up -d
 ```
 
 This configuration uses:
@@ -147,12 +156,18 @@ services:
 
 ### CPU-Only Mode
 
-For systems without NVIDIA GPU or in CI/CD environments, explicitly use the `cpu` profile:
+For systems without NVIDIA GPU or in CI/CD environments, use the `cpu` profile:
 
 ```bash
 # Use CPU profile for systems without GPU
 docker compose --profile cpu up -d
 ```
+
+**Important Notes:**
+- Both GPU and CPU modes require explicit profile selection
+- GPU profile: Container name is `cyber-query-ai-ollama`
+- CPU profile: Container name is `cyber-query-ai-ollama-cpu`
+- Both services use the network alias `ollama` for internal communication
 
 **Verify GPU access (GPU mode only):**
 ```bash

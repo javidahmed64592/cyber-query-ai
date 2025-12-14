@@ -108,12 +108,23 @@ jobs:
           # Pull the Docker image
           docker pull ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
 
-          # Run with docker compose
+          # Download docker-compose.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+
+          # Run with GPU support (requires NVIDIA GPU + Container Toolkit)
+          docker compose --profile gpu up -d
+
+          # OR run with CPU-only mode
           docker compose --profile cpu up -d
+
+          # Pull required Ollama models
+          docker exec cyber-query-ai-ollama ollama pull mistral
+          docker exec cyber-query-ai-ollama ollama pull bge-m3
           ```
 
           Access the application at `https://localhost:443`
+
+          **Note:** Use `cyber-query-ai-ollama` (GPU) or `cyber-query-ai-ollama-cpu` (CPU) as the container name when pulling models.
 
           ### Features
 

@@ -47,9 +47,7 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
   - [**About** (`/about`)](#about-about)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [Option 1: Docker (Recommended)](#option-1-docker-recommended)
-    - [Option 2: From Source (Development)](#option-2-from-source-development)
+  - [Quick Start](#quick-start)
   - [Configuration](#configuration)
     - [Docker Deployment](#docker-deployment)
     - [Local Development](#local-development)
@@ -170,11 +168,8 @@ Comprehensive information about the application, including:
 
 **Note:** You can configure the LLMs used in the application by editing the `config.json` file.
 
-### Installation
+### Quick Start
 
-#### Option 1: Docker (Recommended)
-
-**Quick Start:**
 ```bash
 # Pull the latest image
 docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
@@ -182,24 +177,22 @@ docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
 # Download docker-compose.yml
 curl -O https://raw.githubusercontent.com/javidahmed64592/cyber-query-ai/main/docker-compose.yml
 
-# Start the application (uses GPU by default if available)
-docker compose up -d
+# Start the application
+# For GPU systems:
+docker compose --profile gpu up -d
+
+# For CPU-only systems (no NVIDIA GPU):
+docker compose --profile cpu up -d
 
 # Pull required Ollama models (in a separate terminal)
+# Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
 docker exec cyber-query-ai-ollama ollama pull mistral
 docker exec cyber-query-ai-ollama ollama pull bge-m3
 
 # Access at https://localhost:443
 ```
 
-**CPU-Only Mode (systems without NVIDIA GPU):**
-```bash
-# Use CPU profile explicitly
-docker compose --profile cpu up -d
-
-# Pull required models
-docker exec cyber-query-ai-ollama ollama pull mistral
-docker exec cyber-query-ai-ollama ollama pull bge-m3
+**Note:** Both GPU and CPU modes require explicit profile selection (`--profile gpu` or `--profile cpu`)
 ```
 
 See [Docker Deployment Guide](docs/DOCKER_DEPLOYMENT.md) for advanced configuration.
