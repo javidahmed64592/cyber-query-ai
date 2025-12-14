@@ -4,6 +4,7 @@ import asyncio
 import json
 from collections.abc import Generator
 from importlib.metadata import PackageMetadata
+from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -88,6 +89,22 @@ class TestCyberQueryAIServer:
         """Test CyberQueryAIServer initialization."""
         assert isinstance(mock_server.config, CyberQueryAIConfig)
         assert isinstance(mock_server.chatbot, Chatbot)
+        assert isinstance(mock_server.static_dir, Path)
+
+    def test_init_static_dir_not_exists(
+        self,
+        mock_cyber_query_ai_config: CyberQueryAIConfig,
+        mock_chatbot: MagicMock,
+        mock_exists: MagicMock,
+    ) -> None:
+        """Test CyberQueryAIServer initialization when static directory does not exist."""
+        mock_exists.return_value = False
+        with pytest.raises(SystemExit):
+            with (
+                patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
+                patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
+            ):
+                CyberQueryAIServer(mock_cyber_query_ai_config)
 
     def test_validate_config(
         self, mock_server: CyberQueryAIServer, mock_cyber_query_ai_config: CyberQueryAIConfig

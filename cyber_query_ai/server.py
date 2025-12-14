@@ -57,9 +57,12 @@ class CyberQueryAIServer(TemplateServer):
             tools_json_filepath=get_rag_tools_path(),
         )
 
-        self.static_dir = get_static_dir()
-        if self.static_dir.exists():
-            self.app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
+        if not (static_dir := get_static_dir()).exists():
+            logger.error(f"Static directory not found at {static_dir}.")
+            raise SystemExit(1)
+
+        self.static_dir = static_dir
+        self.app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
 
     def validate_config(self, config_data: dict) -> CyberQueryAIConfig:
         """Validate and parse the configuration data into a CyberQueryAIConfig.
