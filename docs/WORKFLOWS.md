@@ -69,7 +69,7 @@ It consists of the following jobs:
 ### build_wheel
   - Depends on `build_frontend` job
   - Checkout code
-  - Setup Python environment with core dependencies (via custom action)
+  - Setup Python environment with dev dependencies (via custom action)
   - Download frontend build artifact to `static/` directory
   - Build wheel with `uv build`
   - Inspect wheel contents for verification

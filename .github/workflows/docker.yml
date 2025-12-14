@@ -15,7 +15,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
 
       - name: Build and start services with docker compose
         run: |
@@ -41,9 +40,6 @@ jobs:
       contents: write
       packages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
-
       - name: Get version from pyproject.toml
         id: get_version
         run: |

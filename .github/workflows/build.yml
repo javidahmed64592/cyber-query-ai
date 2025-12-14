@@ -29,7 +29,7 @@ jobs:
     needs: build_frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
+      - uses: ./.github/actions/setup-python-dev
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
@@ -78,7 +78,7 @@ jobs:
           PACKAGE_NAME="cyber_query_ai"
 
           # Find site-packages directory
-          SITE_PACKAGES=$(uv run python -c "import site; print(site.getsitepackages()[0])")
+          SITE_PACKAGES=$(find . -name "site-packages" -type d | head -1)
           echo "Site-packages directory: $SITE_PACKAGES"
 
           # Check for required directories in site-packages

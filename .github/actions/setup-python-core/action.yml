@@ -1,5 +1,5 @@
 name: Setup Python Environment (Core)
-description: Sets up Python with uv and installs core dependencies
+description: Sets up Python with uv
 
 runs:
   using: composite
@@ -13,7 +13,4 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version-file: ".python-version"
-    - name: Install dependencies
-      run: |
-        uv sync
       shell: bash
