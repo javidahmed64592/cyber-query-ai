@@ -39,7 +39,7 @@ class TestStaticFiles:
     def test_get_static_dir(self) -> None:
         """Test that get_static_dir returns the correct path."""
         static_dir = get_static_dir()
-        assert static_dir == Path("static")
+        assert static_dir == Path.cwd() / "static"
 
     def test_get_static_files_api_route(self) -> None:
         """Test that get_static_files returns None for API routes."""

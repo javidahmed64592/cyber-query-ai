@@ -1,17 +1,17 @@
 """Helper methods for the CyberQueryAI application."""
 
 import json
-import os
 import re
 from pathlib import Path
 
 import bleach
 from fastapi.responses import FileResponse
+from python_template_server.constants import ROOT_DIR
 
 
 def get_static_dir() -> Path:
     """Get the static directory path."""
-    return Path(os.environ.get("CYBER_QUERY_AI_ROOT_DIR", ".") or ".") / "static"
+    return Path(ROOT_DIR) / "static"
 
 
 def get_static_files(full_path: str, static_dir: Path) -> FileResponse | None:

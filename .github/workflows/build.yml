@@ -4,15 +4,32 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 jobs:
+  build_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - name: Build frontend
+        run: |
+          cd cyber-query-ai-frontend
+          npm run build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyber_query_ai_frontend
+          path: cyber-query-ai-frontend/out
+
   build_wheel:
     runs-on: ubuntu-latest
     needs: build_frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
+      - uses: ./.github/actions/setup-python-dev
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
@@ -31,237 +48,80 @@ jobs:
           name: cyber_query_ai_wheel
           path: dist/cyber_query_ai-*-py3-none-any.whl
 
-  build_frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node
-      - name: Build frontend
-        run: |
-          cd cyber-query-ai-frontend
-          npm run build
-      - name: Upload frontend build
-        uses: actions/upload-artifact@v4
-        with:
-          name: cyber_query_ai_frontend
-          path: cyber-query-ai-frontend/out
-
-  create_installer:
+  verify_structure:
     runs-on: ubuntu-latest
     needs: build_wheel
     steps:
       - uses: actions/checkout@v4
-      - name: Download backend artifact
+      - uses: ./.github/actions/setup-python-core
+
+      - name: Download wheel artifact
         uses: actions/download-artifact@v4
         with:
           name: cyber_query_ai_wheel
-      - name: Prepare release directory
+
+      - name: Install wheel
         run: |
           PACKAGE_NAME="cyber_query_ai"
           WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
-          PACKAGE_VERSION=$(echo "$WHEEL_FILE" | sed -n "s/.*${PACKAGE_NAME}-\(.*\)-py3-none-any\.whl/\1/p")
 
-          mv "$WHEEL_FILE" release/
-          chmod +x release/install_cyber_query_ai.sh
-          mv release ${PACKAGE_NAME}_${PACKAGE_VERSION}
+          if [ ! -f "$WHEEL_FILE" ]; then
+            echo "Wheel file not found"
+            exit 1
+          fi
 
-          tree ${PACKAGE_NAME}_${PACKAGE_VERSION} --dirsfirst -F
-      - name: Create release tarball
+          echo "Installing wheel: $WHEEL_FILE"
+          uv pip install "$WHEEL_FILE"
+
+      - name: Verify installed package structure
         run: |
           PACKAGE_NAME="cyber_query_ai"
-          WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
-          PACKAGE_VERSION=$(echo "$WHEEL_FILE" | sed -n "s/.*${PACKAGE_NAME}-\(.*\)-py3-none-any\.whl/\1/p")
-          tar -czf ${PACKAGE_NAME}_${PACKAGE_VERSION}.tar.gz ${PACKAGE_NAME}_${PACKAGE_VERSION}
-      - name: Upload release tarball
-        uses: actions/upload-artifact@v4
-        with:
-          name: cyber_query_ai_release
-          path: cyber_query_ai_*.tar.gz
-  check_installer:
-    runs-on: ubuntu-latest
-    needs: create_installer
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
-      - name: Download artifact from create_installer job
-        uses: actions/download-artifact@v4
-        with:
-          name: cyber_query_ai_release
-      - name: Extract release tarball
-        run: |
-          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
-          tar -xzf $TAR_FILE
-      - name: Verify pre-installation directory contents
-        run: |
-          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
-          DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
-          PACKAGE_NAME="cyber_query_ai"
 
-          cd "$DIR_NAME"
-          echo "$DIR_NAME/"
-          tree --dirsfirst -F
+          # Find site-packages directory
+          SITE_PACKAGES=$(find . -name "site-packages" -type d | head -1)
+          echo "Site-packages directory: $SITE_PACKAGES"
 
-          WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
-          files=("${WHEEL_FILE}" "readme.txt")
-          scripts=("install_cyber_query_ai.sh")
+          # Check for required directories in site-packages
+          echo "Checking required directories in site-packages..."
+          REQUIRED_DIRS=(
+            "${SITE_PACKAGES}/${PACKAGE_NAME}"
+            "${SITE_PACKAGES}/configuration"
+            "${SITE_PACKAGES}/rag_data"
+            "${SITE_PACKAGES}/static"
+          )
 
-          for file in "${files[@]}"; do
+          for dir in "${REQUIRED_DIRS[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "Required directory not found: $dir"
+              exit 1
+            fi
+          done
+
+          # Check for required files in site-packages
+          echo "Checking required files in site-packages..."
+          REQUIRED_FILES=(
+            "${SITE_PACKAGES}/configuration/config.json"
+            "${SITE_PACKAGES}/rag_data/tools.json"
+            "${SITE_PACKAGES}/static/index.html"
+            "${SITE_PACKAGES}/README.md"
+            "${SITE_PACKAGES}/SECURITY.md"
+            "${SITE_PACKAGES}/LICENSE"
+            "${SITE_PACKAGES}/.here"
+          )
+
+          for file in "${REQUIRED_FILES[@]}"; do
             if [ ! -f "$file" ]; then
-              echo "File $file not found"
+              echo "Required file not found: $file"
               exit 1
             fi
           done
 
-          for script in "${scripts[@]}"; do
-            if [ ! -f "$script" ]; then
-              echo "Script $script not found"
-              exit 1
-            fi
-            if [ ! -x "$script" ]; then
-              echo "Script $script is not executable"
-              exit 1
-            fi
-          done
-      - name: Run installer script
-        run: |
-          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
-          DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
-
-          cd "$DIR_NAME"
-          ./install_cyber_query_ai.sh
-      - name: Verify post-installation directory contents
-        run: |
-          TAR_FILE=$(find . -name 'cyber_query_ai_*.tar.gz')
-          DIR_NAME=$(basename "$TAR_FILE" .tar.gz)
-
-          cd "$DIR_NAME"
-          echo "$DIR_NAME/"
-          tree --dirsfirst -F
-
-          if [ -f "install_cyber_query_ai.sh" ]; then
-            echo "Installer script not removed"
-            exit 1
-          fi
-
-          if [ -f "readme.txt" ]; then
-            echo "Installation README file not removed"
-            exit 1
-          fi
-
-          if [ -f "$(find . -name 'cyber_query_ai-*-py3-none-any.whl')" ]; then
-            echo "Wheel file not removed"
-            exit 1
-          fi
-
-          folders=(".venv" "configuration" "certs" "logs" "static")
-          files=(".here" "LICENSE" "README.md" "SECURITY.md" "certs/cert.pem" "certs/key.pem" "configuration/config.json")
-          scripts=("cyber-query-ai" "uninstall_cyber_query_ai.sh")
-
-          for folder in "${folders[@]}"; do
-            if [ ! -d "$folder" ]; then
-              echo "Folder $folder not found"
-              exit 1
-            fi
-          done
-
-          for file in "${files[@]}"; do
-            if [ ! -f "$file" ]; then
-              echo "File $file not found"
-              exit 1
-            fi
-          done
-
-          for script in "${scripts[@]}"; do
-            if [ ! -f "$script" ]; then
-              echo "Script $script not found"
-              exit 1
-            fi
-            if [ ! -x "$script" ]; then
-              echo "Script $script is not executable"
-              exit 1
-            fi
-          done
-
-  create_release:
-    runs-on: ubuntu-latest
-    needs: check_installer
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
-      - name: Get version from pyproject.toml
-        id: get_version
-        run: |
-          uv sync --extra dev
-          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-      - name: Check if tag exists
-        id: check_tag
-        run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag v${{ steps.get_version.outputs.version }} already exists, skipping release creation"
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Download release tarball
-        if: steps.check_tag.outputs.tag_exists == 'false'
-        uses: actions/download-artifact@v4
-        with:
-          name: cyber_query_ai_release
-      - name: Generate release notes
-        if: steps.check_tag.outputs.tag_exists == 'false'
-        id: release_notes
-        run: |
-          cat > release_notes.md << 'EOF'
-          ## CyberQueryAI v${{ steps.get_version.outputs.version }}
-
-          **AI-powered cybersecurity assistant for ethical hacking and penetration testing**
-
-          ### Quick Start
-
-          1. Download and extract the tarball: `tar -xzf cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz`
-          2. Run the installer: `./install_cyber_query_ai.sh` (Linux/macOS)
-          3. Install Ollama from [ollama.ai](https://ollama.ai/) and pull models: `ollama pull mistral && ollama pull bge-m3`
-          4. Launch the app: `./cyber-query-ai` (Linux/macOS)
-          5. Open your browser: `http://localhost:8000`
-
-          ### Features
-
-          - **Conversational AI Assistant** with full chat history and context awareness
-          - **Code Generation** for security commands and scripts (Python, Bash, PowerShell, etc.)
-          - **Code Analysis** with detailed explanations and security risk assessment
-          - **Exploit Research** for CVEs and attack vectors
-          - **Built-in Security** with input/output sanitization and rate limiting
-
-          ### Requirements
-
-          - uv package manager
-          - Python 3.13+
-          - Ollama with `mistral` and `bge-m3` models
-
-          ### Documentation
-
-          - [Getting Started](https://github.com/javidahmed64592/cyber-query-ai#getting-started)
-          - [API Docs](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/API.md)
-          - [Architecture](https://github.com/javidahmed64592/cyber-query-ai/blob/main/docs/ARCHITECTURE.md)
-          - See `readme.txt` in the release for detailed installation instructions
-
-          **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
-          EOF
-          echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
-      - name: Create GitHub Release
-        if: steps.check_tag.outputs.tag_exists == 'false'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get_version.outputs.tag }}
-          name: "CyberQueryAI ${{ steps.get_version.outputs.version }}"
-          body_path: ${{ steps.release_notes.outputs.release_notes_file }}
-          files: |
-            cyber_query_ai_${{ steps.get_version.outputs.version }}.tar.gz
-          draft: false
-          prerelease: false
-          generate_release_notes: false
+          # Show directory structure
+          echo "Package structure in site-packages:"
+          tree "${SITE_PACKAGES}/${PACKAGE_NAME}" --dirsfirst -F -L 2
+          echo "Configuration structure:"
+          tree "${SITE_PACKAGES}/configuration" --dirsfirst -F
+          echo "RAG data structure:"
+          tree "${SITE_PACKAGES}/rag_data" --dirsfirst -F -L 1
+          echo "Static files structure:"
+          tree "${SITE_PACKAGES}/static" --dirsfirst -F -L 2

@@ -52,11 +52,12 @@ allow-direct-references = true
 include = [
   "cyber_query_ai/**",
   "configuration/**",
+  "rag_data/**",
   "static/**",
   ".here",
+  "LICENSE",
   "README.md",
   "SECURITY.md",
-  "LICENSE",
 ]
 
 [tool.hatch.build.force-include]

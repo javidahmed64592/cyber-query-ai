@@ -198,7 +198,9 @@ class TestPostChatEndpoint:
                 "history": [{"role": "user", "content": "Hello"}],
             }
         )
-        mock_chatbot.llm.invoke.return_value = "Cybersecurity is the practice of protecting systems..."
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({"model_message": "Cybersecurity is the practice of protecting systems..."})
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_chat(request))
 
         assert response.code == ResponseCode.OK
@@ -211,7 +213,9 @@ class TestPostChatEndpoint:
         app = mock_server.app
         client = TestClient(app)
 
-        mock_chatbot.llm.invoke.return_value = "Cybersecurity is important!"
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({"model_message": "Cybersecurity is important!"})
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = client.post(
             "/model/chat",
             json={
@@ -227,6 +231,40 @@ class TestPostChatEndpoint:
         assert isinstance(response_body["timestamp"], str)
         assert isinstance(response_body["model_message"], str)
 
+    def test_post_chat_missing_keys(self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock) -> None:
+        """Test /model/chat handles missing keys in LLM response."""
+        request = MagicMock(spec=Request)
+        request.json = AsyncMock(
+            return_value={
+                "message": "What is cybersecurity?",
+                "history": [],
+            }
+        )
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({"msg": "Missing model_message key"})
+        mock_chatbot.llm.invoke.return_value = mock_response
+        response = asyncio.run(mock_server.post_chat(request))
+
+        assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
+        assert "Missing required keys" in response.message
+
+    def test_post_chat_invalid_json(self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock) -> None:
+        """Test /model/chat handles invalid JSON response from LLM."""
+        request = MagicMock(spec=Request)
+        request.json = AsyncMock(
+            return_value={
+                "message": "What is cybersecurity?",
+                "history": [],
+            }
+        )
+        mock_response = MagicMock()
+        mock_response.content = "Not valid JSON"
+        mock_chatbot.llm.invoke.return_value = mock_response
+        response = asyncio.run(mock_server.post_chat(request))
+
+        assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
+        assert "Invalid JSON response" in response.message
+
     def test_post_chat_error(self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock) -> None:
         """Test /model/chat handles errors gracefully."""
         request = MagicMock(spec=Request)
@@ -240,7 +278,7 @@ class TestPostChatEndpoint:
         response = asyncio.run(mock_server.post_chat(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
-        assert "Failed to generate chat response" in response.message
+        assert "An unexpected error occurred during chat" in response.message
 
 
 class TestPostGenerateCodeEndpoint:
@@ -250,13 +288,15 @@ class TestPostGenerateCodeEndpoint:
         """Test the /code/generate method handles valid JSON and returns generated code."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Generate a command to list files"})
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "generated_code": "ls -la",
                 "explanation": "Lists all files in long format",
                 "language": "bash",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_generate_code(request))
 
         assert response.code == ResponseCode.OK
@@ -271,13 +311,15 @@ class TestPostGenerateCodeEndpoint:
         app = mock_server.app
         client = TestClient(app)
 
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "generated_code": "nmap -sn 192.168.1.0/24",
                 "explanation": "Scans the network",
                 "language": "bash",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = client.post("/code/generate", json={"prompt": "Generate a network scan command"})
         assert response.status_code == ResponseCode.OK
 
@@ -291,7 +333,9 @@ class TestPostGenerateCodeEndpoint:
         """Test /code/generate handles missing keys in LLM response."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Generate code"})
-        mock_chatbot.llm.invoke.return_value = json.dumps({"code": "ls"})
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({"code": "ls"})
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_generate_code(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
@@ -301,7 +345,9 @@ class TestPostGenerateCodeEndpoint:
         """Test /code/generate handles invalid JSON response from LLM."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Generate code"})
-        mock_chatbot.llm.invoke.return_value = "Not valid JSON"
+        mock_response = MagicMock()
+        mock_response.content = "Not valid JSON"
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_generate_code(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
@@ -325,11 +371,13 @@ class TestPostExplainCodeEndpoint:
         """Test the /code/explain method handles valid JSON and returns explanation."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Explain: nmap -sS 192.168.1.1"})
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "explanation": "This performs a TCP SYN scan on the target",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_explain_code(request))
 
         assert response.code == ResponseCode.OK
@@ -342,11 +390,13 @@ class TestPostExplainCodeEndpoint:
         app = mock_server.app
         client = TestClient(app)
 
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "explanation": "This command scans for open ports",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = client.post("/code/explain", json={"prompt": "Explain: nmap -p- 192.168.1.1"})
         assert response.status_code == ResponseCode.OK
 
@@ -360,7 +410,9 @@ class TestPostExplainCodeEndpoint:
         """Test /code/explain handles missing keys in LLM response."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Explain code"})
-        mock_chatbot.llm.invoke.return_value = json.dumps({})
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({})
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_explain_code(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
@@ -370,7 +422,9 @@ class TestPostExplainCodeEndpoint:
         """Test /code/explain handles invalid JSON response from LLM."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Explain code"})
-        mock_chatbot.llm.invoke.return_value = "Not valid JSON"
+        mock_response = MagicMock()
+        mock_response.content = "Not valid JSON"
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_explain_code(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
@@ -394,7 +448,8 @@ class TestPostExploitSearchEndpoint:
         """Test the /exploit/search method handles valid JSON and returns exploits."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Search for Apache exploits"})
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "exploits": [
                     {
@@ -407,6 +462,7 @@ class TestPostExploitSearchEndpoint:
                 "explanation": "Found 1 exploit for Apache",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_exploit_search(request))
 
         assert response.code == ResponseCode.OK
@@ -421,7 +477,8 @@ class TestPostExploitSearchEndpoint:
         app = mock_server.app
         client = TestClient(app)
 
-        mock_chatbot.llm.invoke.return_value = json.dumps(
+        mock_response = MagicMock()
+        mock_response.content = json.dumps(
             {
                 "exploits": [
                     {
@@ -434,6 +491,7 @@ class TestPostExploitSearchEndpoint:
                 "explanation": "Found exploits",
             }
         )
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = client.post("/exploit/search", json={"prompt": "Search for exploits"})
         assert response.status_code == ResponseCode.OK
 
@@ -447,7 +505,9 @@ class TestPostExploitSearchEndpoint:
         """Test /exploit/search handles missing keys in LLM response."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Search exploits"})
-        mock_chatbot.llm.invoke.return_value = json.dumps({"explan": "Missing keys"})
+        mock_response = MagicMock()
+        mock_response.content = json.dumps({"explan": "Missing keys"})
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_exploit_search(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
@@ -457,7 +517,9 @@ class TestPostExploitSearchEndpoint:
         """Test /exploit/search handles invalid JSON response from LLM."""
         request = MagicMock(spec=Request)
         request.json = AsyncMock(return_value={"prompt": "Search exploits"})
-        mock_chatbot.llm.invoke.return_value = "Not valid JSON"
+        mock_response = MagicMock()
+        mock_response.content = "Not valid JSON"
+        mock_chatbot.llm.invoke.return_value = mock_response
         response = asyncio.run(mock_server.post_exploit_search(request))
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR

@@ -30,7 +30,7 @@ const getBaseURL = () => {
 // API client configuration
 const api = axios.create({
   baseURL: getBaseURL() + "/api", // This will be proxied in dev, direct in production
-  timeout: 30000, // 30 seconds timeout for LLM responses
+  timeout: 60000, // 60 seconds timeout for LLM responses
   headers: {
     "Content-Type": "application/json",
   },

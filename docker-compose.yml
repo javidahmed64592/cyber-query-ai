@@ -1,0 +1,144 @@
+services:
+  # Ollama LLM service with GPU support
+  # Use (GPU): docker compose --profile gpu up -d
+  # Use (CPU): docker compose --profile cpu up -d
+  cyber-query-ai-ollama:
+    image: ollama/ollama:latest
+    container_name: cyber-query-ai-ollama
+    profiles: ["gpu"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      monitoring:
+        aliases:
+          - ollama
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # CPU-only Ollama variant (for CI/CD or systems without GPU)
+  cyber-query-ai-ollama-cpu:
+    image: ollama/ollama:latest
+    container_name: cyber-query-ai-ollama-cpu
+    profiles: ["cpu"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      monitoring:
+        aliases:
+          - ollama
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # CyberQueryAI application service
+  cyber-query-ai:
+    image: cyber-query-ai:${ENV:-dev}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PORT: 443
+    container_name: cyber-query-ai
+    ports:
+      - "443:443"
+    environment:
+      # Load API token hash from .env file (optional - will be generated if missing)
+      - API_TOKEN_HASH=${API_TOKEN_HASH:-}
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./configuration:/app/configuration
+      - ./certs:/app/certs
+      - ./logs:/app/logs
+      - ./rag_data:/app/rag_data
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      cyber-query-ai-ollama:
+        condition: service_healthy
+        required: false
+      cyber-query-ai-ollama-cpu:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:443/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Prometheus for metrics collection
+  cyber-query-ai-prometheus:
+    image: prom/prometheus:latest
+    container_name: cyber-query-ai-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+      - "--web.enable-lifecycle"
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - cyber-query-ai
+
+  # Grafana for metrics visualization
+  cyber-query-ai-grafana:
+    image: grafana/grafana:latest
+    container_name: cyber-query-ai-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring
+    restart: unless-stopped
+    depends_on:
+      - cyber-query-ai-prometheus
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  prometheus-data:
+  grafana-data:

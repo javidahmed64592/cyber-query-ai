@@ -57,47 +57,72 @@ It consists of the following jobs:
 
 ## Build Workflow
 
-The Build workflow runs on pushes to the `main` branch and manual dispatch, consisting of the following jobs:
+The Build workflow runs on pushes and pull requests to the `main` branch.
+It consists of the following jobs:
 
 ### build_frontend
   - Checkout code
-  - Set up Node.js  and dependencies with npm caching (via custom action)
+  - Set up Node.js and dependencies with npm caching (via custom action)
   - Build frontend with `npm run build`
-  - Upload frontend build artifact
+  - Upload frontend build artifact (`cyber_query_ai_frontend`)
 
 ### build_wheel
   - Depends on `build_frontend` job
   - Checkout code
-  - Setup Python environment with core dependencies (via custom action)
+  - Setup Python environment with dev dependencies (via custom action)
   - Download frontend build artifact to `static/` directory
   - Build wheel with `uv build`
   - Inspect wheel contents for verification
-  - Upload wheel artifact
+  - Upload wheel artifact (`cyber_query_ai_wheel`)
 
-### create_installer
+### verify_structure
   - Depends on `build_wheel` job
   - Checkout code
+  - Setup Python environment (via custom action)
   - Download wheel artifact
-  - Prepare release directory:
-    - Move wheel to `release/` directory
-    - Make installer script executable
-    - Rename to versioned directory name
-  - Create compressed tarball of release package
-  - Upload release tarball artifact
+  - Install wheel using `uv pip install`
+  - Verify installed package structure in site-packages:
+  - Display directory structure with tree views for verification
 
-### check_installer
-  - Depends on `create_installer` job
+## Docker Workflow
+
+The Docker workflow runs on pushes, pull requests to the `main` branch, and manual dispatch.
+It consists of the following jobs:
+
+### build
   - Checkout code
-  - Setup Python environment with core dependencies (via custom action)
-  - Download release tarball artifact
-  - Extract tarball
-  - Verify pre-installation directory structure:
-    - Check for wheel file, readme.txt, and executable installer script
-  - Run installer script (`install_cyber_query_ai.sh`)
-  - Verify post-installation directory structure:
-    - Ensure virtual environment (`.venv`) created
-    - Verify directories: `configuration/`, `static/`, `certs/`, `logs/`
-    - Check files: `.here`, `LICENSE`, `README.md`, `SECURITY.md`, `configuration/config.json`
-    - Verify SSL certificates: `certs/cert.pem`, `certs/key.pem`
-    - Check executables: `cyber-query-ai`, `uninstall_cyber_query_ai.sh`
-    - Ensure installer files cleaned up (wheel, readme.txt, install script removed)
+  - Setup Python environment with dev dependencies (via custom action)
+  - Build and start services with `docker compose --profile cpu up --build -d`
+  - Wait for services to start (5 seconds)
+  - Show server logs from `cyber-query-ai` container
+  - **Health check** using reusable composite action `.github/actions/docker-check-containers`:
+    - Verifies CyberQueryAI is running on port 443
+    - Checks Prometheus and Grafana services
+    - Validates Ollama integration
+  - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
+
+### publish-release
+  - Depends on `build` job
+  - Only runs on push to `main` branch (not PRs)
+  - Requires `contents: write` and `packages: write` permissions
+  - Checkout code
+  - Setup Python environment with dev dependencies (via custom action)
+  - Extract version from `pyproject.toml` using Python's `tomllib`
+  - Check if Git tag already exists (skip if duplicate)
+  - Set up Docker Buildx for multi-platform builds
+  - Log in to GitHub Container Registry (ghcr.io)
+  - Extract Docker metadata with semantic versioning tags:
+    - `v1.2.3` - Exact version
+    - `1.2` - Major.minor
+    - `1` - Major only
+    - `latest` - Latest stable release
+  - Build and push multi-platform Docker images:
+    - Platforms: `linux/amd64`, `linux/arm64`
+    - Registry: `ghcr.io/<owner>/<repo>`
+    - Uses GitHub Actions cache for layer caching
+  - Generate release notes with Docker-focused instructions:
+    - Quick start with docker compose
+    - Standalone Docker run command
+    - Feature highlights
+    - Available tags and documentation links
+  - Create GitHub Release with version tag and release notes

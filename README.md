@@ -47,10 +47,10 @@ Designed specifically for cybersecurity professionals, ethical hackers, and secu
   - [**About** (`/about`)](#about-about)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [Option 1: Using Pre-built Release (Recommended)](#option-1-using-pre-built-release-recommended)
-    - [Option 2: From Source](#option-2-from-source)
+  - [Quick Start](#quick-start)
   - [Configuration](#configuration)
+    - [Docker Deployment](#docker-deployment)
+    - [Local Development](#local-development)
 - [Technology Stack](#technology-stack)
   - [Backend (Python)](#backend-python)
   - [Frontend (TypeScript/React)](#frontend-typescriptreact)
@@ -162,20 +162,42 @@ Comprehensive information about the application, including:
 
 ### Prerequisites
 
-1. **Ollama**: Download and install from [ollama.ai](https://ollama.ai/)
-2. **Python 3.13+**: Required for the backend application
-3. **AI Model**: Pull a compatible model using Ollama (e.g., `ollama pull mistral`)
+1. **Docker & Docker Compose**: Required for containerized deployment (recommended)
+   - OR **Python 3.13+** and **Ollama** for local development
+2. **AI Models**: Must be pulled in the Ollama container or installed locally if not using Docker
 
 **Note:** You can configure the LLMs used in the application by editing the `config.json` file.
 
-### Installation
+### Quick Start
 
-#### Option 1: Using Pre-built Release (Recommended)
-1. Download the latest release from [GitHub Releases](https://github.com/javidahmed64592/cyber-query-ai/releases)
-2. Extract the archive
-3. Run the installer: `./install_cyber_query_ai.sh`
+```bash
+# Pull the latest image
+docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
 
-#### Option 2: From Source
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/javidahmed64592/cyber-query-ai/main/docker-compose.yml
+
+# Start the application
+# For GPU systems:
+docker compose --profile gpu up -d
+
+# For CPU-only systems (no NVIDIA GPU):
+docker compose --profile cpu up -d
+
+# Pull required Ollama models (in a separate terminal)
+# Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
+docker exec cyber-query-ai-ollama ollama pull mistral
+docker exec cyber-query-ai-ollama ollama pull bge-m3
+
+# Access at https://localhost:443
+```
+
+**Note:** Both GPU and CPU modes require explicit profile selection (`--profile gpu` or `--profile cpu`)
+```
+
+See [Docker Deployment Guide](docs/DOCKER_DEPLOYMENT.md) for advanced configuration.
+
+#### Option 2: From Source (Development)
 ```bash
 # Clone the repository
 git clone https://github.com/javidahmed64592/cyber-query-ai.git
@@ -194,6 +216,22 @@ npm run dev
 ```
 
 ### Configuration
+
+#### Docker Deployment
+The Docker container automatically handles initial setup:
+- **API Token**: Auto-generated on first run and displayed in logs
+- **SSL Certificates**: Auto-generated self-signed certificates
+- **Ollama Models**: Must be manually pulled (see installation steps above)
+
+To use a persistent API token across container restarts:
+1. Generate token locally: `uv run generate-new-token`
+2. Set `API_TOKEN_HASH` environment variable in `docker-compose.yml`
+
+To customize other settings:
+1. Edit `configuration/config.json` (mounted as volume)
+2. Restart containers: `docker compose restart`
+
+#### Local Development
 
 1. **Start Ollama**: Ensure Ollama is running locally:
    ```bash
