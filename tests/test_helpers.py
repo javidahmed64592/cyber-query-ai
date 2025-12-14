@@ -6,13 +6,27 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.responses import FileResponse
+from python_template_server.constants import ROOT_DIR
 
 from cyber_query_ai.helpers import (
     clean_json_response,
+    get_rag_tools_path,
     get_static_dir,
     get_static_files,
     sanitize_text,
 )
+
+
+class TestFilePaths:
+    """Unit tests for file path helper functions."""
+
+    def test_get_rag_tools_path(self) -> None:
+        """Test that get_rag_tools_path returns the correct path."""
+        assert get_rag_tools_path() == Path(ROOT_DIR) / "rag_data" / "tools.json"
+
+    def test_get_static_dir(self) -> None:
+        """Test that get_static_dir returns the correct path."""
+        assert get_static_dir() == Path(ROOT_DIR) / "static"
 
 
 class TestStaticFiles:
@@ -35,11 +49,6 @@ class TestStaticFiles:
         """Mock the exists method of Path."""
         with patch("cyber_query_ai.helpers.Path.exists") as mock:
             yield mock
-
-    def test_get_static_dir(self) -> None:
-        """Test that get_static_dir returns the correct path."""
-        static_dir = get_static_dir()
-        assert static_dir == Path.cwd() / "static"
 
     def test_get_static_files_api_route(self) -> None:
         """Test that get_static_files returns None for API routes."""

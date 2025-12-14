@@ -8,12 +8,17 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
-from python_template_server.constants import ROOT_DIR
 from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
 from cyber_query_ai.chatbot import Chatbot
-from cyber_query_ai.helpers import clean_json_response, get_static_dir, get_static_files, sanitize_text
+from cyber_query_ai.helpers import (
+    clean_json_response,
+    get_rag_tools_path,
+    get_static_dir,
+    get_static_files,
+    sanitize_text,
+)
 from cyber_query_ai.models import (
     CyberQueryAIConfig,
     GetApiConfigResponse,
@@ -49,7 +54,7 @@ class CyberQueryAIServer(TemplateServer):
         self.chatbot = Chatbot(
             model=self.config.model.model,
             embedding_model=self.config.model.embedding_model,
-            tools_json_filepath=ROOT_DIR / "rag_data" / "tools.json",
+            tools_json_filepath=get_rag_tools_path(),
         )
 
         self.static_dir = get_static_dir()
