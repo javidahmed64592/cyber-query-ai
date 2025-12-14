@@ -7,9 +7,10 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  docker-development:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,32 +23,6 @@ jobs:
           sleep 5  # Wait for services to start
 
       - name: Show server logs
-        run: docker compose logs cyber-query-ai
-
-      - uses: ./.github/actions/docker-check-containers
-        with:
-          port: 443
-
-      - name: Stop services
-        run: docker compose down
-
-  docker-production:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
-
-      - name: Build production image
-        run: |
-          docker build -t cyber-query-ai:prod .
-
-      - name: Start services with docker compose
-        run: |
-          docker compose --profile cpu up -d
-          sleep 5  # Wait for container to start
-
-      - name: Show server logs
         run: docker logs cyber-query-ai
 
       - uses: ./.github/actions/docker-check-containers
@@ -55,4 +30,132 @@ jobs:
           port: 443
 
       - name: Stop services
-        run: docker compose down
+        run: docker compose down --volumes --remove-orphans
+
+  publish-release:
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-core
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          uv sync --extra dev
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag v${{ steps.get_version.outputs.version }} already exists, skipping release creation"
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Docker Buildx
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=v${{ steps.get_version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ steps.get_version.outputs.version }}
+            type=semver,pattern={{major}},value=v${{ steps.get_version.outputs.version }}
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+      - name: Generate release notes
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        id: release_notes
+        run: |
+          cat > release_notes.md << 'EOF'
+          ## CyberQueryAI v${{ steps.get_version.outputs.version }}
+
+          **AI-powered cybersecurity assistant for ethical hacking and penetration testing**
+
+          ### Quick Start with Docker
+
+          ```bash
+          # Pull the Docker image
+          docker pull ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
+
+          # Run with docker compose
+          curl -O https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+          docker compose --profile cpu up -d
+          ```
+
+          Access the application at `https://localhost:443`
+
+          ### Features
+
+          - **Conversational AI Assistant** with full chat history and context awareness
+          - **Code Generation** for security commands and scripts (Python, Bash, PowerShell, etc.)
+          - **Code Analysis** with detailed explanations and security risk assessment
+          - **Exploit Research** for CVEs and attack vectors
+          - **Built-in Security** with input/output sanitization and rate limiting
+          - **RAG-enhanced** prompts with cybersecurity tool documentation
+
+          ### Requirements
+
+          - Docker and Docker Compose installed on your system
+
+          ### Available Docker Tags
+
+          - `${{ steps.get_version.outputs.version }}` - This specific version
+          - `latest` - Latest stable release
+          - `main` - Latest development build
+
+          ### Documentation
+
+          - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
+          - [Docker Deployment](https://github.com/${{ github.repository }}/blob/main/docs/DOCKER_DEPLOYMENT.md)
+          - [API Documentation](https://github.com/${{ github.repository }}/blob/main/docs/API.md)
+          - [Architecture](https://github.com/${{ github.repository }}/blob/main/docs/ARCHITECTURE.md)
+
+          **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
+          EOF
+          echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.tag }}
+          name: "CyberQueryAI ${{ steps.get_version.outputs.version }}"
+          body_path: ${{ steps.release_notes.outputs.release_notes_file }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
