@@ -9,6 +9,21 @@ on:
       - main
 
 jobs:
+  build_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-node
+      - name: Build frontend
+        run: |
+          cd cyber-query-ai-frontend
+          npm run build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: cyber_query_ai_frontend
+          path: cyber-query-ai-frontend/out
+
   build_wheel:
     runs-on: ubuntu-latest
     needs: build_frontend
@@ -32,21 +47,6 @@ jobs:
         with:
           name: cyber_query_ai_wheel
           path: dist/cyber_query_ai-*-py3-none-any.whl
-
-  build_frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-node
-      - name: Build frontend
-        run: |
-          cd cyber-query-ai-frontend
-          npm run build
-      - name: Upload frontend build
-        uses: actions/upload-artifact@v4
-        with:
-          name: cyber_query_ai_frontend
-          path: cyber-query-ai-frontend/out
 
   verify_structure:
     runs-on: ubuntu-latest
