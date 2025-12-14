@@ -78,19 +78,10 @@ It consists of the following jobs:
 ### verify_structure
   - Depends on `build_wheel` job
   - Checkout code
-  - Setup Python environment with core dependencies (via custom action)
+  - Setup Python environment (via custom action)
   - Download wheel artifact
   - Install wheel using `uv pip install`
   - Verify installed package structure in site-packages:
-    - Check for required directories: `cyber_query_ai/`, `configuration/`, `rag_data/`, `static/`
-    - Verify Python modules: `__init__.py`, `main.py`, `server.py`, `chatbot.py`, `models.py`, `helpers.py`, `rag.py`
-    - Check configuration and data files: `configuration/config.json`, `rag_data/tools.json`
-    - Verify static build: `static/index.html`, `static/_next/`
-    - Check documentation: `README.md`, `SECURITY.md`, `LICENSE`, `.here`
-  - Verify required binaries are installed:
-    - `cyber-query-ai` - Main application executable
-    - `generate-certificate` - SSL certificate generator
-    - `generate-new-token` - API token generator
   - Display directory structure with tree views for verification
 
 ## Docker Workflow
@@ -100,7 +91,7 @@ It consists of the following jobs:
 
 ### build
   - Checkout code
-  - Setup Python environment with core dependencies (via custom action)
+  - Setup Python environment with dev dependencies (via custom action)
   - Build and start services with `docker compose --profile cpu up --build -d`
   - Wait for services to start (5 seconds)
   - Show server logs from `cyber-query-ai` container

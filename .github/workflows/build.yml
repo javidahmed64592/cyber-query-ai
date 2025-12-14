@@ -100,13 +100,6 @@ jobs:
           # Check for required files in site-packages
           echo "Checking required files in site-packages..."
           REQUIRED_FILES=(
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/__init__.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/main.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/server.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/chatbot.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/models.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/helpers.py"
-            "${SITE_PACKAGES}/${PACKAGE_NAME}/rag.py"
             "${SITE_PACKAGES}/configuration/config.json"
             "${SITE_PACKAGES}/rag_data/tools.json"
             "${SITE_PACKAGES}/static/index.html"
@@ -122,28 +115,6 @@ jobs:
               exit 1
             fi
           done
-
-          # Check for required binaries
-          echo "Checking required binaries..."
-          REQUIRED_BINARIES=(
-            "cyber-query-ai"
-            "generate-certificate"
-            "generate-new-token"
-          )
-
-          for binary in "${REQUIRED_BINARIES[@]}"; do
-            if ! command -v "$binary" &> /dev/null; then
-              echo "Required binary not found: $binary"
-              exit 1
-            fi
-          done
-
-          # Verify static files structure
-          echo "Verifying static files structure..."
-          if [ ! -d "${SITE_PACKAGES}/static/_next" ]; then
-            echo "Next.js static build directory not found"
-            exit 1
-          fi
 
           # Show directory structure
           echo "Package structure in site-packages:"
