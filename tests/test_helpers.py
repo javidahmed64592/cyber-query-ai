@@ -1,8 +1,7 @@
 """Unit tests for the cyber_query_ai.helpers module."""
 
-from collections.abc import Generator
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.responses import FileResponse
@@ -31,24 +30,6 @@ class TestFilePaths:
 
 class TestStaticFiles:
     """Unit tests for the static file serving functions."""
-
-    @pytest.fixture
-    def mock_is_file(self) -> Generator[MagicMock]:
-        """Mock the is_file method of Path."""
-        with patch("cyber_query_ai.helpers.Path.is_file") as mock:
-            yield mock
-
-    @pytest.fixture
-    def mock_is_dir(self) -> Generator[MagicMock]:
-        """Mock the is_dir method of Path."""
-        with patch("cyber_query_ai.helpers.Path.is_dir") as mock:
-            yield mock
-
-    @pytest.fixture
-    def mock_exists(self) -> Generator[MagicMock]:
-        """Mock the exists method of Path."""
-        with patch("cyber_query_ai.helpers.Path.exists") as mock:
-            yield mock
 
     def test_get_static_files_api_route(self) -> None:
         """Test that get_static_files returns None for API routes."""

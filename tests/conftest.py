@@ -1,6 +1,7 @@
 """Pytest fixtures for the CyberQueryAI unit tests."""
 
 from collections.abc import Generator
+from unittest.mock import MagicMock, patch
 
 import pytest
 from prometheus_client import REGISTRY
@@ -24,6 +25,27 @@ from cyber_query_ai.models import (
 
 
 # General fixtures
+@pytest.fixture
+def mock_exists() -> Generator[MagicMock]:
+    """Mock the Path.exists() method."""
+    with patch("pathlib.Path.exists") as mock_exists:
+        yield mock_exists
+
+
+@pytest.fixture
+def mock_is_file() -> Generator[MagicMock]:
+    """Mock the is_file method of Path."""
+    with patch("pathlib.Path.is_file") as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_is_dir() -> Generator[MagicMock]:
+    """Mock the is_dir method of Path."""
+    with patch("pathlib.Path.is_dir") as mock:
+        yield mock
+
+
 @pytest.fixture(autouse=True)
 def clear_prometheus_registry() -> Generator[None]:
     """Clear Prometheus registry before each test to avoid duplicate metric errors."""
