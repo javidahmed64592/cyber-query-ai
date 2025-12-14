@@ -71,6 +71,7 @@ This document summarizes the code architecture and technology stack for the Cybe
     - Sanitization: `sanitize_text()` uses `bleach.clean()` to strip HTML/scripts from user input and LLM output
     - JSON cleaning: `clean_json_response()` repairs common LLM formatting issues (code fences, single quotes, trailing commas)
     - Static file serving: `get_static_dir()` locates `static/` directory, `get_static_files()` handles SPA fallback logic
+    - Filepath helpers: `get_rag_tools_path()` for retrieving the RAG directory
 
 - `models.py`
     - Pydantic models for all request/response types
