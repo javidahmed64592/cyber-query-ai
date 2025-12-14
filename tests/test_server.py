@@ -4,7 +4,6 @@ import asyncio
 import json
 from collections.abc import Generator
 from importlib.metadata import PackageMetadata
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -75,9 +74,8 @@ def mock_server(
     with (
         patch.object(CyberQueryAIServer, "_verify_api_key", new=fake_verify_api_key),
         patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
-        patch("cyber_query_ai.server.get_static_dir", return_value=Path("static")),
         patch("cyber_query_ai.server.get_static_files", return_value=MagicMock(spec=FileResponse)),
-        patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file", return_value=None),
+        patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
     ):
         server = CyberQueryAIServer(mock_cyber_query_ai_config)
         yield server
