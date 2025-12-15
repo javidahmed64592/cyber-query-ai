@@ -9,6 +9,11 @@ from fastapi.responses import FileResponse
 from python_template_server.constants import ROOT_DIR
 
 
+def get_rag_tools_path() -> Path:
+    """Get the rag tools file path."""
+    return Path(ROOT_DIR) / "rag_data" / "tools.json"
+
+
 def get_static_dir() -> Path:
     """Get the static directory path."""
     return Path(ROOT_DIR) / "static"

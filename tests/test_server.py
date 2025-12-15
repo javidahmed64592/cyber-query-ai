@@ -75,9 +75,8 @@ def mock_server(
     with (
         patch.object(CyberQueryAIServer, "_verify_api_key", new=fake_verify_api_key),
         patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
-        patch("cyber_query_ai.server.get_static_dir", return_value=Path("static")),
         patch("cyber_query_ai.server.get_static_files", return_value=MagicMock(spec=FileResponse)),
-        patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file", return_value=None),
+        patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
     ):
         server = CyberQueryAIServer(mock_cyber_query_ai_config)
         yield server
@@ -90,6 +89,35 @@ class TestCyberQueryAIServer:
         """Test CyberQueryAIServer initialization."""
         assert isinstance(mock_server.config, CyberQueryAIConfig)
         assert isinstance(mock_server.chatbot, Chatbot)
+        assert isinstance(mock_server.static_dir, Path)
+
+    def test_init_static_dir_not_exists(
+        self,
+        mock_cyber_query_ai_config: CyberQueryAIConfig,
+        mock_chatbot: MagicMock,
+        mock_exists: MagicMock,
+    ) -> None:
+        """Test CyberQueryAIServer initialization when static directory does not exist."""
+        mock_exists.return_value = False
+        with pytest.raises(SystemExit):
+            with (
+                patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
+                patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
+            ):
+                CyberQueryAIServer(mock_cyber_query_ai_config)
+
+    def test_parse_response(self, mock_server: CyberQueryAIServer, mock_post_chat_response: PostChatResponse) -> None:
+        """Test parsing JSON response strings."""
+        response_str = json.dumps(mock_post_chat_response.model_dump())
+        parsed = mock_server.parse_response(response_str)
+        assert parsed == mock_post_chat_response.model_dump()
+
+    def test_validate_keys(self, mock_server: CyberQueryAIServer) -> None:
+        """Test validation of required keys in response dictionary."""
+        required_keys = {"key1", "key2", "key3"}
+        response_dict = {"key1": "value1", "key2": "value2"}
+        missing_keys = mock_server.validate_keys(required_keys, response_dict)
+        assert missing_keys == ["key3"]
 
     def test_validate_config(
         self, mock_server: CyberQueryAIServer, mock_cyber_query_ai_config: CyberQueryAIConfig

@@ -116,7 +116,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 - `main.py`: Entry point that creates `CyberQueryAIServer()` and calls `server.run()`
 - `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection; includes `prompt_chat()` for conversational interface, `prompt_code_generation()`, `prompt_code_explanation()`, and `prompt_exploit_search()`
 - `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `rag_data/tools.json`; semantic search using `bge-m3` embeddings
-- `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas); `sanitize_text()` uses bleach; `get_static_files()` handles SPA routing
+- `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas); `sanitize_text()` uses bleach; `get_static_files()` handles SPA routing for static files; `get_rag_tools_path()` and `get_static_dir()` return paths
 - `models.py`: All Pydantic models including `CyberQueryAIConfig`, `CyberQueryAIModelConfig`, `PostChatRequest`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`, `GetApiConfigResponse`, `PostLoginResponse`; all response models extend `BaseResponse`
 
 ### Frontend

@@ -32,7 +32,7 @@ This document outlines how to configure and setup a development environment to w
 cyber_query_ai/
 ├── server.py       # CyberQueryAIServer class (extends TemplateServer)
 ├── chatbot.py      # LLM integration with RAG support
-├── helpers.py      # Utility functions (sanitization, JSON cleaning, static file serving)
+├── helpers.py      # Utility functions (sanitization, JSON cleaning, static file serving, filepath helpers)
 ├── main.py         # Application entry point
 ├── models.py       # Pydantic models (requests, responses, config)
 └── rag.py          # RAG system with semantic search
