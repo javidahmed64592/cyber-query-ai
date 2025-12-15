@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for CyberQueryAI
 # Stage 1: Frontend build stage - build Next.js static export
-FROM node:20-alpine AS frontend-builder
+FROM node:22-alpine AS frontend-builder
 
 WORKDIR /frontend
 
@@ -58,7 +58,7 @@ RUN uv pip install --system --no-cache /tmp/*.whl && \
     rm /tmp/*.whl
 
 # Create required directories
-RUN mkdir -p /app/configuration /app/logs /app/certs
+RUN mkdir -p /app/logs /app/certs
 
 # Copy included files from installed wheel to app directory
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
@@ -110,8 +110,8 @@ RUN echo '#!/bin/sh\n\
     MODELS_JSON=$(wget -q -O- "$OLLAMA_HOST/api/tags")\n\
     \n\
     # Extract model names from configuration file\n\
-    CONFIG_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''model'\''])")\n\
-    CONFIG_EMBEDDING_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''embedding_model'\''])")\n\
+    CONFIG_MODEL=$(python -c "import json; print(json.load(open('\''configuration/cyber_query_ai_config.json'\''))['\''model'\'']['\''model'\''])")\n\
+    CONFIG_EMBEDDING_MODEL=$(python -c "import json; print(json.load(open('\''configuration/cyber_query_ai_config.json'\''))['\''model'\'']['\''embedding_model'\''])")\n\
     \n\
     # Check models from configuration file\n\
     if ! echo "$MODELS_JSON" | grep -q "${CONFIG_MODEL}:latest"; then\n\

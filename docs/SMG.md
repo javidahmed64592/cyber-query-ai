@@ -92,7 +92,7 @@ After installing dev dependencies, set up pre-commit hooks:
    ```
 
 **Configuration:**
-Edit `configuration/config.json` to customize server settings:
+Edit `configuration/cyber_query_ai_config.json` to customize server settings:
 ```json
 {
   "server": {

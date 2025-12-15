@@ -183,7 +183,7 @@ docker exec cyber-query-ai-ollama nvidia-smi
 
 **Required models must be manually pulled.** The application will not function without these models:
 
-**Required models** (configured in `configuration/config.json`):
+**Required models** (configured in `configuration/cyber_query_ai_config.json`):
 - **LLM**: `mistral` (default, used for chat, code generation, explanations)
 - **Embedding**: `bge-m3` (used for RAG vector similarity search)
 
@@ -213,7 +213,7 @@ The docker-compose configuration uses **named volumes** to persist runtime data 
 
 **Configuration customization (development only):**
 
-By default, the application uses the `config.json` and RAG data built into the Docker image. To customize these files:
+By default, the application uses the `cyber_query_ai_config.json` and RAG data built into the Docker image. To customize these files:
 
 1. **Extract default configuration:**
    ```bash

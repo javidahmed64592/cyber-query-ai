@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import fs from "fs";
 import path from "path";
 
-// Type for reading the backend config.json
+// Type for reading the backend cyber_query_ai_config.json
 interface BackendConfig {
   server: {
     host: string;
@@ -17,14 +17,14 @@ const getBackendURL = () => {
       __dirname,
       "..",
       "configuration",
-      "config.json"
+      "cyber_query_ai_config.json"
     );
     const configData = fs.readFileSync(configPath, "utf-8");
     const config: BackendConfig = JSON.parse(configData);
     return `https://${config.server.host}:${config.server.port}`;
   } catch (error) {
     console.warn(
-      "Failed to read config.json, falling back to https://localhost:443"
+      "Failed to read cyber_query_ai_config.json, falling back to https://localhost:443"
     );
     return "https://localhost:443";
   }
@@ -57,7 +57,7 @@ const nextConfig: NextConfig = {
       return [
         {
           source: "/api/:path*",
-          destination: `${backendURL}/api/:path*`, // FastAPI backend from config.json
+          destination: `${backendURL}/api/:path*`, // FastAPI backend from cyber_query_ai_config.json
         },
       ];
     },

@@ -166,7 +166,7 @@ Comprehensive information about the application, including:
    - OR **Python 3.13+** and **Ollama** for local development
 2. **AI Models**: Must be pulled in the Ollama container or installed locally if not using Docker
 
-**Note:** You can configure the LLMs used in the application by editing the `config.json` file.
+**Note:** You can configure the LLMs used in the application by editing the `cyber_query_ai_config.json` file.
 
 ### Quick Start
 
@@ -228,7 +228,7 @@ To use a persistent API token across container restarts:
 2. Set `API_TOKEN_HASH` environment variable in `docker-compose.yml`
 
 To customize other settings:
-1. Edit `configuration/config.json` (mounted as volume)
+1. Edit `configuration/cyber_query_ai_config.json` (mounted as volume)
 2. Restart containers: `docker compose restart`
 
 #### Local Development
@@ -255,7 +255,7 @@ To customize other settings:
    uv run generate-certificate
    ```
 
-5. **Configure the application**: Edit `configuration/config.json` to customize settings:
+5. **Configure the application**: Edit `configuration/cyber_query_ai_config.json` to customize settings:
    ```json
    {
      "server": {
@@ -273,7 +273,7 @@ To customize other settings:
    }
    ```
 
-   **Note:** This `configuration/config.json` file is the single source of truth for all configuration settings.
+   **Note:** This `configuration/cyber_query_ai_config.json` file is the single source of truth for all configuration settings.
 
 6. **Launch the application**:
    ```bash

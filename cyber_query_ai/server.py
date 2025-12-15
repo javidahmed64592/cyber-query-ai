@@ -2,12 +2,14 @@
 
 import json
 import logging
+from pathlib import Path
 
 from fastapi import HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
+from python_template_server.constants import CONFIG_DIR
 from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
@@ -42,13 +44,17 @@ EXPLOIT_SEARCH_FIELDS = PostExploitSearchResponse.model_fields.keys() - BaseResp
 class CyberQueryAIServer(TemplateServer):
     """AI chatbot server application inheriting from TemplateServer."""
 
+    CONFIG_FILENAME = "cyber_query_ai_config.json"
+
     def __init__(self, config: CyberQueryAIConfig | None = None) -> None:
         """Initialise the CyberQueryAIServer by delegating to the template server.
 
         :param CyberQueryAIConfig config: CyberQueryAI server configuration
         """
         self.config: CyberQueryAIConfig
-        super().__init__(package_name="cyber-query-ai", config=config)
+        super().__init__(
+            package_name="cyber-query-ai", config_filepath=Path(CONFIG_DIR) / self.CONFIG_FILENAME, config=config
+        )
         self.config.save_to_file(self.config_filepath)
         logger.info("Loaded CyberQueryAI server configuration from: %s", self.config_filepath)
 
