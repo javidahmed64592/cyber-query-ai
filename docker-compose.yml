@@ -66,10 +66,8 @@ services:
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
-      - ./configuration:/app/configuration
-      - ./certs:/app/certs
-      - ./logs:/app/logs
-      - ./rag_data:/app/rag_data
+      - cyber-query-ai-certs:/app/certs
+      - cyber-query-ai-logs:/app/logs
     networks:
       - monitoring
     restart: unless-stopped
@@ -140,5 +138,7 @@ networks:
 
 volumes:
   ollama-data:
+  cyber-query-ai-certs:
+  cyber-query-ai-logs:
   prometheus-data:
   grafana-data:

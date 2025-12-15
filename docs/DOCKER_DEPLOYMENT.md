@@ -6,6 +6,7 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 <!-- omit from toc -->
 ## Table of Contents
 - [The CPU variant uses the same image but without GPU reservations](#the-cpu-variant-uses-the-same-image-but-without-gpu-reservations)
+    - [Volume Management](#volume-management)
     - [Health Checks](#health-checks)
   - [Multi-Stage Build Process](#multi-stage-build-process)
   - [RAG System Integration](#rag-system-integration)
@@ -198,6 +199,44 @@ docker exec cyber-query-ai-ollama ollama list
 # Remove unused models
 docker exec cyber-query-ai-ollama ollama rm <model-name>
 ```
+
+### Volume Management
+
+The docker-compose configuration uses **named volumes** to persist runtime data while preserving built-in defaults:
+
+**Named volumes (automatically managed):**
+- `cyber-query-ai-certs` - SSL certificates (auto-generated on first run)
+- `cyber-query-ai-logs` - Application logs
+- `ollama-data` - Downloaded Ollama models
+- `prometheus-data` - Prometheus metrics
+- `grafana-data` - Grafana dashboards and settings
+
+**Configuration customization (development only):**
+
+By default, the application uses the `config.json` and RAG data built into the Docker image. To customize these files:
+
+1. **Extract default configuration:**
+   ```bash
+   # Copy config from container to local directory
+   docker cp cyber-query-ai:/app/configuration ./configuration
+   docker cp cyber-query-ai:/app/rag_data ./rag_data
+   ```
+
+2. **Edit docker-compose.yml to mount local directories:**
+   ```yaml
+   services:
+     cyber-query-ai:
+       volumes:
+         - cyber-query-ai-certs:/app/certs
+         - cyber-query-ai-logs:/app/logs
+   ```
+
+3. **Restart the container:**
+   ```bash
+   docker compose --profile gpu restart cyber-query-ai
+   ```
+
+**Warning:** Mounting local directories will override the built-in configuration. If the local directories are empty, the application will fail to start.
 
 ### Health Checks
 
