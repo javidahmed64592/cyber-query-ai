@@ -59,6 +59,7 @@ services:
       args:
         PORT: 443
     container_name: cyber-query-ai
+    profiles: ["gpu", "cpu"]
     ports:
       - "443:443"
     environment:
@@ -95,6 +96,7 @@ services:
   cyber-query-ai-prometheus:
     image: prom/prometheus:latest
     container_name: cyber-query-ai-prometheus
+    profiles: ["gpu", "cpu"]
     ports:
       - "9090:9090"
     volumes:
@@ -116,6 +118,7 @@ services:
   cyber-query-ai-grafana:
     image: grafana/grafana:latest
     container_name: cyber-query-ai-grafana
+    profiles: ["gpu", "cpu"]
     ports:
       - "3000:3000"
     environment:
