@@ -69,6 +69,17 @@ class CyberQueryAIServer(TemplateServer):
         self.app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
 
     @staticmethod
+    def parse_response(response_str: str) -> dict:
+        """Parse the LLM response string into a dictionary.
+
+        :param str response_str: LLM response string
+        :return dict: Parsed response dictionary
+        :raises json.JSONDecodeError: If the response cannot be parsed as JSON
+        """
+        cleaned_response = clean_json_response(response_str)
+        return json.loads(cleaned_response)  # type: ignore[no-any-return]
+
+    @staticmethod
     def validate_keys(required_keys: set[str], response_dict: dict) -> list[str]:
         """Validate that all required keys are present in the response dictionary.
 
@@ -145,8 +156,7 @@ class CyberQueryAIServer(TemplateServer):
 
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(str(model_response.content))
-            parsed = json.loads(cleaned_response)
+            parsed = self.parse_response(str(model_response.content))
 
             if missing_keys := self.validate_keys(CHAT_FIELDS, parsed):
                 return PostChatResponse(
@@ -190,8 +200,7 @@ class CyberQueryAIServer(TemplateServer):
 
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(str(model_response.content))
-            parsed = json.loads(cleaned_response)
+            parsed = self.parse_response(str(model_response.content))
 
             if missing_keys := self.validate_keys(CODE_GENERATE_FIELDS, parsed):
                 return PostCodeGenerationResponse(
@@ -243,8 +252,7 @@ class CyberQueryAIServer(TemplateServer):
 
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(str(model_response.content))
-            parsed = json.loads(cleaned_response)
+            parsed = self.parse_response(str(model_response.content))
 
             if missing_keys := self.validate_keys(CODE_EXPLAIN_FIELDS, parsed):
                 return PostCodeExplanationResponse(
@@ -288,8 +296,7 @@ class CyberQueryAIServer(TemplateServer):
 
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
-            cleaned_response = clean_json_response(str(model_response.content))
-            parsed = json.loads(cleaned_response)
+            parsed = self.parse_response(str(model_response.content))
 
             if missing_keys := self.validate_keys(EXPLOIT_SEARCH_FIELDS, parsed):
                 return PostExploitSearchResponse(
