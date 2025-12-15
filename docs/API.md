@@ -19,11 +19,11 @@ For detailed information about these features, authentication token generation, 
 
 ## CyberQueryAI Endpoints
 
-All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/config.json`).
+All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
 
 **Authentication**: Most endpoints require the `X-API-KEY` header. Exceptions are noted below.
 
-**Rate Limiting**: 10 requests per minute per client IP (configurable in `config.json`).
+**Rate Limiting**: 10 requests per minute per client IP (configurable in `cyber_query_ai_config.json`).
 
 All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
 
@@ -483,7 +483,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - Must be kept in sync with `cyber_query_ai/models.py`
 
 **Development Proxy** (`next.config.ts`):
-- Reads `configuration/config.json` at build time
+- Reads `configuration/cyber_query_ai_config.json` at build time
 - Proxies `/api/*` requests to backend in development mode
 
 **Production Deployment**:
@@ -499,7 +499,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - z-index 9999 for top-level rendering above all UI elements
 
 **Configuration**:
-- `configuration/config.json` is the single source of truth for:
+- `configuration/cyber_query_ai_config.json` is the single source of truth for:
   - Server host/port
   - Model configuration (LLM and embedding models)
   - Rate limiting settings

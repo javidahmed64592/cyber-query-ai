@@ -6,6 +6,7 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 <!-- omit from toc -->
 ## Table of Contents
 - [The CPU variant uses the same image but without GPU reservations](#the-cpu-variant-uses-the-same-image-but-without-gpu-reservations)
+    - [Volume Management](#volume-management)
     - [Health Checks](#health-checks)
   - [Multi-Stage Build Process](#multi-stage-build-process)
   - [RAG System Integration](#rag-system-integration)
@@ -16,7 +17,6 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
     - [Available Images](#available-images)
     - [Pulling Images](#pulling-images)
     - [Using with Docker Compose](#using-with-docker-compose)
-    - [Building vs. Pulling](#building-vs-pulling)
   - [Troubleshooting](#troubleshooting)
     - [Ollama Connection Issues](#ollama-connection-issues)
     - [Missing Models](#missing-models)
@@ -39,18 +39,19 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 CyberQueryAI releases are automatically published to GitHub Container Registry as multi-platform Docker images:
 
 ```bash
-# Pull the latest release
-docker pull ghcr.io/javidahmed64592/cyber-query-ai:latest
-
-# Download docker-compose.yml
+# Download docker-compose.yml from the repository
 curl -O https://raw.githubusercontent.com/javidahmed64592/cyber-query-ai/main/docker-compose.yml
 
-# Start all services
+# Start all services (automatically pulls ghcr.io/javidahmed64592/cyber-query-ai:latest)
 # For GPU systems:
 docker compose --profile gpu up -d
 
 # For CPU-only systems:
 docker compose --profile cpu up -d
+
+# Optional: Use a specific version instead of latest
+export CYBER_QUERY_AI_IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
+docker compose --profile gpu up -d
 
 # View logs
 docker compose logs -f cyber-query-ai
@@ -66,6 +67,7 @@ docker exec cyber-query-ai-ollama ollama pull bge-m3
 **Note:**
 - The container automatically generates an API token and SSL certificates on first run if the `API_TOKEN_HASH` environment variable has not been set.
 - The Ollama service does not automatically pull models - you must manually pull the required models (`mistral` and `bge-m3`) as shown above.
+- By default, docker-compose.yml pulls `ghcr.io/javidahmed64592/cyber-query-ai:latest`. Set `CYBER_QUERY_AI_IMAGE` environment variable to use a specific version.
 
 ### Building from Source
 
@@ -181,7 +183,7 @@ docker exec cyber-query-ai-ollama nvidia-smi
 
 **Required models must be manually pulled.** The application will not function without these models:
 
-**Required models** (configured in `configuration/config.json`):
+**Required models** (configured in `configuration/cyber_query_ai_config.json`):
 - **LLM**: `mistral` (default, used for chat, code generation, explanations)
 - **Embedding**: `bge-m3` (used for RAG vector similarity search)
 
@@ -197,6 +199,44 @@ docker exec cyber-query-ai-ollama ollama list
 # Remove unused models
 docker exec cyber-query-ai-ollama ollama rm <model-name>
 ```
+
+### Volume Management
+
+The docker-compose configuration uses **named volumes** to persist runtime data while preserving built-in defaults:
+
+**Named volumes (automatically managed):**
+- `cyber-query-ai-certs` - SSL certificates (auto-generated on first run)
+- `cyber-query-ai-logs` - Application logs
+- `ollama-data` - Downloaded Ollama models
+- `prometheus-data` - Prometheus metrics
+- `grafana-data` - Grafana dashboards and settings
+
+**Configuration customization (development only):**
+
+By default, the application uses the `cyber_query_ai_config.json` and RAG data built into the Docker image. To customize these files:
+
+1. **Extract default configuration:**
+   ```bash
+   # Copy config from container to local directory
+   docker cp cyber-query-ai:/app/configuration ./configuration
+   docker cp cyber-query-ai:/app/rag_data ./rag_data
+   ```
+
+2. **Edit docker-compose.yml to mount local directories:**
+   ```yaml
+   services:
+     cyber-query-ai:
+       volumes:
+         - cyber-query-ai-certs:/app/certs
+         - cyber-query-ai-logs:/app/logs
+   ```
+
+3. **Restart the container:**
+   ```bash
+   docker compose --profile gpu restart cyber-query-ai
+   ```
+
+**Warning:** Mounting local directories will override the built-in configuration. If the local directories are empty, the application will fail to start.
 
 ### Health Checks
 
@@ -311,51 +351,25 @@ docker pull ghcr.io/javidahmed64592/cyber-query-ai:0
 
 ### Using with Docker Compose
 
-The `docker-compose.yml` file in the repository already references the published image:
+The `docker-compose.yml` file supports both pulling pre-built images and building from source via the `CYBER_QUERY_AI_IMAGE` environment variable:
 
-```yaml
-services:
-  cyber-query-ai:
-    image: ghcr.io/javidahmed64592/cyber-query-ai:latest
-    # ... other configuration
-```
-
-To use a specific version, edit `docker-compose.yml`:
-
-```yaml
-services:
-  cyber-query-ai:
-    image: ghcr.io/javidahmed64592/cyber-query-ai:v0.1.0
-```
-
-### Building vs. Pulling
-
-**Pull pre-built image (faster):**
+**Default behavior** (pulls latest pre-built image):
 ```bash
-docker compose --profile cpu up -d
+# Uses ghcr.io/javidahmed64592/cyber-query-ai:latest by default
+docker compose --profile gpu up -d
 ```
 
-**Build from source (for development):**
+**Use specific version:**
 ```bash
-docker compose --profile cpu up --build -d
+# Set environment variable to use a specific version
+export CYBER_QUERY_AI_IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
+docker compose --profile gpu up -d
 ```
-- `POST /api/code-generation` - Generate security scripts
-- `POST /api/code-explanation` - Explain security code
-- `POST /api/exploit-search` - Search vulnerability information
 
-**Example:**
+**Build from source** (for development):
 ```bash
-# Health check
-curl -k https://localhost:443/api/health
-
-# Chat request
-curl -k -X POST https://localhost:443/api/chat \
-  -H "X-API-Key: your-token" \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "How do I scan a network with nmap?"}'
-
-# Metrics
-curl -k https://localhost:443/api/metrics
+# Use --build flag to force building from Dockerfile instead of pulling
+docker compose --profile gpu up --build -d
 ```
 
 ## Troubleshooting

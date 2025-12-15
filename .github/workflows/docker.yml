@@ -108,9 +108,6 @@ jobs:
           ### Quick Start with Docker
 
           ```bash
-          # Pull the Docker image
-          docker pull ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
-
           # Download docker-compose.yml
           curl -O https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
 
