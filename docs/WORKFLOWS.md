@@ -106,7 +106,7 @@ It consists of the following jobs:
   - Only runs on push to `main` branch (not PRs)
   - Requires `contents: write` and `packages: write` permissions
   - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
+  - Setup Python environment (via custom action)
   - Extract version from `pyproject.toml` using Python's `tomllib`
   - Check if Git tag already exists (skip if duplicate)
   - Set up Docker Buildx for multi-platform builds

@@ -137,7 +137,7 @@ Example response:
         "model": "mistral",
         "embedding_model": "bge-m3"
     },
-    "version": "1.0.3"
+    "version": "1.0.4"
 }
 ```
 
