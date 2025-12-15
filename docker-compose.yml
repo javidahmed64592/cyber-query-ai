@@ -52,7 +52,7 @@ services:
 
   # CyberQueryAI application service
   cyber-query-ai:
-    image: cyber-query-ai:${ENV:-dev}
+    image: ${CYBER_QUERY_AI_IMAGE:-ghcr.io/javidahmed64592/cyber-query-ai:latest}
     build:
       context: .
       dockerfile: Dockerfile
