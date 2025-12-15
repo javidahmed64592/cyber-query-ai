@@ -106,6 +106,19 @@ class TestCyberQueryAIServer:
             ):
                 CyberQueryAIServer(mock_cyber_query_ai_config)
 
+    def test_parse_response(self, mock_server: CyberQueryAIServer, mock_post_chat_response: PostChatResponse) -> None:
+        """Test parsing JSON response strings."""
+        response_str = json.dumps(mock_post_chat_response.model_dump())
+        parsed = mock_server.parse_response(response_str)
+        assert parsed == mock_post_chat_response.model_dump()
+
+    def test_validate_keys(self, mock_server: CyberQueryAIServer) -> None:
+        """Test validation of required keys in response dictionary."""
+        required_keys = {"key1", "key2", "key3"}
+        response_dict = {"key1": "value1", "key2": "value2"}
+        missing_keys = mock_server.validate_keys(required_keys, response_dict)
+        assert missing_keys == ["key3"]
+
     def test_validate_config(
         self, mock_server: CyberQueryAIServer, mock_cyber_query_ai_config: CyberQueryAIConfig
     ) -> None:
