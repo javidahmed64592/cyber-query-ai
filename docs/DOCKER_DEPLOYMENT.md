@@ -124,10 +124,12 @@ CyberQueryAI extends the template server with four services:
    - Auto-generates certificates and API tokens on first run
 
 3. **cyber-query-ai-prometheus** (Port 9090)
+   - Configuration included in package at `prometheus/prometheus.yml`
    - Inherits template server metrics plus custom CyberQueryAI metrics
    - Scrapes `/api/metrics` endpoint
 
 4. **cyber-query-ai-grafana** (Port 3000)
+   - Provisioning and dashboards included in package at `grafana/`
    - Pre-configured with authentication, rate limiting, and health dashboards
    - Custom dashboard for CyberQueryAI-specific metrics
 

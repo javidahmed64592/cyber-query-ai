@@ -174,7 +174,7 @@ The build workflow creates a release package containing:
 
 1. Creates `.venv` using `uv venv`
 2. Installs wheel with `uv pip install`, then deletes wheel
-3. Extracts `cyber_query_ai_config.json`, `README.md`, `SECURITY.md`, `LICENSE` from site-packages to root
+3. Extracts required files from site-packages to root
 4. Generates `cyber-query-ai` bash executable that launches app
 5. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
 6. Self-deletes installer files after completion
