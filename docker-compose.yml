@@ -69,6 +69,7 @@ services:
     volumes:
       - cyber-query-ai-certs:/app/certs
       - cyber-query-ai-logs:/app/logs
+      - monitoring-configs:/monitoring-configs
     networks:
       - monitoring
     restart: unless-stopped
@@ -100,10 +101,10 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - monitoring-configs:/monitoring-configs:ro
       - prometheus-data:/prometheus
     command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--config.file=/monitoring-configs/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
       - "--web.console.libraries=/usr/share/prometheus/console_libraries"
       - "--web.console.templates=/usr/share/prometheus/consoles"
@@ -112,7 +113,8 @@ services:
       - monitoring
     restart: unless-stopped
     depends_on:
-      - cyber-query-ai
+      cyber-query-ai:
+        condition: service_started
 
   # Grafana for metrics visualization
   cyber-query-ai-grafana:
@@ -125,15 +127,18 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=
+      - GF_PATHS_PROVISIONING=/monitoring-configs/grafana/provisioning
     volumes:
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - monitoring-configs:/monitoring-configs:ro
       - grafana-data:/var/lib/grafana
     networks:
       - monitoring
     restart: unless-stopped
     depends_on:
-      - cyber-query-ai-prometheus
+      cyber-query-ai:
+        condition: service_started
+      cyber-query-ai-prometheus:
+        condition: service_started
 
 networks:
   monitoring:
@@ -145,3 +150,4 @@ volumes:
   cyber-query-ai-logs:
   prometheus-data:
   grafana-data:
+  monitoring-configs:

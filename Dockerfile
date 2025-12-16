@@ -78,6 +78,15 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
 RUN echo '#!/bin/sh\n\
     set -e\n\
     \n\
+    # Copy monitoring configs to shared volume if they do not exist\n\
+    if [ -d "/monitoring-configs" ]; then\n\
+    echo "Setting up monitoring configurations..."\n\
+    mkdir -p /monitoring-configs/prometheus /monitoring-configs/grafana\n\
+    cp -r /app/prometheus/* /monitoring-configs/prometheus/ 2>/dev/null || true\n\
+    cp -r /app/grafana/* /monitoring-configs/grafana/ 2>/dev/null || true\n\
+    echo "Monitoring configurations ready"\n\
+    fi\n\
+    \n\
     # Generate API token if needed\n\
     if [ -z "$API_TOKEN_HASH" ]; then\n\
     echo "Generating new token..."\n\
