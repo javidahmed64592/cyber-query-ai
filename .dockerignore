@@ -54,10 +54,6 @@ Dockerfile
 .dockerignore
 docker-compose.yml
 
-# Grafana & Prometheus (not needed in app container)
-grafana/
-prometheus/
-
 # Tests
 tests/
 
