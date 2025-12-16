@@ -82,6 +82,12 @@ It consists of the following jobs:
   - Download wheel artifact
   - Install wheel using `uv pip install`
   - Verify installed package structure in site-packages:
+    - `cyber_query_ai/` - Python package
+    - `configuration/` - Server configuration
+    - `grafana/` - Grafana dashboards and provisioning
+    - `prometheus/` - Prometheus configuration
+    - `rag_data/` - RAG system tool documentation
+    - `static/` - Frontend static files
   - Display directory structure with tree views for verification
 
 ## Docker Workflow

@@ -52,6 +52,8 @@ allow-direct-references = true
 include = [
   "cyber_query_ai/**",
   "configuration/**",
+  "grafana/**",
+  "prometheus/**",
   "rag_data/**",
   "static/**",
   ".here",
