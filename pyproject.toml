@@ -193,6 +193,3 @@ module = [
     "slowapi.*"
 ]
 ignore_missing_imports = true
-
-[tool.pip-audit]
-ignore-package = ["cyber-query-ai", "python-template-server"]
