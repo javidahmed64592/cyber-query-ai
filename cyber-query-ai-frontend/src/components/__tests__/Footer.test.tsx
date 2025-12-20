@@ -52,7 +52,7 @@ describe("Footer", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(`--version v${TEST_VERSION}`)
+        screen.getByText(`--version=v${TEST_VERSION}`)
       ).toBeInTheDocument();
     });
   });
@@ -63,7 +63,7 @@ describe("Footer", () => {
     render(<Footer />);
 
     await waitFor(() => {
-      expect(screen.getByText("--model mistral")).toBeInTheDocument();
+      expect(screen.getByText("--model=mistral")).toBeInTheDocument();
     });
   });
 
@@ -73,18 +73,7 @@ describe("Footer", () => {
     render(<Footer />);
 
     await waitFor(() => {
-      expect(screen.getByText("--rag_model bge-m3")).toBeInTheDocument();
-    });
-  });
-
-  it("displays pipe separators between config values", async () => {
-    mockGetConfig.mockResolvedValue(createMockConfig());
-
-    render(<Footer />);
-
-    await waitFor(() => {
-      const pipes = screen.getAllByText("|");
-      expect(pipes.length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByText("--rag_model=bge-m3")).toBeInTheDocument();
     });
   });
 
@@ -186,18 +175,6 @@ describe("Footer", () => {
 
     const footer = screen.getByRole("contentinfo");
     expect(footer.tagName).toBe("FOOTER");
-  });
-
-  it("includes version from config API", async () => {
-    mockGetConfig.mockResolvedValue(createMockConfig());
-
-    render(<Footer />);
-
-    // Test that the version is loaded from the config API
-    await waitFor(() => {
-      const versionText = screen.getByText(`--version v${TEST_VERSION}`);
-      expect(versionText).toBeInTheDocument();
-    });
   });
 
   it("fetches config on mount", () => {
