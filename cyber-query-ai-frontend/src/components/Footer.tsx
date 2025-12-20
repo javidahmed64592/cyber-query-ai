@@ -31,13 +31,12 @@ const Footer = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="text-[var(--text-muted)] text-sm font-mono text-center flex flex-wrap justify-center gap-4">
           <span className="text-[var(--neon-green)]">cyber@query:~$</span>
+          <span>ai</span>
           {config ? (
             <>
-              <span>--version v{config.version}</span>
-              <span className="text-[var(--terminal-border)]">|</span>
-              <span>--model {config.model.model}</span>
-              <span className="text-[var(--terminal-border)]">|</span>
-              <span>--rag_model {config.model.embedding_model}</span>
+              <span>--version=v{config.version}</span>
+              <span>--model={config.model.model}</span>
+              <span>--rag_model={config.model.embedding_model}</span>
             </>
           ) : (
             <span>--loading...</span>

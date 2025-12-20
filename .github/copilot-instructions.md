@@ -117,7 +117,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 - `chatbot.py`: Prompt templates with strict JSON formatting rules; RAG context injection; includes `prompt_chat()` for conversational interface, `prompt_code_generation()`, `prompt_code_explanation()`, and `prompt_exploit_search()`
 - `rag.py`: Vector store creation from `rag_data/*.txt` with metadata from `rag_data/tools.json`; semantic search using `bge-m3` embeddings
 - `helpers.py`: `clean_json_response()` repairs LLM output (strips markdown, fixes quotes, removes trailing commas); `sanitize_text()` uses bleach; `get_static_files()` handles SPA routing for static files; `get_rag_tools_path()` and `get_static_dir()` return paths
-- `models.py`: All Pydantic models including `CyberQueryAIConfig`, `CyberQueryAIModelConfig`, `PostChatRequest`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`, `GetApiConfigResponse`, `PostLoginResponse`; all response models extend `BaseResponse`
+- `models.py`: All Pydantic models including `CyberQueryAIConfig`, `CyberQueryAIModelConfig`, `PostChatRequest`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`, `GetApiConfigResponse`; all response models extend `BaseResponse`
 
 ### Frontend
 
@@ -253,7 +253,7 @@ Users must:
 2. **Not cleaning LLM JSON**: Always use `clean_json_response()` before parsing
 3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together; ensure all response types extend `BaseResponse`
 4. **Missing sanitization**: All user input and LLM output must be sanitized
-5. **Wrong config path**: Configuration is in `configuration/cyber_query_ai_config.json` (not `config.json`)
+5. **Wrong config path**: Configuration is in `configuration/cyber_query_ai_config.json`
 6. **Missing authentication**: Most endpoints require X-API-KEY header; generate token with `uv run generate-new-token`
 7. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
 8. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime

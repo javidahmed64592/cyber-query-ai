@@ -17,11 +17,6 @@
 *.html text eol=lf
 *.sh text eol=lf
 
-# Convert to CRLF line endings for specific text file types
-*.bat text eol=crlf
-*.cmd text eol=crlf
-*.ps1 text eol=crlf
-
 # Denote all files that are truly binary and should not be modified
 *.png binary
 *.jpg binary

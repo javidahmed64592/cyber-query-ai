@@ -17,26 +17,10 @@ CyberQueryAI inherits from [python-template-server](https://github.com/javidahme
 
 For detailed information about these features, authentication token generation, server middleware, and base configuration, see the [python-template-server README](https://github.com/javidahmed64592/python-template-server/blob/main/README.md).
 
-## CyberQueryAI Endpoints
-
-All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
-
-**Authentication**: Most endpoints require the `X-API-KEY` header. Exceptions are noted below.
-
-**Rate Limiting**: 10 requests per minute per client IP (configurable in `cyber_query_ai_config.json`).
-
-All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
-
-The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
-
 <!-- omit from toc -->
 ## Table of Contents
 - [Base Server Infrastructure](#base-server-infrastructure)
-- [CyberQueryAI Endpoints](#cyberqueryai-endpoints)
 - [Endpoints](#endpoints)
-  - [GET /api/health](#get-apihealth)
-  - [GET /api/metrics](#get-apimetrics)
-  - [POST /api/login](#post-apilogin)
   - [GET /api/config](#get-apiconfig)
   - [POST /api/model/chat](#post-apimodelchat)
   - [POST /api/code/generate](#post-apicodegenerate)
@@ -50,67 +34,9 @@ The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSO
 
 ## Endpoints
 
-### GET /api/health
-
-- **Purpose**: Health check endpoint for monitoring server availability
-- **Authentication**: Not required
-- **Rate Limiting**: Not applied
-- **Request**: None
-- **Response model**: `HealthResponse` (extends `BaseResponse`)
-    - code: number (200 for healthy)
-    - message: string (health status description)
-    - timestamp: ISO 8601 string
-    - status: string ("healthy")
-
-Example response:
-```json
-{
-    "code": 200,
-    "message": "Server is healthy.",
-    "timestamp": "2025-12-13T12:00:00.000000Z",
-    "status": "healthy"
-}
-```
-
-### GET /api/metrics
-
-- **Purpose**: Prometheus metrics endpoint for monitoring and observability
-- **Authentication**: Not required
-- **Rate Limiting**: Not applied
-- **Request**: None
-- **Response**: Prometheus text format metrics including:
-    - HTTP request metrics (request count, duration, status codes)
-    - Authentication metrics (success/failure counts)
-    - Rate limiting metrics (applied/rejected counts)
-    - Custom application metrics
-
-**Note**: This endpoint is provided by the TemplateServer base class. See the [python-template-server documentation](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details.
-
-### POST /api/login
-
-- **Purpose**: Validate API key authentication
-- **Authentication**: Required (validates the `X-API-KEY` header)
-- **Rate Limiting**: Applied (10 requests/minute)
-- **Request**: Headers must include `X-API-KEY` with your API token
-- **Response model**: `PostLoginResponse` (extends `BaseResponse`)
-    - code: number (200 for success)
-    - message: string (authentication status message)
-    - timestamp: ISO 8601 string
-
-Example request:
-```bash
-curl -k -X POST https://localhost:443/api/login \
-  -H "X-API-KEY: your-api-key-here"
-```
-
-Example response:
-```json
-{
-    "code": 200,
-    "message": "Login successful.",
-    "timestamp": "2025-12-13T12:00:00.000000Z"
-}
-```
+All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
+All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
+The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
 
 ### GET /api/config
 
@@ -370,7 +296,6 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - `ChatMessageModel`: { role: RoleType ("user" | "assistant"), content: str }
 
 **Response Models (all extend BaseResponse):**
-- `PostLoginResponse`: BaseResponse fields only
 - `GetApiConfigResponse`: { model: CyberQueryAIModelConfig, version: str }
 - `PostChatResponse`: { model_message: str }
 - `PostCodeGenerationResponse`: { generated_code: str, explanation: str, language: str }

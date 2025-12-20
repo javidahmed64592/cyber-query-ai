@@ -102,7 +102,7 @@ jobs:
           # Check for required files in site-packages
           echo "Checking required files in site-packages..."
           REQUIRED_FILES=(
-            "${SITE_PACKAGES}/configuration/config.json"
+            "${SITE_PACKAGES}/configuration/cyber_query_ai_config.json"
             "${SITE_PACKAGES}/rag_data/tools.json"
             "${SITE_PACKAGES}/static/index.html"
             "${SITE_PACKAGES}/README.md"

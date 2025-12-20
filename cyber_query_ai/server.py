@@ -29,7 +29,6 @@ from cyber_query_ai.models import (
     PostCodeExplanationResponse,
     PostCodeGenerationResponse,
     PostExploitSearchResponse,
-    PostLoginResponse,
     PostPromptRequest,
 )
 
@@ -113,7 +112,6 @@ class CyberQueryAIServer(TemplateServer):
     def setup_routes(self) -> None:
         """Set up API routes."""
         super().setup_routes()
-        self.add_authenticated_route("/login", self.post_login, PostLoginResponse, methods=["POST"])
         self.add_unauthenticated_route(
             "/config", self.get_api_config, GetApiConfigResponse, methods=["GET"], limited=False
         )
@@ -128,15 +126,6 @@ class CyberQueryAIServer(TemplateServer):
             "/exploit/search", self.post_exploit_search, PostExploitSearchResponse, methods=["POST"]
         )
         self.add_unauthenticated_route("/{full_path:path}", self.serve_spa, None, methods=["GET"], limited=False)
-
-    async def post_login(self, request: Request) -> PostLoginResponse:
-        """Handle user login and return a success response."""
-        logger.info("User login successful.")
-        return PostLoginResponse(
-            code=ResponseCode.OK,
-            message="Login successful.",
-            timestamp=PostLoginResponse.current_timestamp(),
-        )
 
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
         """Get the API configuration including model configuration and version."""

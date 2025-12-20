@@ -9,51 +9,51 @@ The CI workflow runs on pushes and pull requests to the `main` branch.
 It consists of the following jobs:
 
 ### validate-pyproject
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Validate `pyproject.toml` structure using `validate-pyproject`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Validate `pyproject.toml` structure using `validate-pyproject`
 
 ### ruff
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Run Ruff linter with `uv run -m ruff check`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Run Ruff linter with `uv run -m ruff check`
 
 ### mypy
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Run mypy type checking with `uv run -m mypy .`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Run mypy type checking with `uv run -m mypy .`
 
 ### pytest
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Run pytest with coverage (HTML and terminal reports) using `uv run -m pytest --cov-report html --cov-report term`
-  - Fails if coverage drops below 80% (configured in `pyproject.toml`)
-  - Upload HTML coverage report as artifact
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Run pytest with coverage (HTML and terminal reports) using `uv run -m pytest --cov-report html --cov-report term`
+- Fails if coverage drops below 80% (configured in `pyproject.toml`)
+- Upload HTML coverage report as artifact
 
 ### bandit
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Run security scanning with bandit on `example/` directory
-  - Generate JSON report for artifacts
-  - Fail if security vulnerabilities are found
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Run security scanning with bandit on `cyber_query_ai/` directory
+- Generate JSON report for artifacts
+- Fail if security vulnerabilities are found
 
 ### pip-audit
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Audit dependencies for known CVEs using `pip-audit --desc`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Audit dependencies for known CVEs using `pip-audit --desc`
 
 ### frontend
-  - Checkout code
-  - Set up Node.js  and dependencies with npm caching (via custom action)
-  - Run type checking with `npm run type-check`
-  - Run linting with `npm run lint`
-  - Run formatting check with `npm run format`
-  - Run tests with `npm run test`
+- Checkout code
+- Set up Node.js  and dependencies with npm caching (via custom action)
+- Run type checking with `npm run type-check`
+- Run linting with `npm run lint`
+- Run formatting check with `npm run format`
+- Run tests with `npm run test`
 
 ### version-check
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Check version consistency across `pyproject.toml`, `uv.lock`, and `cyber-query-ai-frontend/package.json`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Check version consistency across `pyproject.toml` and `uv.lock`
 
 ## Build Workflow
 
@@ -76,19 +76,19 @@ It consists of the following jobs:
   - Upload wheel artifact (`cyber_query_ai_wheel`)
 
 ### verify_structure
-  - Depends on `build_wheel` job
-  - Checkout code
-  - Setup Python environment (via custom action)
-  - Download wheel artifact
-  - Install wheel using `uv pip install`
-  - Verify installed package structure in site-packages:
-    - `cyber_query_ai/` - Python package
-    - `configuration/` - Server configuration
-    - `grafana/` - Grafana dashboards and provisioning
-    - `prometheus/` - Prometheus configuration
-    - `rag_data/` - RAG system tool documentation
-    - `static/` - Frontend static files
-  - Display directory structure with tree views for verification
+- Depends on `build_wheel` job
+- Checkout code
+- Setup Python environment (via custom action)
+- Download wheel artifact
+- Install wheel using `uv pip install`
+- Verify installed package structure in site-packages:
+  - `cyber_query_ai/` - Python package
+  - `configuration/` - Server configuration
+  - `grafana/` - Grafana dashboards and provisioning
+  - `prometheus/` - Prometheus configuration
+  - `rag_data/` - RAG system tool documentation
+  - `static/` - Frontend static files
+- Display directory structure with tree views for verification
 
 ## Docker Workflow
 
@@ -96,16 +96,16 @@ The Docker workflow runs on pushes, pull requests to the `main` branch, and manu
 It consists of the following jobs:
 
 ### build
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Build and start services with `docker compose --profile cpu up --build -d`
-  - Wait for services to start (5 seconds)
-  - Show server logs from `cyber-query-ai` container
-  - **Health check** using reusable composite action `.github/actions/docker-check-containers`:
-    - Verifies CyberQueryAI is running on port 443
-    - Checks Prometheus and Grafana services
-    - Validates Ollama integration
-  - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Build and start services with `docker compose --profile cpu up --build -d`
+- Wait for services to start (5 seconds)
+- Show server logs from `cyber-query-ai` container
+- **Health check** using reusable composite action `.github/actions/docker-check-containers`:
+  - Verifies server is running on port 443
+  - Checks Prometheus and Grafana services
+  - Validates Ollama integration
+- Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
 
 ### publish-release
   - Depends on `build` job
