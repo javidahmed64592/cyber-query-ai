@@ -13,7 +13,6 @@ from cyber_query_ai.models import (
     PostCodeExplanationResponse,
     PostCodeGenerationResponse,
     PostExploitSearchResponse,
-    PostLoginResponse,
     PostPromptRequest,
     RoleType,
 )
@@ -97,21 +96,6 @@ class TestPostPromptRequest:
 
 
 # Response schemas
-class TestPostLoginResponse:
-    """Unit tests for the PostLoginResponse model."""
-
-    def test_model_dump(
-        self,
-        mock_post_login_response: PostLoginResponse,
-        mock_post_login_response_dict: dict,
-    ) -> None:
-        """Test the model_dump method."""
-        result = mock_post_login_response.model_dump()
-        assert result["code"] == mock_post_login_response_dict["code"]
-        assert result["message"] == mock_post_login_response_dict["message"]
-        assert result["timestamp"] == mock_post_login_response_dict["timestamp"]
-
-
 class TestGetApiConfigResponse:
     """Unit tests for the GetApiConfigResponse model."""
 

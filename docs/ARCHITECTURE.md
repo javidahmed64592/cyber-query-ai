@@ -35,7 +35,6 @@ This document summarizes the code architecture and technology stack for the Cybe
     - `CyberQueryAIServer` class extends `TemplateServer` from python-template-server
     - Overrides `validate_config()` to load `CyberQueryAIConfig` (extends `TemplateServerConfig`)
     - Overrides `setup_routes()` to register application-specific endpoints:
-        - `POST /api/login` - Authenticated route that validates API key
         - `GET /api/config` - Unauthenticated route returning model config and version
         - `POST /api/model/chat` - **Primary endpoint** for AI Assistant with conversation history
         - `POST /api/code/generate` - Generate commands or scripts (language inferred by LLM)
@@ -78,7 +77,7 @@ This document summarizes the code architecture and technology stack for the Cybe
     - All response models extend `BaseResponse` from python-template-server (code, message, timestamp)
     - `CyberQueryAIConfig` extends `TemplateServerConfig` and adds `model: CyberQueryAIModelConfig`
     - Request models: `PostChatRequest`, `PostPromptRequest`, `ChatMessageModel`
-    - Response models: `PostLoginResponse`, `GetApiConfigResponse`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`
+    - Response models: `GetApiConfigResponse`, `PostChatResponse`, `PostCodeGenerationResponse`, `PostCodeExplanationResponse`, `PostExploitSearchResponse`
     - Other models: `ExploitModel`, `RoleType` enum, `CyberQueryAIModelConfig`
 
 ## Frontend Structure: `cyber-query-ai-frontend`

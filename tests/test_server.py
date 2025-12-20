@@ -143,8 +143,8 @@ class TestCyberQueryAIServerRoutes:
         routes = [route.path for route in api_routes]
         expected_endpoints = [
             "/health",
-            "/metrics",
             "/login",
+            "/metrics",
             "/config",
             "/model/chat",
             "/code/generate",
@@ -154,32 +154,6 @@ class TestCyberQueryAIServerRoutes:
         ]
         for endpoint in expected_endpoints:
             assert endpoint in routes, f"Expected endpoint {endpoint} not found in routes"
-
-
-class TestPostLoginEndpoint:
-    """Integration tests for the /login endpoint."""
-
-    def test_post_login(self, mock_server: CyberQueryAIServer) -> None:
-        """Test the /login method."""
-        request = MagicMock(spec=Request)
-        response = asyncio.run(mock_server.post_login(request))
-
-        assert response.code == ResponseCode.OK
-        assert response.message == "Login successful."
-        assert isinstance(response.timestamp, str)
-
-    def test_post_login_endpoint(self, mock_server: CyberQueryAIServer) -> None:
-        """Test /login endpoint returns 200."""
-        app = mock_server.app
-        client = TestClient(app)
-
-        response = client.post("/login")
-        assert response.status_code == ResponseCode.OK
-
-        response_body = response.json()
-        assert response_body["code"] == ResponseCode.OK
-        assert response_body["message"] == "Login successful."
-        assert isinstance(response_body["timestamp"], str)
 
 
 class TestGetApiConfigEndpoint:
