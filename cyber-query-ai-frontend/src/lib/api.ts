@@ -112,15 +112,11 @@ export const getConfig = async (): Promise<ApiConfigResponse> => {
 
 export const login = async (apiKey: string): Promise<LoginResponse> => {
   try {
-    const response = await api.post<LoginResponse>(
-      "/login",
-      {},
-      {
-        headers: {
-          "X-API-KEY": apiKey,
-        },
-      }
-    );
+    const response = await api.get<LoginResponse>("/login", {
+      headers: {
+        "X-API-KEY": apiKey,
+      },
+    });
     const data = response.data;
 
     if (!isSuccessResponse(data)) {
