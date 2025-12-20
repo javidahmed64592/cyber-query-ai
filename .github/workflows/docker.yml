@@ -22,7 +22,7 @@ jobs:
           sleep 5  # Wait for services to start
 
       - name: Show server logs
-        run: docker logs cyber-query-ai
+        run: docker compose logs cyber-query-ai
 
       - uses: ./.github/actions/docker-check-containers
         with:

@@ -53,7 +53,7 @@ jobs:
       - uses: ./.github/actions/setup-python-dev
       - name: Security check
         run: |
-          uv run bandit -r example/ -f json -o bandit-report.json || true
+          uv run bandit -r python_template_server/ -f json -o bandit-report.json || true
       - uses: actions/upload-artifact@v4
         with:
           name: bandit-report
