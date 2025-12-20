@@ -124,7 +124,7 @@ The backend will be available at `https://localhost:443` by default (HTTPS only)
 - **Format code:** `uv run ruff format .`
 - **Type check:** `uv run mypy .`
 - **Run tests:** `uv run pytest`
-- **Security scan:** `uv run bandit -r example/`
+- **Security scan:** `uv run bandit -r cyber_query_ai/`
 - **Audit dependencies:** `uv run pip-audit`
 
 

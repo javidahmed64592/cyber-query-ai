@@ -17,22 +17,9 @@ CyberQueryAI inherits from [python-template-server](https://github.com/javidahme
 
 For detailed information about these features, authentication token generation, server middleware, and base configuration, see the [python-template-server README](https://github.com/javidahmed64592/python-template-server/blob/main/README.md).
 
-## CyberQueryAI Endpoints
-
-All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
-
-**Authentication**: Most endpoints require the `X-API-KEY` header. Exceptions are noted below.
-
-**Rate Limiting**: 10 requests per minute per client IP (configurable in `cyber_query_ai_config.json`).
-
-All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
-
-The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
-
 <!-- omit from toc -->
 ## Table of Contents
 - [Base Server Infrastructure](#base-server-infrastructure)
-- [CyberQueryAI Endpoints](#cyberqueryai-endpoints)
 - [Endpoints](#endpoints)
   - [GET /api/health](#get-apihealth)
   - [GET /api/metrics](#get-apimetrics)
@@ -49,6 +36,10 @@ The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSO
 
 
 ## Endpoints
+
+All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
+All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
+The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
 
 ### GET /api/health
 
