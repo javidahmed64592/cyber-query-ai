@@ -499,11 +499,11 @@ docker compose logs -f cyber-query-ai-ollama
 
 **Optimize for CPU:**
 ```bash
-# Use a smaller model (edit configuration/config.json)
+# Use a smaller model (edit configuration/cyber_query_ai_config.json)
 docker exec cyber-query-ai-ollama ollama pull mistral:7b-instruct-q4_0
 ```
 
-Then update `configuration/config.json`:
+Then update `configuration/cyber_query_ai_config.json`:
 ```json
 {
   "model": {

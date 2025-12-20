@@ -253,7 +253,7 @@ Users must:
 2. **Not cleaning LLM JSON**: Always use `clean_json_response()` before parsing
 3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together; ensure all response types extend `BaseResponse`
 4. **Missing sanitization**: All user input and LLM output must be sanitized
-5. **Wrong config path**: Configuration is in `configuration/cyber_query_ai_config.json` (not `config.json`)
+5. **Wrong config path**: Configuration is in `configuration/cyber_query_ai_config.json`
 6. **Missing authentication**: Most endpoints require X-API-KEY header; generate token with `uv run generate-new-token`
 7. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
 8. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime
