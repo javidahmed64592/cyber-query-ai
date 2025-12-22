@@ -2,15 +2,15 @@ import nextPlugin from "eslint-config-next";
 import prettierPlugin from "eslint-plugin-prettier";
 import importPlugin from "eslint-plugin-import";
 import prettierConfig from "eslint-config-prettier";
-import typescriptPlugin from "@typescript-eslint/eslint-plugin";
 import typescriptParser from "@typescript-eslint/parser";
 
 const eslintConfig = [
   ...nextPlugin,
   prettierConfig,
 
+  // TypeScript-specific rules (relies on @typescript-eslint plugin from eslint-config-next)
   {
-    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       parser: typescriptParser,
       parserOptions: {
@@ -21,8 +21,20 @@ const eslintConfig = [
         },
       },
     },
+    rules: {
+      // TypeScript specific rules
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+      "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+
+  // General rules for all files
+  {
+    files: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
     plugins: {
-      "@typescript-eslint": typescriptPlugin,
       prettier: prettierPlugin,
       import: importPlugin,
     },
@@ -34,13 +46,6 @@ const eslintConfig = [
     rules: {
       // Prettier integration
       "prettier/prettier": "error",
-
-      // TypeScript specific rules
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" },
-      ],
-      "@typescript-eslint/no-explicit-any": "warn",
 
       // React specific rules
       "react/jsx-uses-react": "off",
