@@ -68,6 +68,8 @@ services:
     volumes:
       - certs:/app/certs
       - logs:/app/logs
+    networks:
+      - monitoring
     restart: unless-stopped
     depends_on:
       cyber-query-ai-ollama:
