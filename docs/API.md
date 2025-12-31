@@ -11,7 +11,6 @@ CyberQueryAI inherits from [python-template-server](https://github.com/javidahme
 - **Rate Limiting**: Configurable request throttling (default: 10 requests/minute per IP)
 - **Security Headers**: Automatic HSTS, CSP, and X-Frame-Options enforcement
 - **Request Logging**: Comprehensive logging of all requests/responses with client IP tracking
-- **Prometheus Metrics**: Built-in metrics for monitoring authentication, rate limiting, and HTTP performance
 - **Health Checks**: Standard `/api/health` endpoint for availability monitoring
 - **HTTPS Support**: Built-in SSL certificate generation and management
 
@@ -34,7 +33,7 @@ For detailed information about these features, authentication token generation, 
 
 ## Endpoints
 
-All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/cyber_query_ai_config.json`).
+All endpoints are mounted under the `/api` prefix and serve on `https://0.0.0.0:443` by default (configurable via `configuration/config.json`).
 All LLM-driven endpoints expect JSON requests and return JSON responses following the `BaseResponse` schema (see [python-template-server models](https://github.com/javidahmed64592/python-template-server/blob/main/README.md) for details).
 The backend sanitizes prompts and attempts to normalize LLM outputs to valid JSON before parsing.
 
@@ -408,7 +407,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - Must be kept in sync with `cyber_query_ai/models.py`
 
 **Development Proxy** (`next.config.ts`):
-- Reads `configuration/cyber_query_ai_config.json` at build time
+- Reads `configuration/config.json` at build time
 - Proxies `/api/*` requests to backend in development mode
 
 **Production Deployment**:
@@ -424,7 +423,7 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - z-index 9999 for top-level rendering above all UI elements
 
 **Configuration**:
-- `configuration/cyber_query_ai_config.json` is the single source of truth for:
+- `configuration/config.json` is the single source of truth for:
   - Server host/port
   - Model configuration (LLM and embedding models)
   - Rate limiting settings

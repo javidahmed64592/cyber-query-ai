@@ -29,9 +29,6 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy backend source files
 COPY cyber_query_ai/ ./cyber_query_ai/
-COPY configuration/ ./configuration/
-COPY grafana/ ./grafana/
-COPY prometheus/ ./prometheus/
 COPY rag_data/ ./rag_data/
 COPY pyproject.toml .here LICENSE README.md SECURITY.md ./
 
@@ -55,18 +52,18 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Copy the built wheel from backend builder
 COPY --from=backend-builder /build/dist/*.whl /tmp/
 
+# Copy configuration
+COPY configuration /app/configuration/
+
 # Install the wheel
 RUN uv pip install --system --no-cache /tmp/*.whl && \
     rm /tmp/*.whl
 
 # Create required directories
-RUN mkdir -p /app/logs /app/certs
+RUN mkdir -p /app/logs
 
 # Copy included files from installed wheel to app directory
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
-    cp -r "${SITE_PACKAGES_DIR}/configuration" /app/ && \
-    cp -r "${SITE_PACKAGES_DIR}/grafana" /app/ && \
-    cp -r "${SITE_PACKAGES_DIR}/prometheus" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/static" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
     cp "${SITE_PACKAGES_DIR}/.here" /app/.here && \
@@ -78,15 +75,6 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
 RUN echo '#!/bin/sh\n\
     set -e\n\
     \n\
-    # Copy monitoring configs to shared volume if they do not exist\n\
-    if [ -d "/monitoring-configs" ]; then\n\
-    echo "Setting up monitoring configurations..."\n\
-    mkdir -p /monitoring-configs/prometheus /monitoring-configs/grafana\n\
-    cp -r /app/prometheus/* /monitoring-configs/prometheus/ 2>/dev/null || true\n\
-    cp -r /app/grafana/* /monitoring-configs/grafana/ 2>/dev/null || true\n\
-    echo "Monitoring configurations ready"\n\
-    fi\n\
-    \n\
     # Generate API token if needed\n\
     if [ -z "$API_TOKEN_HASH" ]; then\n\
     echo "Generating new token..."\n\
@@ -94,15 +82,7 @@ RUN echo '#!/bin/sh\n\
     export $(grep -v "^#" .env | xargs)\n\
     fi\n\
     \n\
-    # Generate certificates if needed\n\
-    if [ ! -f certs/cert.pem ] || [ ! -f certs/key.pem ]; then\n\
-    echo "Generating self-signed certificates..."\n\
-    generate-certificate\n\
-    fi\n\
-    \n\
-    # Check required Ollama models\n\
-    REQUIRED_MODELS="mistral bge-m3"\n\
-    \n\
+    # Check Ollama connection and models\n\
     echo "Checking Ollama connection at $OLLAMA_HOST..."\n\
     MAX_RETRIES=30\n\
     RETRY_COUNT=0\n\
@@ -123,8 +103,8 @@ RUN echo '#!/bin/sh\n\
     MODELS_JSON=$(wget -q -O- "$OLLAMA_HOST/api/tags")\n\
     \n\
     # Extract model names from configuration file\n\
-    CONFIG_MODEL=$(python -c "import json; print(json.load(open('\''configuration/cyber_query_ai_config.json'\''))['\''model'\'']['\''model'\''])")\n\
-    CONFIG_EMBEDDING_MODEL=$(python -c "import json; print(json.load(open('\''configuration/cyber_query_ai_config.json'\''))['\''model'\'']['\''embedding_model'\''])")\n\
+    CONFIG_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''model'\''])")\n\
+    CONFIG_EMBEDDING_MODEL=$(python -c "import json; print(json.load(open('\''configuration/config.json'\''))['\''model'\'']['\''embedding_model'\''])")\n\
     \n\
     # Check models from configuration file\n\
     if ! echo "$MODELS_JSON" | grep -q "${CONFIG_MODEL}:latest"; then\n\
@@ -136,14 +116,14 @@ RUN echo '#!/bin/sh\n\
     fi\n\
     fi\n\
     \n\
-    exec cyber-query-ai' > /app/start.sh && \
+    exec cyber-query-ai --port $PORT' > /app/start.sh && \
     chmod +x /app/start.sh
 
 # Expose HTTPS port
-EXPOSE 443
+EXPOSE $PORT
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('https://localhost:443/api/health', context=__import__('ssl')._create_unverified_context()).read()" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('https://localhost:$PORT/api/health', context=__import__('ssl')._create_unverified_context()).read()" || exit 1
 
 CMD ["/app/start.sh"]

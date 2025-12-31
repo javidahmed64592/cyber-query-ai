@@ -17,17 +17,17 @@ This document summarizes the code architecture and technology stack for the Cybe
 - Frontend: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Axios for API calls, DOMPurify (client-side sanitization)
 - Authentication: X-API-KEY header with SHA-256 hashed tokens (provided by python-template-server)
 - Rate Limiting: SlowAPI with configurable storage (in-memory/Redis/Memcached, default: in-memory)
-- Observability: Prometheus metrics, request logging, health checks (provided by python-template-server)
+- Observability: Request logging, health checks (provided by python-template-server)
 - Dev / tooling: pytest, Ruff, mypy, Jest, ESLint, Prettier, TypeScript, Ollama for local LLM hosting
 
 ## High-Level Architecture
 
-- The backend inherits from `TemplateServer` (from python-template-server package), which provides production-ready infrastructure including authentication, rate limiting, security headers, request logging, and Prometheus metrics.
+- The backend inherits from `TemplateServer` (from python-template-server package), which provides production-ready infrastructure including authentication, rate limiting, security headers and request logging.
 - `CyberQueryAIServer` extends `TemplateServer` and implements domain-specific endpoints for LLM-driven cybersecurity tasks.
 - The server creates a `Chatbot` instance (wrapping an Ollama LLM with RAG support) during initialization and stores it as `self.chatbot`.
 - Static frontend files are served from the `static/` directory with SPA fallback routing.
 - The frontend is a Next.js application that calls backend endpoints via `src/lib/api.ts`. In production it expects same-origin `/api` paths; in development Next.js proxies requests to the HTTPS backend.
-- Configuration is centralized in `configuration/cyber_query_ai_config.json` and extends `TemplateServerConfig` with application-specific model settings.
+- Configuration is centralized in `configuration/config.json` and extends `TemplateServerConfig` with application-specific model settings.
 
 ## Backend Structure: `cyber_query_ai`
 
@@ -48,7 +48,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 
 - `main.py`
     - Simple entry point that creates `CyberQueryAIServer()` instance and calls `server.run()`
-    - Server reads configuration from `configuration/cyber_query_ai_config.json` via `CyberQueryAIConfig.load_from_file()`
+    - Server reads configuration from `configuration/config.json` via `CyberQueryAIConfig.load_from_file()`
     - Uvicorn configured for HTTPS with SSL certificates from `certs/` directory
 
 - `chatbot.py`
@@ -138,7 +138,7 @@ This document summarizes the code architecture and technology stack for the Cybe
   - `isCommandSafe()` - Command safety checker (flags dangerous patterns)
 
 - `next.config.ts`
-  - Reads `configuration/cyber_query_ai_config.json` at build time
+  - Reads `configuration/config.json` at build time
   - Development proxy: rewrites `/api/*` to HTTPS backend
   - Custom `https.Agent` with `rejectUnauthorized: false` for self-signed certificates
   - Sets `NODE_TLS_REJECT_UNAUTHORIZED=0` environment variable
@@ -155,14 +155,14 @@ This document summarizes the code architecture and technology stack for the Cybe
 
 **Rate Limiting**:
 - 10 requests/minute per IP address on authenticated endpoints
-- Configured via `configuration/cyber_query_ai_config.json` `rate_limit` section
+- Configured via `configuration/config.json` `rate_limit` section
 - Can be disabled by setting `enabled: false` in config
 - Supports multiple storage backends: in-memory (default), Redis, Memcached
 - Rate limit errors return HTTP 429 with descriptive message
 
 **LLM Integration**:
 - Uses local Ollama via `langchain-ollama.OllamaLLM`
-- Default model: `mistral` (configurable in `configuration/cyber_query_ai_config.json`)
+- Default model: `mistral` (configurable in `configuration/config.json`)
 - Embedding model: `bge-m3` for RAG semantic search
 - All LLM calls executed via `run_in_threadpool()` to prevent event loop blocking
 - Responses cleaned with `clean_json_response()` before JSON parsing
@@ -171,7 +171,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 - Input sanitization: `sanitize_text()` using `bleach` for all user prompts
 - Output sanitization: Client-side DOMPurify for LLM-generated content
 - Security headers: HSTS, CSP, X-Frame-Options automatically applied by TemplateServer
-- HTTPS only: Self-signed certificates generated via `uv run generate-certificate`
+- HTTPS only: Self-signed certificates
 - Command safety: Client-side `isCommandSafe()` flags dangerous patterns
 
 **Error Handling**:
@@ -182,10 +182,8 @@ This document summarizes the code architecture and technology stack for the Cybe
 - All LLM endpoint errors return valid response models with empty data fields
 
 **Monitoring & Observability**:
-- Prometheus metrics at `/api/metrics` (authentication, rate limiting, HTTP stats)
 - Health check at `/api/health` (returns server status)
 - Request logging with client IP tracking (configured in `TemplateServer`)
-- Custom metrics for LLM performance and error rates
 
 **Static File Serving**:
 - Frontend built as Next.js static export to `static/` directory
@@ -194,7 +192,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 - Implemented in `helpers.get_static_files()` and `server.serve_spa()`
 
 **Configuration**:
-- Single source of truth: `configuration/cyber_query_ai_config.json`
+- Single source of truth: `configuration/config.json`
 - Extends `TemplateServerConfig` with `model: CyberQueryAIModelConfig`
 - Loaded via `CyberQueryAIConfig.load_from_file()` method
 - Available at runtime via `/api/config` endpoint (unauthenticated)

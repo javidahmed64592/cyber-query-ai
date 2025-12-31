@@ -52,24 +52,22 @@ services:
 
   # CyberQueryAI application service
   cyber-query-ai:
-    image: ${CYBER_QUERY_AI_IMAGE:-ghcr.io/javidahmed64592/cyber-query-ai:latest}
+    image: ${IMAGE:-ghcr.io/javidahmed64592/cyber-query-ai:latest}
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        PORT: 443
     container_name: cyber-query-ai
     profiles: ["gpu", "cpu"]
     ports:
-      - "443:443"
+      - "${PORT:-443}:${PORT:-443}"
     environment:
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
+      - PORT=${PORT:-443}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
-      - cyber-query-ai-certs:/app/certs
-      - cyber-query-ai-logs:/app/logs
-      - monitoring-configs:/monitoring-configs
+      - certs:/app/certs
+      - logs:/app/logs
     networks:
       - monitoring
     restart: unless-stopped
@@ -86,68 +84,18 @@ services:
           "CMD",
           "sh",
           "-c",
-          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:443/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
+          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:$PORT/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
 
-  # Prometheus for metrics collection
-  cyber-query-ai-prometheus:
-    image: prom/prometheus:latest
-    container_name: cyber-query-ai-prometheus
-    profiles: ["gpu", "cpu"]
-    ports:
-      - "9090:9090"
-    volumes:
-      - monitoring-configs:/monitoring-configs:ro
-      - prometheus-data:/prometheus
-    command:
-      - "--config.file=/monitoring-configs/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
-      - "--web.console.templates=/usr/share/prometheus/consoles"
-      - "--web.enable-lifecycle"
-    networks:
-      - monitoring
-    restart: unless-stopped
-    depends_on:
-      cyber-query-ai:
-        condition: service_started
-
-  # Grafana for metrics visualization
-  cyber-query-ai-grafana:
-    image: grafana/grafana:latest
-    container_name: cyber-query-ai-grafana
-    profiles: ["gpu", "cpu"]
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-      - GF_INSTALL_PLUGINS=
-      - GF_PATHS_PROVISIONING=/monitoring-configs/grafana/provisioning
-    volumes:
-      - monitoring-configs:/monitoring-configs:ro
-      - grafana-data:/var/lib/grafana
-    networks:
-      - monitoring
-    restart: unless-stopped
-    depends_on:
-      cyber-query-ai:
-        condition: service_started
-      cyber-query-ai-prometheus:
-        condition: service_started
-
 networks:
   monitoring:
     driver: bridge
 
 volumes:
+  certs:
+  logs:
   ollama-data:
-  cyber-query-ai-certs:
-  cyber-query-ai-logs:
-  prometheus-data:
-  grafana-data:
-  monitoring-configs:

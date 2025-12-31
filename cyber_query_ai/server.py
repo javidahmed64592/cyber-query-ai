@@ -43,7 +43,7 @@ EXPLOIT_SEARCH_FIELDS = PostExploitSearchResponse.model_fields.keys() - BaseResp
 class CyberQueryAIServer(TemplateServer):
     """AI chatbot server application inheriting from TemplateServer."""
 
-    CONFIG_FILENAME = "cyber_query_ai_config.json"
+    CONFIG_FILENAME = "config.json"
 
     def __init__(self, config: CyberQueryAIConfig | None = None) -> None:
         """Initialise the CyberQueryAIServer by delegating to the template server.
@@ -54,8 +54,6 @@ class CyberQueryAIServer(TemplateServer):
         super().__init__(
             package_name="cyber-query-ai", config_filepath=Path(CONFIG_DIR) / self.CONFIG_FILENAME, config=config
         )
-        self.config.save_to_file(self.config_filepath)
-        logger.info("Loaded CyberQueryAI server configuration from: %s", self.config_filepath)
 
         self.chatbot = Chatbot(
             model=self.config.model.model,
@@ -66,7 +64,7 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Embedding model: %s", self.config.model.embedding_model)
 
         if not (static_dir := get_static_dir()).exists():
-            logger.error(f"Static directory not found: {static_dir}.")
+            logger.error("Static directory not found: %s", static_dir)
             raise SystemExit(1)
 
         self.static_dir = static_dir

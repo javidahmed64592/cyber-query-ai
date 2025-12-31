@@ -4,7 +4,6 @@ from collections.abc import Generator
 from unittest.mock import MagicMock, patch
 
 import pytest
-from prometheus_client import REGISTRY
 from python_template_server.models import ResponseCode
 
 from cyber_query_ai.models import (
@@ -43,20 +42,6 @@ def mock_is_dir() -> Generator[MagicMock]:
     """Mock the is_dir method of Path."""
     with patch("pathlib.Path.is_dir") as mock:
         yield mock
-
-
-@pytest.fixture(autouse=True)
-def clear_prometheus_registry() -> Generator[None]:
-    """Clear Prometheus registry before each test to avoid duplicate metric errors."""
-    # Clear all collectors from the registry
-    collectors = list(REGISTRY._collector_to_names.keys())
-    for collector in collectors:
-        REGISTRY.unregister(collector)
-    yield
-    # Clear again after the test
-    collectors = list(REGISTRY._collector_to_names.keys())
-    for collector in collectors:
-        REGISTRY.unregister(collector)
 
 
 # Application Server Configuration Models
