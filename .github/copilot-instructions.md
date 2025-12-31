@@ -10,7 +10,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 
 - **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting authentication (X-API-KEY), rate limiting (10/min), security headers and request logging
 - **Single chatbot instance**: Created during `CyberQueryAIServer.__init__()` and stored as `self.chatbot` for all routes to access
-- **Configuration**: Config loaded from `configuration/cyber_query_ai_config.json` using `CyberQueryAIConfig.load_from_file()` which extends `TemplateServerConfig`
+- **Configuration**: Config loaded from `configuration/config.json` using `CyberQueryAIConfig.load_from_file()` which extends `TemplateServerConfig`
 - **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
 - **JSON-only LLM contract**: All prompts enforce strict JSON responses; use `clean_json_response()` before `json.loads()` to handle LLM formatting quirks (code blocks, single quotes, trailing commas)
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
@@ -19,7 +19,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ### Frontend: Next.js App Router + Static Export + Authentication
 
 - **Dual deployment modes**: Dev uses Next.js HTTPS proxy to backend; production serves static build from `static/` with same-origin API calls
-- **Single source of truth**: `configuration/cyber_query_ai_config.json` is read by `next.config.ts` at build time to configure the dev proxy URL (HTTPS with self-signed cert support)
+- **Single source of truth**: `configuration/config.json` is read by `next.config.ts` at build time to configure the dev proxy URL (HTTPS with self-signed cert support)
 - **Authentication**: X-API-KEY header authentication managed via `AuthContext` with localStorage persistence; automatic redirect to `/login/` for unauthenticated users
 - **API client with interceptors**: `src/lib/api.ts` adds X-API-KEY header to all requests and handles 401 redirects
 - **Error notifications**: Portal-based toast notifications using `createPortal(component, document.body)` for proper z-index stacking
@@ -86,7 +86,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ### Rate Limiting
 
-- **10 requests/minute per IP** on authenticated LLM endpoints (configurable in `configuration/cyber_query_ai_config.json`)
+- **10 requests/minute per IP** on authenticated LLM endpoints (configurable in `configuration/config.json`)
 - Provided by python-template-server using SlowAPI with in-memory storage (supports Redis/Memcached)
 - Disable in tests with `limiter.enabled = False`
 
@@ -129,7 +129,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 - `src/components/ErrorNotification.tsx`: Portal-based toast notifications using `createPortal(component, document.body)` with z-index 9999; `useErrorNotification()` hook
 - `src/components/`: Presentational components including `ChatWindow.tsx`, `ChatMessage.tsx`, `Navigation.tsx` (with logout), `Footer.tsx`, `HealthIndicator.tsx`; keep business logic in `api.ts`
 - `src/app/login/page.tsx`: API key authentication page with form validation
-- `next.config.ts`: Reads `configuration/cyber_query_ai_config.json` at build time; HTTPS proxy with custom agent (`rejectUnauthorized: false`) for self-signed certs; `NODE_TLS_REJECT_UNAUTHORIZED=0`
+- `next.config.ts`: Reads `configuration/config.json` at build time; HTTPS proxy with custom agent (`rejectUnauthorized: false`) for self-signed certs; `NODE_TLS_REJECT_UNAUTHORIZED=0`
 
 ## RAG System Details
 
@@ -198,13 +198,13 @@ Users must:
 1. Pull required Ollama models: `ollama pull mistral && ollama pull bge-m3`
 2. Generate API authentication token: `uv run generate-new-token` (save the displayed token!)
 3. Generate SSL certificate: `uv run generate-certificate` (or auto-generated on first run)
-4. Edit `configuration/cyber_query_ai_config.json` to customize server settings (host, port, models, rate limits)
+4. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
 5. Ensure Ollama is running: `ollama serve`
 6. Access application at `https://localhost:443` and login with API token
 
 ## Configuration
 
-### `configuration/cyber_query_ai_config.json` (required at runtime)
+### `configuration/config.json` (required at runtime)
 
 ```json
 {
@@ -240,7 +240,7 @@ Users must:
 }
 ```
 
-**Note:** `configuration/cyber_query_ai_config.json` is the single source of truth for all configuration:
+**Note:** `configuration/config.json` is the single source of truth for all configuration:
 
 - Backend server reads it via `CyberQueryAIConfig.load_from_file()` (extends `TemplateServerConfig`)
 - `next.config.ts` reads it at build time to configure the development proxy
@@ -253,7 +253,7 @@ Users must:
 2. **Not cleaning LLM JSON**: Always use `clean_json_response()` before parsing
 3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together; ensure all response types extend `BaseResponse`
 4. **Missing sanitization**: All user input and LLM output must be sanitized
-5. **Wrong config path**: Configuration is in `configuration/cyber_query_ai_config.json`
+5. **Wrong config path**: Configuration is in `configuration/config.json`
 6. **Missing authentication**: Most endpoints require X-API-KEY header; generate token with `uv run generate-new-token`
 7. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
 8. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime

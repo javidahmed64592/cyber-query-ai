@@ -56,19 +56,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        PORT: 443
     container_name: cyber-query-ai
     profiles: ["gpu", "cpu"]
     ports:
-      - "443:443"
+      - "${PORT:-443}:${PORT:-443}"
     environment:
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
+      - PORT=${PORT:-443}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
-      - cyber-query-ai-certs:/app/certs
-      - cyber-query-ai-logs:/app/logs
+      - certs:/app/certs
+      - logs:/app/logs
     restart: unless-stopped
     depends_on:
       cyber-query-ai-ollama:
@@ -83,7 +82,7 @@ services:
           "CMD",
           "sh",
           "-c",
-          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:443/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
+          'python -c "import urllib.request; urllib.request.urlopen(''https://localhost:$PORT/api/health'', context=__import__(''ssl'')._create_unverified_context()).read()"',
         ]
       interval: 30s
       timeout: 10s
@@ -91,6 +90,6 @@ services:
       start_period: 10s
 
 volumes:
+  certs:
+  logs:
   ollama-data:
-  cyber-query-ai-certs:
-  cyber-query-ai-logs:
