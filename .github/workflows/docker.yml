@@ -9,8 +9,11 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  CONTAINER_NAME: cyber-query-ai
+
 jobs:
-  build:
+  build-docker:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +25,7 @@ jobs:
           sleep 5  # Wait for services to start
 
       - name: Show server logs
-        run: docker compose logs cyber-query-ai
+        run: docker compose logs ${{ env.CONTAINER_NAME }}
 
       - uses: ./.github/actions/docker-check-containers
         with:
@@ -33,19 +36,18 @@ jobs:
 
   publish-release:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build-docker]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       packages: write
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
+      - uses: ./.github/actions/setup-python-dev
 
       - name: Get version from pyproject.toml
         id: get_version
         run: |
-          uv sync --extra dev
           VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
@@ -148,9 +150,9 @@ jobs:
           ### Documentation
 
           - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
-          - [Docker Deployment](https://github.com/${{ github.repository }}/blob/main/docs/DOCKER_DEPLOYMENT.md)
           - [API Documentation](https://github.com/${{ github.repository }}/blob/main/docs/API.md)
           - [Architecture](https://github.com/${{ github.repository }}/blob/main/docs/ARCHITECTURE.md)
+          - [Docker Deployment](https://github.com/${{ github.repository }}/blob/main/docs/DOCKER_DEPLOYMENT.md)
 
           **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
           EOF
@@ -161,7 +163,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
-          name: "CyberQueryAI ${{ steps.get_version.outputs.version }}"
+          name: "CyberQueryAI v${{ steps.get_version.outputs.version }}"
           body_path: ${{ steps.release_notes.outputs.release_notes_file }}
           draft: false
           prerelease: false

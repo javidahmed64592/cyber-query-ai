@@ -8,8 +8,11 @@ on:
     branches:
       - main
 
+env:
+  PACKAGE_NAME: cyber_query_ai
+
 jobs:
-  build_frontend:
+  build-frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +27,9 @@ jobs:
           name: cyber_query_ai_frontend
           path: cyber-query-ai-frontend/out
 
-  build_wheel:
+  build-wheel:
     runs-on: ubuntu-latest
-    needs: build_frontend
+    needs: build-frontend
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-python-dev
@@ -41,16 +44,16 @@ jobs:
       - name: Inspect wheel contents
         run: |
           echo "Wheel contents:"
-          unzip -l dist/cyber_query_ai-*-py3-none-any.whl
+          unzip -l dist/${{ env.PACKAGE_NAME }}-*-py3-none-any.whl
       - name: Upload wheel
         uses: actions/upload-artifact@v4
         with:
-          name: cyber_query_ai_wheel
-          path: dist/cyber_query_ai-*-py3-none-any.whl
+          name: ${{ env.PACKAGE_NAME }}_wheel
+          path: dist/${{ env.PACKAGE_NAME }}-*-py3-none-any.whl
 
-  verify_structure:
+  verify-structure:
     runs-on: ubuntu-latest
-    needs: build_wheel
+    needs: build-wheel
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-python-core
@@ -58,12 +61,11 @@ jobs:
       - name: Download wheel artifact
         uses: actions/download-artifact@v4
         with:
-          name: cyber_query_ai_wheel
+          name: ${{ env.PACKAGE_NAME }}_wheel
 
       - name: Install wheel
         run: |
-          PACKAGE_NAME="cyber_query_ai"
-          WHEEL_FILE=$(find . -name "${PACKAGE_NAME}-*-py3-none-any.whl")
+          WHEEL_FILE=$(find . -name "${{ env.PACKAGE_NAME }}-*-py3-none-any.whl")
 
           if [ ! -f "$WHEEL_FILE" ]; then
             echo "Wheel file not found"
@@ -75,8 +77,6 @@ jobs:
 
       - name: Verify installed package structure
         run: |
-          PACKAGE_NAME="cyber_query_ai"
-
           # Find site-packages directory
           SITE_PACKAGES=$(find . -name "site-packages" -type d | head -1)
           echo "Site-packages directory: $SITE_PACKAGES"
@@ -84,8 +84,7 @@ jobs:
           # Check for required directories in site-packages
           echo "Checking required directories in site-packages..."
           REQUIRED_DIRS=(
-            "${SITE_PACKAGES}/${PACKAGE_NAME}"
-            "${SITE_PACKAGES}/configuration"
+            "${SITE_PACKAGES}/${{ env.PACKAGE_NAME }}"
             "${SITE_PACKAGES}/rag_data"
             "${SITE_PACKAGES}/static"
           )

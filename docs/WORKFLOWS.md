@@ -60,32 +60,28 @@ It consists of the following jobs:
 The Build workflow runs on pushes and pull requests to the `main` branch.
 It consists of the following jobs:
 
-### build_frontend
-  - Checkout code
-  - Set up Node.js and dependencies with npm caching (via custom action)
-  - Build frontend with `npm run build`
-  - Upload frontend build artifact (`cyber_query_ai_frontend`)
+### build-frontend
+- Checkout code
+- Set up Node.js and dependencies with npm caching (via custom action)
+- Build frontend with `npm run build`
+- Upload frontend build artifact (`cyber_query_ai_frontend`)
 
-### build_wheel
-  - Depends on `build_frontend` job
-  - Checkout code
-  - Setup Python environment with dev dependencies (via custom action)
-  - Download frontend build artifact to `static/` directory
-  - Build wheel with `uv build`
-  - Inspect wheel contents for verification
-  - Upload wheel artifact (`cyber_query_ai_wheel`)
+### build-wheel
+- Depends on `build_frontend` job
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Download frontend build artifact to `static/` directory
+- Build wheel with `uv build`
+- Inspect wheel contents for verification
+- Upload wheel artifact (`cyber_query_ai_wheel`)
 
-### verify_structure
-- Depends on `build_wheel` job
+### verify-structure
+- Depends on `build-wheel` job
 - Checkout code
 - Setup Python environment (via custom action)
 - Download wheel artifact
 - Install wheel using `uv pip install`
-- Verify installed package structure in site-packages:
-  - `cyber_query_ai/` - Python package
-  - `configuration/` - Server configuration
-  - `rag_data/` - RAG system tool documentation
-  - `static/` - Frontend static files
+- Verify installed package structure in site-packages
 - Display directory structure with tree views for verification
 
 ## Docker Workflow
@@ -93,9 +89,8 @@ It consists of the following jobs:
 The Docker workflow runs on pushes, pull requests to the `main` branch, and manual dispatch.
 It consists of the following jobs:
 
-### build
+### build-docker
 - Checkout code
-- Setup Python environment with dev dependencies (via custom action)
 - Build and start services with `docker compose --profile cpu up --build -d`
 - Wait for services to start (5 seconds)
 - Show server logs from `cyber-query-ai` container
@@ -105,27 +100,23 @@ It consists of the following jobs:
 - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
 
 ### publish-release
-  - Depends on `build` job
-  - Only runs on push to `main` branch (not PRs)
-  - Requires `contents: write` and `packages: write` permissions
-  - Checkout code
-  - Setup Python environment (via custom action)
-  - Extract version from `pyproject.toml` using Python's `tomllib`
-  - Check if Git tag already exists (skip if duplicate)
-  - Set up Docker Buildx for multi-platform builds
-  - Log in to GitHub Container Registry (ghcr.io)
-  - Extract Docker metadata with semantic versioning tags:
-    - `v1.2.3` - Exact version
-    - `1.2` - Major.minor
-    - `1` - Major only
-    - `latest` - Latest stable release
-  - Build and push multi-platform Docker images:
-    - Platforms: `linux/amd64`, `linux/arm64`
-    - Registry: `ghcr.io/<owner>/<repo>`
-    - Uses GitHub Actions cache for layer caching
-  - Generate release notes with Docker-focused instructions:
-    - Quick start with docker compose
-    - Standalone Docker run command
-    - Feature highlights
-    - Available tags and documentation links
-  - Create GitHub Release with version tag and release notes
+- Depends on `build-docker` and `check-installer` jobs
+- Only runs on push to `main` branch (not PRs)
+- Requires `contents: write` and `packages: write` permissions
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Extract version from `pyproject.toml` using Python's `tomllib`
+- Check if Git tag already exists (skip if duplicate)
+- Set up Docker Buildx for multi-platform builds
+- Log in to GitHub Container Registry (ghcr.io)
+- Extract Docker metadata with semantic versioning tags:
+  - `v1.2.3` - Exact version
+  - `1.2` - Major.minor
+  - `1` - Major only
+  - `latest` - Latest stable release
+- Build and push multi-platform Docker images:
+  - Platforms: `linux/amd64`, `linux/arm64`
+  - Registry: `ghcr.io/<owner>/<repo>`
+  - Uses GitHub Actions cache for layer caching
+- Generate release notes
+- Create GitHub Release with version tag and release notes
