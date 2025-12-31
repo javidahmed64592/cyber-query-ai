@@ -5,25 +5,33 @@ This guide covers CyberQueryAI-specific Docker deployment features. For general 
 
 <!-- omit from toc -->
 ## Table of Contents
-- [The CPU variant uses the same image but without GPU reservations](#the-cpu-variant-uses-the-same-image-but-without-gpu-reservations)
-    - [Volume Management](#volume-management)
-    - [Health Checks](#health-checks)
-  - [Multi-Stage Build Process](#multi-stage-build-process)
-  - [RAG System Integration](#rag-system-integration)
-  - [Accessing CyberQueryAI](#accessing-cyberqueryai)
-    - [Web Interface](#web-interface)
-    - [API Endpoints](#api-endpoints)
-  - [GitHub Container Registry](#github-container-registry)
-    - [Available Images](#available-images)
-    - [Pulling Images](#pulling-images)
-    - [Using with Docker Compose](#using-with-docker-compose)
-  - [Troubleshooting](#troubleshooting)
-    - [Ollama Connection Issues](#ollama-connection-issues)
-    - [Missing Models](#missing-models)
-    - [GPU Not Available](#gpu-not-available)
-    - [Frontend Not Loading](#frontend-not-loading)
-    - [RAG System Errors](#rag-system-errors)
-    - [LLM Responses Slow or Timeout](#llm-responses-slow-or-timeout)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+  - [Using Pre-built Image (Recommended)](#using-pre-built-image-recommended)
+  - [Building from Source](#building-from-source)
+- [Docker Compose Services](#docker-compose-services)
+- [Ollama Integration](#ollama-integration)
+  - [GPU Support](#gpu-support)
+  - [CPU-Only Mode](#cpu-only-mode)
+  - [Model Management](#model-management)
+  - [Volume Management](#volume-management)
+  - [Health Checks](#health-checks)
+- [Multi-Stage Build Process](#multi-stage-build-process)
+- [RAG System Integration](#rag-system-integration)
+- [Accessing CyberQueryAI](#accessing-cyberqueryai)
+  - [Web Interface](#web-interface)
+  - [API Endpoints](#api-endpoints)
+- [GitHub Container Registry](#github-container-registry)
+  - [Available Images](#available-images)
+  - [Pulling Images](#pulling-images)
+  - [Using with Docker Compose](#using-with-docker-compose)
+- [Troubleshooting](#troubleshooting)
+  - [Ollama Connection Issues](#ollama-connection-issues)
+  - [Missing Models](#missing-models)
+  - [GPU Not Available](#gpu-not-available)
+  - [Frontend Not Loading](#frontend-not-loading)
+  - [RAG System Errors](#rag-system-errors)
+  - [LLM Responses Slow or Timeout](#llm-responses-slow-or-timeout)
 
 ## Prerequisites
 
@@ -50,7 +58,7 @@ docker compose --profile gpu up -d
 docker compose --profile cpu up -d
 
 # Optional: Use a specific version instead of latest
-export CYBER_QUERY_AI_IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
+export IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
 docker compose --profile gpu up -d
 
 # View logs
@@ -67,7 +75,7 @@ docker exec cyber-query-ai-ollama ollama pull bge-m3
 **Note:**
 - The container automatically generates an API token and SSL certificates on first run if the `API_TOKEN_HASH` environment variable has not been set.
 - The Ollama service does not automatically pull models - you must manually pull the required models (`mistral` and `bge-m3`) as shown above.
-- By default, docker-compose.yml pulls `ghcr.io/javidahmed64592/cyber-query-ai:latest`. Set `CYBER_QUERY_AI_IMAGE` environment variable to use a specific version.
+- By default, docker-compose.yml pulls `ghcr.io/javidahmed64592/cyber-query-ai:latest`. Set `IMAGE` environment variable to use a specific version.
 
 ### Building from Source
 
@@ -168,8 +176,7 @@ docker compose --profile cpu up -d
 docker exec cyber-query-ai-ollama nvidia-smi
 ```
 
-# The CPU variant uses the same image but without GPU reservations
-```
+The CPU variant uses the same image but without GPU reservations
 
 ### Model Management
 
@@ -197,36 +204,9 @@ docker exec cyber-query-ai-ollama ollama rm <model-name>
 The docker-compose configuration uses **named volumes** to persist runtime data while preserving built-in defaults:
 
 **Named volumes (automatically managed):**
-- `cyber-query-ai-certs` - SSL certificates (auto-generated on first run)
-- `cyber-query-ai-logs` - Application logs
+- `certs` - SSL certificates (auto-generated on first run)
+- `logs` - Application logs
 - `ollama-data` - Downloaded Ollama models
-
-**Configuration customization (development only):**
-
-By default, the application uses the `config.json` and RAG data built into the Docker image. To customize these files:
-
-1. **Extract default configuration:**
-   ```bash
-   # Copy config from container to local directory
-   docker cp cyber-query-ai:/app/configuration ./configuration
-   docker cp cyber-query-ai:/app/rag_data ./rag_data
-   ```
-
-2. **Edit docker-compose.yml to mount local directories:**
-   ```yaml
-   services:
-     cyber-query-ai:
-       volumes:
-         - cyber-query-ai-certs:/app/certs
-         - cyber-query-ai-logs:/app/logs
-   ```
-
-3. **Restart the container:**
-   ```bash
-   docker compose --profile gpu restart cyber-query-ai
-   ```
-
-**Warning:** Mounting local directories will override the built-in configuration. If the local directories are empty, the application will fail to start.
 
 ### Health Checks
 
@@ -340,7 +320,7 @@ docker pull ghcr.io/javidahmed64592/cyber-query-ai:0
 
 ### Using with Docker Compose
 
-The `docker-compose.yml` file supports both pulling pre-built images and building from source via the `CYBER_QUERY_AI_IMAGE` environment variable:
+The `docker-compose.yml` file supports both pulling pre-built images and building from source via the `IMAGE` environment variable:
 
 **Default behavior** (pulls latest pre-built image):
 ```bash
@@ -351,7 +331,7 @@ docker compose --profile gpu up -d
 **Use specific version:**
 ```bash
 # Set environment variable to use a specific version
-export CYBER_QUERY_AI_IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
+export IMAGE=ghcr.io/javidahmed64592/cyber-query-ai:v1.0.4
 docker compose --profile gpu up -d
 ```
 

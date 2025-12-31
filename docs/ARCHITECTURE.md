@@ -171,7 +171,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 - Input sanitization: `sanitize_text()` using `bleach` for all user prompts
 - Output sanitization: Client-side DOMPurify for LLM-generated content
 - Security headers: HSTS, CSP, X-Frame-Options automatically applied by TemplateServer
-- HTTPS only: Self-signed certificates generated via `uv run generate-certificate`
+- HTTPS only: Self-signed certificates
 - Command safety: Client-side `isCommandSafe()` flags dangerous patterns
 
 **Error Handling**:

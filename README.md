@@ -251,12 +251,7 @@ To customize other settings:
    # Save the displayed token - you'll need it to log in!
    ```
 
-4. **Generate SSL certificate** (optional, auto-generated on first run):
-   ```bash
-   uv run generate-certificate
-   ```
-
-5. **Configure the application**: Edit `configuration/config.json` to customize settings:
+4. **Configure the application**: Edit `configuration/config.json` to customize settings:
    ```json
    {
      "server": {
@@ -276,12 +271,12 @@ To customize other settings:
 
    **Note:** This `configuration/config.json` file is the single source of truth for all configuration settings.
 
-6. **Launch the application**:
+5. **Launch the application**:
    ```bash
    cyber-query-ai
    ```
 
-7. **Access the web interface**: Open your browser to `https://localhost:443`
+6. **Access the web interface**: Open your browser to `https://localhost:443`
    - **First-time setup**: Enter the API token from step 3 on the login page
    - Your browser will warn about the self-signed certificate - this is expected for local development
 

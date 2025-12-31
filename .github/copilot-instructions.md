@@ -14,7 +14,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 - **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
 - **JSON-only LLM contract**: All prompts enforce strict JSON responses; use `clean_json_response()` before `json.loads()` to handle LLM formatting quirks (code blocks, single quotes, trailing commas)
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
-- **HTTPS-only**: Server runs on port 443 with SSL certificates from `certs/` directory (auto-generated or via `uv run generate-certificate`)
+- **HTTPS-only**: Server runs on port 443 with SSL certificates from `certs/` directory (auto-generated)
 
 ### Frontend: Next.js App Router + Static Export + Authentication
 
@@ -35,7 +35,6 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 ollama serve  # Ensure Ollama is running
 ollama pull mistral && ollama pull bge-m3  # Pull required models
 uv run generate-new-token  # Generate API authentication token
-uv run generate-certificate  # Generate SSL certificate (optional, auto-generated)
 
 # Backend only
 uv sync --extra dev
@@ -197,10 +196,9 @@ Users must:
 
 1. Pull required Ollama models: `ollama pull mistral && ollama pull bge-m3`
 2. Generate API authentication token: `uv run generate-new-token` (save the displayed token!)
-3. Generate SSL certificate: `uv run generate-certificate` (or auto-generated on first run)
-4. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
-5. Ensure Ollama is running: `ollama serve`
-6. Access application at `https://localhost:443` and login with API token
+3. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
+4. Ensure Ollama is running: `ollama serve`
+5. Access application at `https://localhost:443` and login with API token
 
 ## Configuration
 

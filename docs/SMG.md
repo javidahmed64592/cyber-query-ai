@@ -30,12 +30,12 @@ This document outlines how to configure and setup a development environment to w
 
 ```
 cyber_query_ai/
-├── server.py       # CyberQueryAIServer class (extends TemplateServer)
 ├── chatbot.py      # LLM integration with RAG support
 ├── helpers.py      # Utility functions (sanitization, JSON cleaning, static file serving, filepath helpers)
 ├── main.py         # Application entry point
 ├── models.py       # Pydantic models (requests, responses, config)
-└── rag.py          # RAG system with semantic search
+├── rag.py          # RAG system with semantic search
+└── server.py       # CyberQueryAIServer class (extends TemplateServer)
 ```
 
 ### Installing Dependencies
@@ -86,29 +86,8 @@ After installing dev dependencies, set up pre-commit hooks:
    # Save the displayed token for authentication!
    ```
 
-4. Generate SSL certificate (optional, auto-generated on first run):
-   ```sh
-   uv run generate-certificate
-   ```
-
 **Configuration:**
-Edit `configuration/config.json` to customize server settings:
-```json
-{
-  "server": {
-    "host": "0.0.0.0",
-    "port": 443
-  },
-  "model": {
-    "model": "mistral",
-    "embedding_model": "bge-m3"
-  },
-  "rate_limit": {
-    "enabled": true,
-    "rate_limit": "10/minute"
-  }
-}
-```
+Edit `configuration/config.json` to customize server settings.
 
 **Start the server:**
 ```sh
