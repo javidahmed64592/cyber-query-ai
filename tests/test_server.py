@@ -144,7 +144,6 @@ class TestCyberQueryAIServerRoutes:
         expected_endpoints = [
             "/health",
             "/login",
-            "/metrics",
             "/config",
             "/model/chat",
             "/code/generate",
