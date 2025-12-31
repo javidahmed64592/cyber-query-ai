@@ -86,8 +86,6 @@ jobs:
           REQUIRED_DIRS=(
             "${SITE_PACKAGES}/${PACKAGE_NAME}"
             "${SITE_PACKAGES}/configuration"
-            "${SITE_PACKAGES}/grafana"
-            "${SITE_PACKAGES}/prometheus"
             "${SITE_PACKAGES}/rag_data"
             "${SITE_PACKAGES}/static"
           )
@@ -117,17 +115,3 @@ jobs:
               exit 1
             fi
           done
-
-          # Show directory structure
-          echo "Package structure in site-packages:"
-          tree "${SITE_PACKAGES}/${PACKAGE_NAME}" --dirsfirst -F -L 2
-          echo "Configuration structure:"
-          tree "${SITE_PACKAGES}/configuration" --dirsfirst -F
-          echo "Grafana structure:"
-          tree "${SITE_PACKAGES}/grafana" --dirsfirst -F -L 2
-          echo "Prometheus structure:"
-          tree "${SITE_PACKAGES}/prometheus" --dirsfirst -F
-          echo "RAG data structure:"
-          tree "${SITE_PACKAGES}/rag_data" --dirsfirst -F -L 1
-          echo "Static files structure:"
-          tree "${SITE_PACKAGES}/static" --dirsfirst -F -L 2

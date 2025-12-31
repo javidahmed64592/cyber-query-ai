@@ -1,7 +1,7 @@
 <!-- omit from toc -->
 # Docker Deployment Guide
 
-This guide covers CyberQueryAI-specific Docker deployment features. For general template server Docker deployment instructions (authentication, metrics, Prometheus, Grafana, basic configuration), see the [python-template-server Docker Deployment Guide](https://github.com/javidahmed64592/python-template-server/blob/main/docs/DOCKER_DEPLOYMENT.md).
+This guide covers CyberQueryAI-specific Docker deployment features. For general template server Docker deployment instructions, see the [python-template-server Docker Deployment Guide](https://github.com/javidahmed64592/python-template-server/blob/main/docs/DOCKER_DEPLOYMENT.md).
 
 <!-- omit from toc -->
 ## Table of Contents
@@ -123,16 +123,6 @@ CyberQueryAI extends the template server with four services:
    - RAG-enhanced prompts for tool documentation
    - Auto-generates certificates and API tokens on first run
 
-3. **cyber-query-ai-prometheus** (Port 9090)
-   - Configuration included in package at `prometheus/prometheus.yml`
-   - Inherits template server metrics plus custom CyberQueryAI metrics
-   - Scrapes `/api/metrics` endpoint
-
-4. **cyber-query-ai-grafana** (Port 3000)
-   - Provisioning and dashboards included in package at `grafana/`
-   - Pre-configured with authentication, rate limiting, and health dashboards
-   - Custom dashboard for CyberQueryAI-specific metrics
-
 ## Ollama Integration
 
 ### GPU Support
@@ -210,8 +200,6 @@ The docker-compose configuration uses **named volumes** to persist runtime data 
 - `cyber-query-ai-certs` - SSL certificates (auto-generated on first run)
 - `cyber-query-ai-logs` - Application logs
 - `ollama-data` - Downloaded Ollama models
-- `prometheus-data` - Prometheus metrics
-- `grafana-data` - Grafana dashboards and settings
 
 **Configuration customization (development only):**
 
@@ -315,7 +303,6 @@ All endpoints require `X-API-Key` header except where noted:
 **Public:**
 - `GET /api/health` - Health status (no auth)
 - `GET /api/config` - Model configuration and version (no auth)
-- `GET /api/metrics` - Prometheus metrics (no auth)
 
 **Authenticated:**
 - `POST /api/chat` - Chat with LLM (RAG-enhanced)

@@ -11,7 +11,6 @@ CyberQueryAI inherits from [python-template-server](https://github.com/javidahme
 - **Rate Limiting**: Configurable request throttling (default: 10 requests/minute per IP)
 - **Security Headers**: Automatic HSTS, CSP, and X-Frame-Options enforcement
 - **Request Logging**: Comprehensive logging of all requests/responses with client IP tracking
-- **Prometheus Metrics**: Built-in metrics for monitoring authentication, rate limiting, and HTTP performance
 - **Health Checks**: Standard `/api/health` endpoint for availability monitoring
 - **HTTPS Support**: Built-in SSL certificate generation and management
 

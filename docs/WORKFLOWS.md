@@ -84,8 +84,6 @@ It consists of the following jobs:
 - Verify installed package structure in site-packages:
   - `cyber_query_ai/` - Python package
   - `configuration/` - Server configuration
-  - `grafana/` - Grafana dashboards and provisioning
-  - `prometheus/` - Prometheus configuration
   - `rag_data/` - RAG system tool documentation
   - `static/` - Frontend static files
 - Display directory structure with tree views for verification
@@ -103,7 +101,6 @@ It consists of the following jobs:
 - Show server logs from `cyber-query-ai` container
 - **Health check** using reusable composite action `.github/actions/docker-check-containers`:
   - Verifies server is running on port 443
-  - Checks Prometheus and Grafana services
   - Validates Ollama integration
 - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
 

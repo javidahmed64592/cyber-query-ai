@@ -30,8 +30,6 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Copy backend source files
 COPY cyber_query_ai/ ./cyber_query_ai/
 COPY configuration/ ./configuration/
-COPY grafana/ ./grafana/
-COPY prometheus/ ./prometheus/
 COPY rag_data/ ./rag_data/
 COPY pyproject.toml .here LICENSE README.md SECURITY.md ./
 
@@ -65,8 +63,6 @@ RUN mkdir -p /app/logs /app/certs
 # Copy included files from installed wheel to app directory
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
     cp -r "${SITE_PACKAGES_DIR}/configuration" /app/ && \
-    cp -r "${SITE_PACKAGES_DIR}/grafana" /app/ && \
-    cp -r "${SITE_PACKAGES_DIR}/prometheus" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/static" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
     cp "${SITE_PACKAGES_DIR}/.here" /app/.here && \
@@ -77,15 +73,6 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
 # Create startup script with Ollama model checking
 RUN echo '#!/bin/sh\n\
     set -e\n\
-    \n\
-    # Copy monitoring configs to shared volume if they do not exist\n\
-    if [ -d "/monitoring-configs" ]; then\n\
-    echo "Setting up monitoring configurations..."\n\
-    mkdir -p /monitoring-configs/prometheus /monitoring-configs/grafana\n\
-    cp -r /app/prometheus/* /monitoring-configs/prometheus/ 2>/dev/null || true\n\
-    cp -r /app/grafana/* /monitoring-configs/grafana/ 2>/dev/null || true\n\
-    echo "Monitoring configurations ready"\n\
-    fi\n\
     \n\
     # Generate API token if needed\n\
     if [ -z "$API_TOKEN_HASH" ]; then\n\

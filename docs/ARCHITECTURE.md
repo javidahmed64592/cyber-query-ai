@@ -17,12 +17,12 @@ This document summarizes the code architecture and technology stack for the Cybe
 - Frontend: Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, Axios for API calls, DOMPurify (client-side sanitization)
 - Authentication: X-API-KEY header with SHA-256 hashed tokens (provided by python-template-server)
 - Rate Limiting: SlowAPI with configurable storage (in-memory/Redis/Memcached, default: in-memory)
-- Observability: Prometheus metrics, request logging, health checks (provided by python-template-server)
+- Observability: Request logging, health checks (provided by python-template-server)
 - Dev / tooling: pytest, Ruff, mypy, Jest, ESLint, Prettier, TypeScript, Ollama for local LLM hosting
 
 ## High-Level Architecture
 
-- The backend inherits from `TemplateServer` (from python-template-server package), which provides production-ready infrastructure including authentication, rate limiting, security headers, request logging, and Prometheus metrics.
+- The backend inherits from `TemplateServer` (from python-template-server package), which provides production-ready infrastructure including authentication, rate limiting, security headers and request logging.
 - `CyberQueryAIServer` extends `TemplateServer` and implements domain-specific endpoints for LLM-driven cybersecurity tasks.
 - The server creates a `Chatbot` instance (wrapping an Ollama LLM with RAG support) during initialization and stores it as `self.chatbot`.
 - Static frontend files are served from the `static/` directory with SPA fallback routing.
@@ -182,10 +182,8 @@ This document summarizes the code architecture and technology stack for the Cybe
 - All LLM endpoint errors return valid response models with empty data fields
 
 **Monitoring & Observability**:
-- Prometheus metrics at `/api/metrics` (authentication, rate limiting, HTTP stats)
 - Health check at `/api/health` (returns server status)
 - Request logging with client IP tracking (configured in `TemplateServer`)
-- Custom metrics for LLM performance and error rates
 
 **Static File Serving**:
 - Frontend built as Next.js static export to `static/` directory

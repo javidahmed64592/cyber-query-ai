@@ -8,7 +8,7 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 
 ### Backend: TemplateServer + LangChain + Ollama
 
-- **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting authentication (X-API-KEY), rate limiting (10/min), security headers, request logging, and Prometheus metrics
+- **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting authentication (X-API-KEY), rate limiting (10/min), security headers and request logging
 - **Single chatbot instance**: Created during `CyberQueryAIServer.__init__()` and stored as `self.chatbot` for all routes to access
 - **Configuration**: Config loaded from `configuration/cyber_query_ai_config.json` using `CyberQueryAIConfig.load_from_file()` which extends `TemplateServerConfig`
 - **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
