@@ -67,7 +67,7 @@ It consists of the following jobs:
 - Upload frontend build artifact (`cyber_query_ai_frontend`)
 
 ### build-wheel
-- Depends on `build_frontend` job
+- Depends on `build-frontend` job
 - Checkout code
 - Setup Python environment with dev dependencies (via custom action)
 - Download frontend build artifact to `static/` directory
