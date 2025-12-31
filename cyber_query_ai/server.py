@@ -64,7 +64,7 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Embedding model: %s", self.config.model.embedding_model)
 
         if not (static_dir := get_static_dir()).exists():
-            logger.error(f"Static directory not found: {static_dir}.")
+            logger.error("Static directory not found: %s", static_dir)
             raise SystemExit(1)
 
         self.static_dir = static_dir

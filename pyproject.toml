@@ -72,7 +72,7 @@ addopts = [
 
 [tool.coverage.run]
 branch = true
-source = ["cyber_query_ai"]
+source = ["cyber_query_ai", "tests"]
 
 [tool.coverage.report]
 fail_under = 80
@@ -149,7 +149,6 @@ select = [
 ignore = [
     "D203",
     "D213",
-    "G004",
     "PLR0913",
     "S101"
 ]
