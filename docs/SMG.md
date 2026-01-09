@@ -42,12 +42,6 @@ cyber_query_ai/
 
 This repository is managed using the `uv` Python project manager: https://docs.astral.sh/uv/
 
-To install `uv`:
-
-```sh
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex" # Windows
-```
-
 Install the required dependencies:
 
 ```sh
@@ -63,7 +57,7 @@ uv sync --extra dev
 After installing dev dependencies, set up pre-commit hooks:
 
 ```sh
-    uv run pre-commit install
+uv run pre-commit install
 ```
 
 ### Running the Backend
