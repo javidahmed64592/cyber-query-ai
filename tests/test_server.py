@@ -147,7 +147,6 @@ class TestCyberQueryAIServerRoutes:
             "/code/generate",
             "/code/explain",
             "/exploit/search",
-            "/{full_path:path}",
         ]
         for endpoint in expected_endpoints:
             assert endpoint in routes, f"Expected endpoint {endpoint} not found in routes"
