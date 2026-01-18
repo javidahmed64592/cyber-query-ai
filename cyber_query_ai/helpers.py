@@ -5,43 +5,12 @@ import re
 from pathlib import Path
 
 import bleach
-from fastapi.responses import FileResponse
 from python_template_server.constants import ROOT_DIR
 
 
 def get_rag_tools_path() -> Path:
     """Get the rag tools file path."""
     return Path(ROOT_DIR) / "rag_data" / "tools.json"
-
-
-def get_static_dir() -> Path:
-    """Get the static directory path."""
-    return Path(ROOT_DIR) / "static"
-
-
-def get_static_files(full_path: str, static_dir: Path) -> FileResponse | None:
-    """Get the static files for a given full path."""
-    # Skip API routes - they should be handled by the API router
-    if full_path.startswith("api/"):
-        return None
-
-    # Serve specific static files
-    file_path = static_dir / full_path
-    if file_path.is_file():
-        return FileResponse(file_path)
-
-    # Check if it's a directory with index.html
-    if file_path.is_dir():
-        index_path = file_path / "index.html"
-        if index_path.is_file():
-            return FileResponse(index_path)
-
-    # Fallback to index.html for SPA routing
-    index_path = static_dir / "index.html"
-    if index_path.exists():
-        return FileResponse(index_path)
-
-    return None
 
 
 def clean_json_response(response_text: str) -> str:
