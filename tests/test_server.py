@@ -8,8 +8,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import HTTPException, Request, Security
-from fastapi.responses import FileResponse
+from fastapi import Request, Security
 from fastapi.routing import APIRoute
 from fastapi.security import APIKeyHeader
 from fastapi.testclient import TestClient
@@ -75,7 +74,6 @@ def mock_server(
     with (
         patch.object(CyberQueryAIServer, "_verify_api_key", new=fake_verify_api_key),
         patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
-        patch("cyber_query_ai.server.get_static_files", return_value=MagicMock(spec=FileResponse)),
         patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
     ):
         server = CyberQueryAIServer(mock_cyber_query_ai_config)
@@ -535,22 +533,3 @@ class TestPostExploitSearchEndpoint:
 
         assert response.code == ResponseCode.INTERNAL_SERVER_ERROR
         assert "An unexpected error occurred during exploit search." in response.message
-
-
-class TestServeSPA:
-    """Tests for the SPA serving functionality."""
-
-    def test_serve_spa_success(self, mock_server: CyberQueryAIServer) -> None:
-        """Test serve_spa successfully returns static files."""
-        request = MagicMock(spec=Request)
-        response = asyncio.run(mock_server.serve_spa(request, "index.html"))
-        assert isinstance(response, FileResponse)
-
-    def test_serve_spa_404(self, mock_server: CyberQueryAIServer) -> None:
-        """Test serve_spa returns 404 when no static files exist."""
-        request = MagicMock(spec=Request)
-        with (
-            patch("cyber_query_ai.server.get_static_files", return_value=None),
-            pytest.raises(HTTPException, match="File not found"),
-        ):
-            asyncio.run(mock_server.serve_spa(request, "nonexistent/path"))

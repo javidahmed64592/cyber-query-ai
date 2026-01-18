@@ -414,7 +414,6 @@ The primary Pydantic models are defined in `cyber_query_ai/models.py`:
 - Next.js static export (`output: "export"`)
 - Frontend served from `static/` directory by FastAPI
 - API calls use same-origin `/api` paths (no proxy needed)
-- SPA fallback handled by `serve_spa()` in `server.py`
 
 **Error Handling** (`src/components/ErrorNotification.tsx`):
 - Portal-based toast notifications using `createPortal(component, document.body)`

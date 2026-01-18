@@ -4,10 +4,8 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import HTTPException, Request
+from fastapi import Request
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse
-from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from python_template_server.constants import CONFIG_DIR
 from python_template_server.models import BaseResponse, ResponseCode
@@ -17,8 +15,6 @@ from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.helpers import (
     clean_json_response,
     get_rag_tools_path,
-    get_static_dir,
-    get_static_files,
     sanitize_text,
 )
 from cyber_query_ai.models import (
@@ -63,13 +59,11 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Initialized Chatbot with LLM: %s", self.config.model.model)
         logger.info("Embedding model: %s", self.config.model.embedding_model)
 
-        if not (static_dir := get_static_dir()).exists():
-            logger.error("Static directory not found: %s", static_dir)
+        if not self.static_dir_exists:
+            logger.error("Static directory not found!")
             raise SystemExit(1)
 
-        self.static_dir = static_dir
         logger.info("Serving static files from: %s", self.static_dir)
-        self.app.mount("/static", StaticFiles(directory=self.static_dir), name="static")
 
     @staticmethod
     def parse_response(response_str: str) -> dict:
@@ -109,7 +103,6 @@ class CyberQueryAIServer(TemplateServer):
 
     def setup_routes(self) -> None:
         """Set up API routes."""
-        super().setup_routes()
         self.add_unauthenticated_route(
             "/config", self.get_api_config, GetApiConfigResponse, methods=["GET"], limited=False
         )
@@ -123,7 +116,7 @@ class CyberQueryAIServer(TemplateServer):
         self.add_authenticated_route(
             "/exploit/search", self.post_exploit_search, PostExploitSearchResponse, methods=["POST"]
         )
-        self.add_unauthenticated_route("/{full_path:path}", self.serve_spa, None, methods=["GET"], limited=False)
+        super().setup_routes()
 
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
         """Get the API configuration including model configuration and version."""
@@ -328,10 +321,3 @@ class CyberQueryAIServer(TemplateServer):
                 exploits=[],
                 explanation="",
             )
-
-    async def serve_spa(self, request: Request, full_path: str) -> FileResponse:
-        """Serve the SPA for all non-API routes."""
-        if static_files := get_static_files(full_path, self.static_dir):
-            return static_files
-
-        raise HTTPException(status_code=404, detail="File not found")
