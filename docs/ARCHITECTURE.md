@@ -25,7 +25,7 @@ This document summarizes the code architecture and technology stack for the Cybe
 - The backend inherits from `TemplateServer` (from python-template-server package), which provides production-ready infrastructure including authentication, rate limiting, security headers and request logging.
 - `CyberQueryAIServer` extends `TemplateServer` and implements domain-specific endpoints for LLM-driven cybersecurity tasks.
 - The server creates a `Chatbot` instance (wrapping an Ollama LLM with RAG support) during initialization and stores it as `self.chatbot`.
-- Static frontend files are served from the `static/` directory with SPA fallback routing.
+- Static frontend files are served from the `static/` directory with SPA routing.
 - The frontend is a Next.js application that calls backend endpoints via `src/lib/api.ts`. In production it expects same-origin `/api` paths; in development Next.js proxies requests to the HTTPS backend.
 - Configuration is centralized in `configuration/config.json` and extends `TemplateServerConfig` with application-specific model settings.
 
@@ -40,9 +40,8 @@ This document summarizes the code architecture and technology stack for the Cybe
         - `POST /api/code/generate` - Generate commands or scripts (language inferred by LLM)
         - `POST /api/code/explain` - Explain commands or scripts (type detected by LLM)
         - `POST /api/exploit/search` - Search for exploits and vulnerabilities
-        - `GET /{full_path:path}` - SPA fallback serving static files
     - Creates and stores `Chatbot` instance with RAG support during initialization
-    - Mounts static files from `static/` directory if present
+    - Mounts static files from `static/` directory
     - Rate limiting (10 requests/minute) applied to authenticated endpoints via TemplateServer middleware
     - All LLM endpoints use `run_in_threadpool()` to prevent blocking the event loop
 
@@ -69,7 +68,6 @@ This document summarizes the code architecture and technology stack for the Cybe
 - `helpers.py`
     - Sanitization: `sanitize_text()` uses `bleach.clean()` to strip HTML/scripts from user input and LLM output
     - JSON cleaning: `clean_json_response()` repairs common LLM formatting issues (code fences, single quotes, trailing commas)
-    - Static file serving: `get_static_dir()` locates `static/` directory, `get_static_files()` handles SPA fallback logic
     - Filepath helpers: `get_rag_tools_path()` for retrieving the RAG directory
 
 - `models.py`
@@ -180,16 +178,6 @@ This document summarizes the code architecture and technology stack for the Cybe
 - LLM errors: HTTP 200 with `code: 500` in JSON body (includes error message in `message` field)
 - Server errors: HTTP 500 with descriptive error message
 - All LLM endpoint errors return valid response models with empty data fields
-
-**Monitoring & Observability**:
-- Health check at `/api/health` (returns server status)
-- Request logging with client IP tracking (configured in `TemplateServer`)
-
-**Static File Serving**:
-- Frontend built as Next.js static export to `static/` directory
-- Served by FastAPI with SPA fallback routing
-- Priority: exact file match → directory/index.html → fallback to index.html → 404
-- Implemented in `helpers.get_static_files()` and `server.serve_spa()`
 
 **Configuration**:
 - Single source of truth: `configuration/config.json`
