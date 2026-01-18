@@ -133,7 +133,6 @@ cyber-query-ai-frontend/
 │   │   ├── code-generation/     # Code generation interface
 │   │   ├── exploit-search/      # Exploit search interface
 │   │   ├── login/               # Login page for API key authentication
-│   │   ├── 404/                 # Custom 404 page
 │   │   ├── globals.css          # UI style configuration
 │   │   ├── layout.tsx           # Root layout with AuthProvider and navigation
 │   │   ├── not-found.tsx        # Not found page
