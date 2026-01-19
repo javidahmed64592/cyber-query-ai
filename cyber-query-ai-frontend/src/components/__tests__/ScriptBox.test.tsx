@@ -142,7 +142,7 @@ if __name__ == "__main__":
     // Check that the script container has scrollable styling
     const container = screen
       .getByText(/print\('line'\)/)
-      .closest(".command-box");
+      .closest(".bg-terminal-bg");
     expect(container).toHaveClass("max-h-96", "overflow-y-auto");
   });
 

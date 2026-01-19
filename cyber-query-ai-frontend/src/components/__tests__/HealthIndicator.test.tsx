@@ -24,8 +24,8 @@ describe("HealthIndicator", () => {
 
     const indicator = screen.getByTitle("Server: ONLINE");
     expect(indicator).toBeInTheDocument();
-    expect(indicator).toHaveClass("bg-[var(--neon-green)]");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--neon-green)]");
+    expect(indicator).toHaveClass("bg-neon-green");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_#00ff41]");
     expect(indicator).toHaveAttribute("title", "Server: ONLINE");
   });
 
@@ -36,8 +36,8 @@ describe("HealthIndicator", () => {
 
     const indicator = screen.getByTitle("Server: OFFLINE");
     expect(indicator).toBeInTheDocument();
-    expect(indicator).toHaveClass("bg-[var(--neon-red)]");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--neon-red)]");
+    expect(indicator).toHaveClass("bg-neon-red");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_#ff0040]");
     expect(indicator).toHaveAttribute("title", "Server: OFFLINE");
   });
 
@@ -50,7 +50,9 @@ describe("HealthIndicator", () => {
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("bg-yellow-400");
     expect(indicator).toHaveClass("shadow-[0_0_4px_yellow]");
-    expect(indicator).toHaveClass("animate-pulse-neon");
+    expect(indicator?.className).toContain(
+      "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+    );
     expect(indicator).toHaveAttribute("title", "Server: CHECKING");
   });
 
@@ -89,8 +91,8 @@ describe("HealthIndicator", () => {
 
     const indicator = screen.getByTitle("Server: UNKNOWN");
     expect(indicator).toBeInTheDocument();
-    expect(indicator).toHaveClass("bg-[var(--text-muted)]");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_var(--text-muted)]");
+    expect(indicator).toHaveClass("bg-text-muted");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_#888888]");
     expect(indicator).toHaveAttribute("title", "Server: UNKNOWN");
   });
 
@@ -112,12 +114,12 @@ describe("HealthIndicator", () => {
     expect(screen.queryByText("ONLINE")).not.toBeInTheDocument();
   });
 
-  it("has transition animation classes", () => {
+  it("maintains consistent styling across status changes", () => {
     mockUseHealthStatus.mockReturnValue("online");
 
     render(<HealthIndicator />);
 
     const indicator = screen.getByTitle("Server: ONLINE");
-    expect(indicator).toHaveClass("transition-all", "duration-200");
+    expect(indicator).toHaveClass("w-3", "h-3", "rounded-full");
   });
 });

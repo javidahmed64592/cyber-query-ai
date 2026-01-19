@@ -28,25 +28,31 @@ describe("ExplanationBox", () => {
     const explanation = "Line 1\nLine 2\n  Indented line";
     render(<ExplanationBox explanation={explanation} isLoading={false} />);
 
-    const explanationTexts = screen.getAllByText((_, element) => {
-      return element?.textContent === explanation;
-    });
-    expect(explanationTexts[1]).toHaveClass("whitespace-pre-wrap");
+    const textContainer = screen.getByText(/Line 1/).parentElement;
+    expect(textContainer).toHaveClass("whitespace-pre-wrap");
   });
 
   it("applies terminal-border class to container", () => {
     const explanation = "Test explanation";
     render(<ExplanationBox explanation={explanation} isLoading={false} />);
 
-    const container = screen.getByText(explanation).parentElement;
-    expect(container).toHaveClass("terminal-border", "rounded-lg", "p-4");
+    const container =
+      screen.getByText(explanation).parentElement?.parentElement;
+    expect(container).toHaveClass(
+      "border",
+      "border-terminal-border",
+      "bg-terminal-bg",
+      "rounded-lg",
+      "p-4"
+    );
   });
 
   it("applies scrollable styling for long explanations", () => {
     const longExplanation = "A".repeat(1000);
     render(<ExplanationBox explanation={longExplanation} isLoading={false} />);
 
-    const container = screen.getByText(longExplanation).parentElement;
+    const container =
+      screen.getByText(longExplanation).parentElement?.parentElement;
     expect(container).toHaveClass("max-h-64", "overflow-y-auto");
   });
 
@@ -54,9 +60,9 @@ describe("ExplanationBox", () => {
     const explanation = "Test explanation";
     render(<ExplanationBox explanation={explanation} isLoading={false} />);
 
-    const textElement = screen.getByText(explanation);
-    expect(textElement).toHaveClass(
-      "text-[var(--text-secondary)]",
+    const textContainer = screen.getByText(explanation).parentElement;
+    expect(textContainer).toHaveClass(
+      "text-text-secondary",
       "whitespace-pre-wrap"
     );
   });
@@ -67,10 +73,14 @@ describe("ExplanationBox", () => {
     const loadingText = screen.getByText("Generating explanation...");
     const container = loadingText.parentElement;
     expect(container).toHaveClass(
-      "terminal-border",
+      "border",
+      "border-terminal-border",
+      "bg-terminal-bg",
       "rounded-lg",
-      "p-4",
-      "animate-pulse-neon"
+      "p-4"
+    );
+    expect(container?.className).toContain(
+      "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
     );
   });
 
@@ -82,10 +92,11 @@ And preserves formatting.`;
       <ExplanationBox explanation={multilineExplanation} isLoading={false} />
     );
 
-    const explanationElements = screen.getAllByText((_, element) => {
-      return element?.textContent === multilineExplanation;
-    });
-    expect(explanationElements.length).toBeGreaterThan(0);
+    // Text is split by newlines, check that first line is rendered
+    expect(
+      screen.getByText(/This is a multiline explanation/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/It spans multiple lines/)).toBeInTheDocument();
   });
 
   it("renders header with correct styling", () => {
@@ -93,10 +104,6 @@ And preserves formatting.`;
     render(<ExplanationBox explanation={explanation} isLoading={false} />);
 
     const header = screen.getByText("📖 Explanation:");
-    expect(header).toHaveClass(
-      "text-lg",
-      "font-semibold",
-      "text-[var(--text-primary)]"
-    );
+    expect(header).toHaveClass("text-lg", "font-semibold", "text-text-primary");
   });
 });

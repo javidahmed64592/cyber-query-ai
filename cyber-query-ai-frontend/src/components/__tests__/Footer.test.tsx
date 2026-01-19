@@ -118,9 +118,9 @@ describe("Footer", () => {
 
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveClass(
-      "bg-[var(--background-secondary)]",
+      "bg-background-secondary",
       "border-t",
-      "border-[var(--terminal-border)]"
+      "border-terminal-border"
     );
   });
 
@@ -154,7 +154,7 @@ describe("Footer", () => {
     render(<Footer />);
 
     const terminalPrompt = screen.getByText("cyber@query:~$");
-    expect(terminalPrompt).toHaveClass("text-[var(--neon-green)]");
+    expect(terminalPrompt).toHaveClass("text-neon-green");
   });
 
   it("has proper container constraints", () => {
