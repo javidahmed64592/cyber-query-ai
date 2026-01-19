@@ -42,10 +42,10 @@ export default function CodeExplanation() {
 
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
+        <h1 className="text-4xl font-bold text-text-primary">
           Code Explanation
         </h1>
-        <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
+        <p className="text-text-muted max-w-2xl mx-auto">
           Get detailed explanations of cybersecurity commands and scripts.
           Understand what each part does and learn how to use tools effectively
           for ethical penetration testing. The AI automatically detects the
@@ -71,7 +71,7 @@ export default function CodeExplanation() {
       {/* Results Section */}
       {(isLoading || response) && (
         <div className="max-w-4xl mx-auto space-y-6">
-          <hr className="border-[var(--terminal-border)]" />
+          <hr className="border-terminal-border" />
 
           {/* Explanation */}
           <ExplanationBox
@@ -84,10 +84,10 @@ export default function CodeExplanation() {
       {/* Welcome Message */}
       {!isLoading && !response && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
-          <div className="text-[var(--text-muted)] text-lg">
+          <div className="text-text-muted text-lg">
             Understand any cybersecurity code! 🔍
           </div>
-          <div className="text-sm text-[var(--text-muted)] space-y-2">
+          <div className="text-sm text-text-muted space-y-2">
             <p>Try explaining code like:</p>
             <ul className="space-y-1 text-left list-disc list-inside">
               <li>&quot;nmap -sS -O 192.168.1.0/24&quot;</li>

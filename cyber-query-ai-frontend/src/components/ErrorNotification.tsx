@@ -40,7 +40,7 @@ export default function ErrorNotification({
         isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4"
       }`}
     >
-      <div className="bg-[var(--terminal-bg)] border-2 border-[var(--neon-red)] rounded-lg shadow-lg p-4 flex items-start space-x-3">
+      <div className="bg-terminal-bg border-2 border-neon-red rounded-lg shadow-lg p-4 flex items-start space-x-3">
         {/* Error Icon */}
         <div className="flex-shrink-0">
           <span className="text-2xl">❌</span>
@@ -48,18 +48,14 @@ export default function ErrorNotification({
 
         {/* Error Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-[var(--neon-red)] mb-1">
-            Error
-          </h3>
-          <p className="text-sm text-[var(--text-primary)] break-words">
-            {message}
-          </p>
+          <h3 className="text-sm font-semibold text-neon-red mb-1">Error</h3>
+          <p className="text-sm text-text-primary break-words">{message}</p>
         </div>
 
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="flex-shrink-0 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+          className="flex-shrink-0 text-text-muted hover:text-text-primary transition-colors"
           aria-label="Close notification"
         >
           <svg

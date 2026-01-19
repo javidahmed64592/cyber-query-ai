@@ -107,8 +107,8 @@ describe("Navigation", () => {
       name: /Code Generation/,
     });
     // Both desktop and mobile links should have active styling
-    expect(codeGenLinks[0]).toHaveClass("neon-glow");
-    expect(codeGenLinks[1]).toHaveClass("neon-glow");
+    expect(codeGenLinks[0]).toHaveClass("text-border-accent", "font-bold");
+    expect(codeGenLinks[1]).toHaveClass("text-border-accent", "font-bold");
   });
 
   describe("Mobile Navigation", () => {
@@ -215,7 +215,7 @@ describe("Navigation", () => {
 
       const aboutLinks = screen.getAllByRole("link", { name: /About/ });
       const mobileAboutLink = aboutLinks[1]; // Second one is in mobile menu
-      expect(mobileAboutLink).toHaveClass("neon-glow");
+      expect(mobileAboutLink).toHaveClass("text-border-accent", "font-bold");
     });
   });
 
@@ -239,7 +239,7 @@ describe("Navigation", () => {
 
       const indicator = screen.getByTitle("Server: ONLINE");
       expect(indicator).toBeInTheDocument();
-      expect(indicator).toHaveClass("bg-[var(--neon-green)]");
+      expect(indicator).toHaveClass("bg-neon-green");
     });
 
     it("displays offline status indicator when server is offline", () => {
@@ -249,7 +249,7 @@ describe("Navigation", () => {
 
       const indicator = screen.getByTitle("Server: OFFLINE");
       expect(indicator).toBeInTheDocument();
-      expect(indicator).toHaveClass("bg-[var(--neon-red)]");
+      expect(indicator).toHaveClass("bg-neon-red");
     });
 
     it("displays checking status indicator when status is being checked", () => {
@@ -260,7 +260,9 @@ describe("Navigation", () => {
       const indicator = screen.getByTitle("Server: CHECKING");
       expect(indicator).toBeInTheDocument();
       expect(indicator).toHaveClass("bg-yellow-400");
-      expect(indicator).toHaveClass("animate-pulse-neon");
+      expect(indicator?.className).toContain(
+        "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
+      );
     });
 
     it("positions HealthIndicator next to the logo", () => {

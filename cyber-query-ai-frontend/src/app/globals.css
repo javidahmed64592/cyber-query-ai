@@ -1,26 +1,23 @@
 @import "tailwindcss";
 
-:root {
-  /* Cybersecurity Hacker Theme Colors */
-  --background: #0a0a0a;
-  --foreground: #00ff41;
-  --background-secondary: #111111;
-  --background-tertiary: #1a1a1a;
-  --border: #333333;
-  --border-accent: #00ff41;
-  --text-primary: #00ff41;
-  --text-secondary: #ffffff;
-  --text-muted: #888888;
-  --neon-green: #00ff41;
-  --neon-purple: #bf00ff;
-  --neon-blue: #00bfff;
-  --neon-red: #ff0040;
-  --terminal-bg: #0d1117;
-  --terminal-border: #30363d;
+@theme {
+  --color-background: #0a0a0a;
+  --color-background-secondary: #111111;
+  --color-background-tertiary: #1a1a1a;
+  --color-foreground: #00ff41;
+  --color-border: #333333;
+  --color-border-accent: #00ff41;
+  --color-text-primary: #00ff41;
+  --color-text-secondary: #ffffff;
+  --color-text-muted: #888888;
+  --color-neon-green: #00ff41;
+  --color-neon-purple: #bf00ff;
+  --color-neon-blue: #00bfff;
+  --color-neon-red: #ff0040;
+  --color-terminal-bg: #0d1117;
+  --color-terminal-border: #30363d;
 
-  /* Shadows */
-  --shadow-neon:
-    0 0 1px currentColor, 0 0 1px currentColor, 0 0 2px currentColor;
+  --shadow-neon: 0 0 3px currentColor, 0 0 6px currentColor;
   --shadow-terminal:
     0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
 }
@@ -31,8 +28,8 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace;
   line-height: 1.6;
   margin: 0;
@@ -46,99 +43,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background-secondary);
+  background: var(--color-background-secondary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
+  background: var(--color-border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--border-accent);
-}
-
-/* Utility Classes */
-.neon-glow {
-  text-shadow: var(--shadow-neon);
-}
-
-.terminal-border {
-  border: 1px solid var(--terminal-border);
-  background: var(--terminal-bg);
-}
-
-.neon-border {
-  border: 1px solid var(--border-accent);
-  box-shadow: 0 0 5px var(--border-accent);
-}
-
-/* Animation for loading states */
-@keyframes pulse-neon {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse-neon {
-  animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Custom component styles */
-.cyber-input {
-  background: var(--terminal-bg);
-  border: 1px solid var(--terminal-border);
-  color: var(--text-primary);
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  font-family: inherit;
-  transition: all 0.2s ease;
-}
-
-.cyber-input:focus {
-  outline: none;
-  border-color: var(--border-accent);
-  box-shadow: 0 0 2px var(--border-accent);
-}
-
-.cyber-button {
-  background: var(--background-secondary);
-  border: 1px solid var(--border-accent);
-  color: var(--text-primary);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  font-family: inherit;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.cyber-button:hover {
-  background: var(--border-accent);
-  color: var(--background);
-  box-shadow: 0 0 2px var(--border-accent);
-}
-
-.cyber-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.command-box {
-  background: var(--terminal-bg);
-  border: 1px solid var(--terminal-border);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  font-family: inherit;
-  color: var(--text-secondary);
-  position: relative;
-  overflow-x: auto;
+  background: var(--color-border-accent);
 }
 
 /* Mobile Navigation Styles */
@@ -149,7 +63,7 @@ body {
   }
 
   .mobile-nav-item:hover {
-    background-color: var(--background-tertiary);
+    background-color: var(--color-background-tertiary);
   }
 }
 

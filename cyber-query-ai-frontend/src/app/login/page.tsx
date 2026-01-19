@@ -39,12 +39,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
-            CyberQueryAI
-          </h1>
-          <p className="text-[var(--text-muted)]">
-            AI-powered cybersecurity assistant
-          </p>
+          <h1 className="text-4xl font-bold text-text-primary">CyberQueryAI</h1>
+          <p className="text-text-muted">AI-powered cybersecurity assistant</p>
         </div>
 
         {/* Login Form */}
@@ -52,7 +48,7 @@ export default function LoginPage() {
           <div className="space-y-2">
             <label
               htmlFor="apiKey"
-              className="block text-sm font-medium text-[var(--text-primary)]"
+              className="block text-sm font-medium text-text-primary"
             >
               API Key
             </label>
@@ -63,15 +59,15 @@ export default function LoginPage() {
               onChange={e => setApiKey(e.target.value)}
               placeholder="Enter your API key"
               disabled={isLoading}
-              className="w-full px-4 py-3 bg-[var(--terminal-bg)] border border-[var(--terminal-border)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--neon-cyan)] disabled:opacity-50"
+              className="w-full px-4 py-3 bg-terminal-bg border border-terminal-border rounded-lg text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-neon-blue disabled:opacity-50"
               autoComplete="off"
             />
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="p-3 bg-[var(--terminal-bg)] border border-[var(--neon-red)] rounded-lg">
-              <p className="text-sm text-[var(--neon-red)]">❌ {error}</p>
+            <div className="p-3 bg-terminal-bg border border-neon-red rounded-lg">
+              <p className="text-sm text-neon-red">❌ {error}</p>
             </div>
           )}
 
@@ -79,7 +75,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 px-4 bg-[var(--neon-cyan)] text-[var(--background)] font-medium rounded-lg hover:bg-opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="w-full py-3 px-4 bg-border-accent text-background font-medium rounded-lg hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-all uppercase tracking-wider"
           >
             {isLoading ? "Authenticating..." : "Login"}
           </button>
@@ -87,7 +83,7 @@ export default function LoginPage() {
 
         {/* Help Text */}
         <div className="text-center space-y-2">
-          <p className="text-xs text-[var(--text-muted)]">
+          <p className="text-xs text-text-muted">
             Your API key is stored locally and used to authenticate with the
             backend server.
           </p>

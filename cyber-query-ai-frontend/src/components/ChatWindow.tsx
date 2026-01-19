@@ -94,10 +94,10 @@ const ChatWindow = () => {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="text-6xl mb-4">💬</div>
-            <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+            <h3 className="text-2xl font-bold text-text-primary mb-2">
               Welcome to CyberQueryAI
             </h3>
-            <p className="text-[var(--text-secondary)] max-w-md">
+            <p className="text-text-secondary max-w-md">
               Ask me anything about cybersecurity tasks, and I&apos;ll help you
               generate commands, scripts, explanations, or search for exploits.
             </p>
@@ -106,12 +106,10 @@ const ChatWindow = () => {
                 onClick={() =>
                   setInput("How do I scan a network for open ports?")
                 }
-                className="p-3 text-left bg-[var(--background-secondary)] border border-[var(--terminal-border)] rounded hover:border-[var(--border-accent)] transition-colors duration-200"
+                className="p-3 text-left bg-background-secondary border border-terminal-border rounded hover:border-border-accent transition-colors duration-200"
               >
-                <span className="text-[var(--text-secondary)] text-sm">
-                  Example:
-                </span>
-                <p className="text-[var(--text-primary)] mt-1">
+                <span className="text-text-secondary text-sm">Example:</span>
+                <p className="text-text-primary mt-1">
                   How do I scan a network for open ports?
                 </p>
               </button>
@@ -119,23 +117,19 @@ const ChatWindow = () => {
                 onClick={() =>
                   setInput("Generate a Python script to brute force SSH")
                 }
-                className="p-3 text-left bg-[var(--background-secondary)] border border-[var(--terminal-border)] rounded hover:border-[var(--border-accent)] transition-colors duration-200"
+                className="p-3 text-left bg-background-secondary border border-terminal-border rounded hover:border-border-accent transition-colors duration-200"
               >
-                <span className="text-[var(--text-secondary)] text-sm">
-                  Example:
-                </span>
-                <p className="text-[var(--text-primary)] mt-1">
+                <span className="text-text-secondary text-sm">Example:</span>
+                <p className="text-text-primary mt-1">
                   Generate a Python script to brute force SSH
                 </p>
               </button>
               <button
                 onClick={() => setInput("Explain how SQL injection works")}
-                className="p-3 text-left bg-[var(--background-secondary)] border border-[var(--terminal-border)] rounded hover:border-[var(--border-accent)] transition-colors duration-200"
+                className="p-3 text-left bg-background-secondary border border-terminal-border rounded hover:border-border-accent transition-colors duration-200"
               >
-                <span className="text-[var(--text-secondary)] text-sm">
-                  Example:
-                </span>
-                <p className="text-[var(--text-primary)] mt-1">
+                <span className="text-text-secondary text-sm">Example:</span>
+                <p className="text-text-primary mt-1">
                   Explain how SQL injection works
                 </p>
               </button>
@@ -143,12 +137,10 @@ const ChatWindow = () => {
                 onClick={() =>
                   setInput("Search for Apache Struts vulnerabilities")
                 }
-                className="p-3 text-left bg-[var(--background-secondary)] border border-[var(--terminal-border)] rounded hover:border-[var(--border-accent)] transition-colors duration-200"
+                className="p-3 text-left bg-background-secondary border border-terminal-border rounded hover:border-border-accent transition-colors duration-200"
               >
-                <span className="text-[var(--text-secondary)] text-sm">
-                  Example:
-                </span>
-                <p className="text-[var(--text-primary)] mt-1">
+                <span className="text-text-secondary text-sm">Example:</span>
+                <p className="text-text-primary mt-1">
                   Search for Apache Struts vulnerabilities
                 </p>
               </button>
@@ -165,15 +157,15 @@ const ChatWindow = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start mb-4">
-                <div className="bg-[var(--background-secondary)] border border-[var(--terminal-border)] rounded-lg px-4 py-3">
+                <div className="bg-background-secondary border border-terminal-border rounded-lg px-4 py-3">
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-[var(--border-accent)] rounded-full animate-pulse" />
+                    <div className="w-2 h-2 bg-border-accent rounded-full animate-pulse" />
                     <div
-                      className="w-2 h-2 bg-[var(--border-accent)] rounded-full animate-pulse"
+                      className="w-2 h-2 bg-border-accent rounded-full animate-pulse"
                       style={{ animationDelay: "0.2s" }}
                     />
                     <div
-                      className="w-2 h-2 bg-[var(--border-accent)] rounded-full animate-pulse"
+                      className="w-2 h-2 bg-border-accent rounded-full animate-pulse"
                       style={{ animationDelay: "0.4s" }}
                     />
                   </div>
@@ -186,7 +178,7 @@ const ChatWindow = () => {
       </div>
 
       {/* Input */}
-      <div className="p-4 border-t border-[var(--terminal-border)] bg-[var(--background-secondary)]">
+      <div className="p-4 border-t border-terminal-border bg-background-secondary">
         <div className="flex items-end space-x-3">
           <textarea
             ref={textareaRef}
@@ -195,14 +187,14 @@ const ChatWindow = () => {
             onKeyDown={handleKeyPress}
             placeholder="Ask me anything about cybersecurity..."
             disabled={isLoading}
-            className="flex-1 cyber-input resize-none overflow-y-auto"
+            className="flex-1 bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_#00ff41] disabled:opacity-50 resize-none overflow-y-auto"
             rows={1}
             style={{ minHeight: "54px", maxHeight: "216px" }}
           />
           <button
             onClick={handleClear}
             disabled={messages.length === 0 || isLoading}
-            className="p-3 bg-[var(--background-tertiary)] border border-[var(--terminal-border)] text-[var(--text-secondary)] rounded hover:enabled:bg-[var(--terminal-border)] hover:enabled:text-[var(--text-primary)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 h-[54px] w-[54px] flex items-center justify-center"
+            className="p-3 bg-background-tertiary border border-terminal-border text-text-secondary rounded hover:enabled:bg-terminal-border hover:enabled:text-text-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 h-[54px] w-[54px] flex items-center justify-center"
             title="Clear chat history"
           >
             <svg
@@ -222,7 +214,7 @@ const ChatWindow = () => {
           <button
             onClick={handleSend}
             disabled={isLoading || !input.trim()}
-            className="p-3 bg-[var(--border-accent)] text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 neon-glow h-[54px] w-[54px] flex items-center justify-center"
+            className="p-3 bg-border-accent text-white rounded hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200 h-[54px] w-[54px] flex items-center justify-center"
             title={isLoading ? "Sending..." : "Send message"}
           >
             {isLoading ? (

@@ -41,10 +41,10 @@ export default function CodeGeneration() {
 
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold neon-glow text-[var(--text-primary)]">
+        <h1 className="text-4xl font-bold text-text-primary">
           Code Generation
         </h1>
-        <p className="text-[var(--text-muted)] max-w-2xl mx-auto">
+        <p className="text-text-muted max-w-2xl mx-auto">
           Describe your cybersecurity task and get commands or scripts for
           ethical penetration testing and security research. The AI
           automatically determines whether to generate a simple command or a
@@ -70,7 +70,7 @@ export default function CodeGeneration() {
       {/* Results Section */}
       {(isLoading || response) && (
         <div className="max-w-4xl mx-auto space-y-6">
-          <hr className="border-[var(--terminal-border)]" />
+          <hr className="border-terminal-border" />
 
           {/* Code Output */}
           <ScriptBox
@@ -90,10 +90,10 @@ export default function CodeGeneration() {
       {/* Welcome Message */}
       {!isLoading && !response && (
         <div className="max-w-2xl mx-auto text-center space-y-4">
-          <div className="text-[var(--text-muted)] text-lg">
+          <div className="text-text-muted text-lg">
             Welcome to CyberQueryAI! 🚀
           </div>
-          <div className="text-sm text-[var(--text-muted)] space-y-2">
+          <div className="text-sm text-text-muted space-y-2">
             <p>Try asking for code like:</p>
             <ul className="space-y-1 text-left list-disc list-inside">
               <li>&quot;Scan a network for open ports&quot;</li>
