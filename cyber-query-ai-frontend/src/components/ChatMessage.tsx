@@ -19,21 +19,21 @@ const CODE_BLOCK_STYLES = {
     margin: "1rem 0",
     borderRadius: "0.5rem",
     overflow: "hidden",
-    backgroundColor: "var(--background)",
-    border: "1px solid var(--terminal-border)",
+    backgroundColor: "#0a0a0a",
+    border: "1px solid #30363d",
   },
   header: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     padding: "0.5rem 0.75rem",
-    backgroundColor: "var(--background-tertiary)",
-    borderBottom: "1px solid var(--border)",
+    backgroundColor: "#1a1a1a",
+    borderBottom: "1px solid #333333",
   },
   language: {
     fontSize: "0.75rem",
     fontWeight: 500,
-    color: "var(--text-muted)",
+    color: "#888888",
     textTransform: "lowercase" as const,
   },
   button: {
@@ -51,25 +51,25 @@ const CODE_BLOCK_STYLES = {
     margin: 0,
     padding: "1rem",
     overflowX: "auto" as const,
-    backgroundColor: "var(--background)",
+    backgroundColor: "#0a0a0a",
   },
   code: {
     fontFamily: "'Courier New', monospace",
     fontSize: "0.875rem",
     lineHeight: 1.5,
-    color: "var(--neon-green)",
+    color: "#00ff41",
     whiteSpace: "pre" as const,
   },
 } as const;
 
 const INLINE_CODE_STYLE = {
-  backgroundColor: "var(--background-tertiary)",
-  color: "var(--neon-green)",
+  backgroundColor: "#1a1a1a",
+  color: "#00ff41",
   padding: "0.125rem 0.375rem",
   borderRadius: "0.25rem",
   fontSize: "0.875em",
   fontFamily: "'Courier New', monospace",
-  border: "1px solid var(--border)",
+  border: "1px solid #333333",
 } as const;
 
 const ChatMessage = ({ role, content }: ChatMessageProps) => {
@@ -195,16 +195,14 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
       <div
         className={`max-w-[80%] rounded-lg px-4 py-3 relative ${
           isUser
-            ? "bg-[#1a4d2e] text-[var(--neon-green)] border border-[var(--border-accent)]"
-            : "bg-[var(--background-secondary)] border border-[var(--terminal-border)]"
+            ? "bg-[#1a4d2e] text-neon-green border border-border-accent"
+            : "bg-background-secondary border border-terminal-border"
         }`}
       >
         {/* Role indicator */}
         <div
           className={`text-xs font-semibold mb-1 ${
-            isUser
-              ? "text-[var(--neon-green)] opacity-90"
-              : "text-[var(--border-accent)] neon-glow"
+            isUser ? "text-neon-green opacity-90" : "text-border-accent"
           }`}
         >
           {isUser ? "You" : "CyberQueryAI"}
@@ -213,7 +211,7 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
         {/* Message content */}
         <div
           className={`prose prose-sm max-w-none ${
-            isUser ? "text-[var(--neon-green)]" : "text-[var(--text-primary)]"
+            isUser ? "text-neon-green" : "text-text-primary"
           }`}
         >
           {contentParts.map((part, index) => {
@@ -233,17 +231,13 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
                       title="Copy code"
                       style={{
                         ...CODE_BLOCK_STYLES.button,
-                        color: isCopied
-                          ? "var(--neon-green)"
-                          : "var(--text-muted)",
+                        color: isCopied ? "#00ff41" : "#888888",
                       }}
                       onMouseEnter={e =>
-                        !isCopied &&
-                        (e.currentTarget.style.color = "var(--text-secondary)")
+                        !isCopied && (e.currentTarget.style.color = "#ffffff")
                       }
                       onMouseLeave={e =>
-                        !isCopied &&
-                        (e.currentTarget.style.color = "var(--text-muted)")
+                        !isCopied && (e.currentTarget.style.color = "#888888")
                       }
                     >
                       {isCopied ? (
