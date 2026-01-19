@@ -187,7 +187,7 @@ const ChatWindow = () => {
             onKeyDown={handleKeyPress}
             placeholder="Ask me anything about cybersecurity..."
             disabled={isLoading}
-            className="flex-1 bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_var(--color-border-accent)] disabled:opacity-50 resize-none overflow-y-auto"
+            className="flex-1 bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_#00ff41] disabled:opacity-50 resize-none overflow-y-auto"
             rows={1}
             style={{ minHeight: "54px", maxHeight: "216px" }}
           />

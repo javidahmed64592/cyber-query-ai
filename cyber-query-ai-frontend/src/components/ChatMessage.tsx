@@ -289,7 +289,7 @@ const ChatMessage = ({ role, content }: ChatMessageProps) => {
         {!isUser && (
           <button
             onClick={handleCopy}
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded hover:bg-[var(--background-tertiary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 rounded hover:bg-background-tertiary text-text-secondary hover:text-text-primary"
             title="Copy message"
           >
             {copied ? (

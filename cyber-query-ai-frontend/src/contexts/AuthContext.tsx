@@ -91,10 +91,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Show a loading state during initialization and redirects
   if (!isInitialized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[var(--neon-cyan)] border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-[var(--text-muted)]">Loading...</p>
+          <div className="animate-spin h-8 w-8 border-4 border-neon-blue border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-text-muted">Loading...</p>
         </div>
       </div>
     );
@@ -103,12 +103,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Show loading state while redirecting unauthenticated users
   if (!apiKey && pathname !== "/login/") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-4 border-[var(--neon-cyan)] border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-[var(--text-muted)]">
-            Redirecting to login...
-          </p>
+          <div className="animate-spin h-8 w-8 border-4 border-neon-blue border-t-transparent rounded-full mx-auto"></div>
+          <p className="mt-4 text-text-muted">Redirecting to login...</p>
         </div>
       </div>
     );

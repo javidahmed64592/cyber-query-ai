@@ -44,7 +44,7 @@ const TextInput = ({
             onChange={e => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className={`w-full ${height} resize-none bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_var(--color-border-accent)] disabled:opacity-50`}
+            className={`w-full ${height} resize-none bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_#00ff41] disabled:opacity-50`}
             disabled={isLoading}
           />
         ) : (
@@ -54,7 +54,7 @@ const TextInput = ({
             onChange={e => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="w-full bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_var(--color-border-accent)] disabled:opacity-50"
+            className="w-full bg-terminal-bg border border-terminal-border text-text-primary p-3 rounded-md font-mono transition-all duration-200 focus:outline-none focus:border-border-accent focus:shadow-[0_0_2px_#00ff41] disabled:opacity-50"
             disabled={isLoading}
           />
         )}
@@ -63,7 +63,7 @@ const TextInput = ({
       <button
         onClick={onSubmit}
         disabled={isLoading || !value.trim()}
-        className="w-full sm:w-auto bg-background-secondary border border-border-accent text-text-primary px-6 py-3 rounded-md font-mono font-semibold cursor-pointer transition-all duration-200 uppercase tracking-wider hover:enabled:bg-border-accent hover:enabled:text-background hover:enabled:shadow-[0_0_2px_var(--color-border-accent)] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full sm:w-auto bg-background-secondary border border-border-accent text-text-primary px-6 py-3 rounded-md font-mono font-semibold cursor-pointer transition-all duration-200 uppercase tracking-wider hover:enabled:bg-border-accent hover:enabled:text-background hover:enabled:shadow-[0_0_2px_#00ff41] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {isLoading ? (
           <span className="flex items-center justify-center space-x-2">
