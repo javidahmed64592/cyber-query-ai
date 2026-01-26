@@ -20,7 +20,7 @@
     "test:coverage:open": "jest --coverage && start coverage/lcov-report/index.html"
   },
   "dependencies": {
-    "axios": "^1.13.2",
+    "axios": "^1.13.3",
     "clsx": "^2.1.1",
     "dompurify": "^3.3.1",
     "framer-motion": "^12.26.0",
