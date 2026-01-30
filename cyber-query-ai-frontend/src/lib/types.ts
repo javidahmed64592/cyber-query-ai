@@ -2,7 +2,6 @@
 
 // Base response types
 export interface BaseResponse {
-  code: number;
   message: string;
   timestamp: string;
 }

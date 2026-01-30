@@ -60,7 +60,6 @@ describe("API Tests", () => {
   describe("health", () => {
     it("should fetch health status successfully", async () => {
       const mockHealth: HealthResponse = {
-        code: 200,
         message: "Server is healthy",
         timestamp: "2023-01-01T00:00:00Z",
         status: "healthy",
@@ -94,7 +93,6 @@ describe("API Tests", () => {
   describe("config", () => {
     it("should fetch config successfully", async () => {
       const mockConfig: ApiConfigResponse = {
-        code: 200,
         message: "Successfully retrieved chatbot configuration.",
         timestamp: "2023-01-01T00:00:00Z",
         model: {
@@ -132,7 +130,6 @@ describe("API Tests", () => {
 
   describe("sendChatMessage", () => {
     const mockResponse: ChatResponse = {
-      code: 200,
       message: "Successfully generated chat response.",
       timestamp: "2023-01-01T00:00:00Z",
       model_message: "Here's how to use nmap for network scanning...",
@@ -195,7 +192,6 @@ describe("API Tests", () => {
 
     it("should handle empty message", async () => {
       const emptyMessageResponse: ChatResponse = {
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "I need more information to help you.",
@@ -312,7 +308,6 @@ And check service versions`;
 
   describe("generateCode", () => {
     const mockResponse: CodeGenerationResponse = {
-      code: 200,
       message: "Successfully generated code.",
       timestamp: "2023-01-01T00:00:00Z",
       generated_code: "nmap -sV -p 80,443 target.com",
@@ -334,7 +329,6 @@ And check service versions`;
 
     it("should handle code generation for scripts", async () => {
       const scriptResponse: CodeGenerationResponse = {
-        code: 200,
         message: "Successfully generated code.",
         timestamp: "2023-01-01T00:00:00Z",
         generated_code:
@@ -419,7 +413,6 @@ And check service versions`;
 
   describe("explainCode", () => {
     const mockResponse: CodeExplanationResponse = {
-      code: 200,
       message: "Successfully explained code.",
       timestamp: "2023-01-01T00:00:00Z",
       explanation:
@@ -437,7 +430,6 @@ And check service versions`;
 
     it("should successfully explain a script", async () => {
       const scriptResponse: CodeExplanationResponse = {
-        code: 200,
         message: "Successfully explained code.",
         timestamp: "2023-01-01T00:00:00Z",
         explanation:
@@ -473,7 +465,6 @@ And check service versions`;
 
   describe("searchExploits", () => {
     const mockResponse: ExploitSearchResponse = {
-      code: 200,
       message: "Successfully searched for exploits.",
       timestamp: "2023-01-01T00:00:00Z",
       exploits: [
@@ -510,7 +501,6 @@ And check service versions`;
 
     it("should handle empty exploits response", async () => {
       const emptyResponse: ExploitSearchResponse = {
-        code: 200,
         message: "Successfully searched for exploits.",
         timestamp: "2023-01-01T00:00:00Z",
         exploits: [],
@@ -538,7 +528,6 @@ And check service versions`;
   describe("login", () => {
     it("should successfully login with valid API key", async () => {
       const mockResponse: LoginResponse = {
-        code: 200,
         message: "Login successful.",
         timestamp: "2023-01-01T00:00:00Z",
       };
