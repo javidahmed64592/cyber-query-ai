@@ -58,12 +58,6 @@ const extractErrorMessage = (error: unknown): string => {
     if (error.response) {
       const errorData = error.response.data;
 
-      // Check for BaseResponse format with message field
-      if (errorData?.message) {
-        return errorData.message;
-      }
-
-      // Check for detail field (common in FastAPI errors)
       if (errorData?.detail) {
         return typeof errorData.detail === "string"
           ? errorData.detail
