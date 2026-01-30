@@ -4,14 +4,11 @@ FROM node:22-alpine AS frontend-builder
 
 WORKDIR /frontend
 
-# Copy frontend package files
-COPY cyber-query-ai-frontend/package*.json ./
+# Copy frontend source
+COPY cyber-query-ai-frontend/ ./
 
 # Install dependencies
 RUN npm ci
-
-# Copy frontend source
-COPY cyber-query-ai-frontend/ ./
 
 # Build static export
 RUN npm run build

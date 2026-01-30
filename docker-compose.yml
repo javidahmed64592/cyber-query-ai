@@ -61,11 +61,13 @@ services:
     ports:
       - "${PORT:-443}:${PORT:-443}"
     environment:
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-443}
       # Load API token hash from .env file (optional - will be generated if missing)
       - API_TOKEN_HASH=${API_TOKEN_HASH:-}
-      - PORT=${PORT:-443}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
+      - ./.env:/app/.env
       - certs:/app/certs
       - logs:/app/logs
     networks:

@@ -46,9 +46,6 @@ include = [
   "rag_data/**",
   "static/**",
   ".here",
-  "LICENSE",
-  "README.md",
-  "SECURITY.md",
 ]
 
 [tool.hatch.build.force-include]
