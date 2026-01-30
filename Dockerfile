@@ -4,14 +4,11 @@ FROM node:22-alpine AS frontend-builder
 
 WORKDIR /frontend
 
-# Copy frontend package files
-COPY cyber-query-ai-frontend/package*.json ./
+# Copy frontend source
+COPY cyber-query-ai-frontend/ ./
 
 # Install dependencies
 RUN npm ci
-
-# Copy frontend source
-COPY cyber-query-ai-frontend/ ./
 
 # Build static export
 RUN npm run build
@@ -30,7 +27,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # Copy backend source files
 COPY cyber_query_ai/ ./cyber_query_ai/
 COPY rag_data/ ./rag_data/
-COPY pyproject.toml .here LICENSE README.md SECURITY.md ./
+COPY pyproject.toml .here LICENSE README.md ./
 
 # Copy built frontend from previous stage
 COPY --from=frontend-builder /frontend/out ./static/
@@ -66,10 +63,7 @@ RUN mkdir -p /app/logs
 RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head -1) && \
     cp -r "${SITE_PACKAGES_DIR}/static" /app/ && \
     cp -r "${SITE_PACKAGES_DIR}/rag_data" /app/ && \
-    cp "${SITE_PACKAGES_DIR}/.here" /app/.here && \
-    cp "${SITE_PACKAGES_DIR}/LICENSE" /app/LICENSE && \
-    cp "${SITE_PACKAGES_DIR}/README.md" /app/README.md && \
-    cp "${SITE_PACKAGES_DIR}/SECURITY.md" /app/SECURITY.md
+    cp "${SITE_PACKAGES_DIR}/.here" /app/.here
 
 # Create startup script with Ollama model checking
 RUN echo '#!/bin/sh\n\

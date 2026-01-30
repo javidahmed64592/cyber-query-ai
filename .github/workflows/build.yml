@@ -10,6 +10,7 @@ on:
 
 env:
   PACKAGE_NAME: cyber_query_ai
+  FRONTEND_PACKAGE_NAME: cyber-query-ai-frontend
 
 jobs:
   build-frontend:
@@ -19,13 +20,13 @@ jobs:
       - uses: ./.github/actions/setup-node
       - name: Build frontend
         run: |
-          cd cyber-query-ai-frontend
+          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run build
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
-          name: cyber_query_ai_frontend
-          path: cyber-query-ai-frontend/out
+          name: ${{ env.FRONTEND_PACKAGE_NAME }}-build
+          path: ${{ env.FRONTEND_PACKAGE_NAME }}/out
 
   build-wheel:
     runs-on: ubuntu-latest
@@ -36,7 +37,7 @@ jobs:
       - name: Download frontend build
         uses: actions/download-artifact@v4
         with:
-          name: cyber_query_ai_frontend
+          name: ${{ env.FRONTEND_PACKAGE_NAME }}-build
           path: static
       - name: Create wheel
         run: |
@@ -101,9 +102,6 @@ jobs:
           REQUIRED_FILES=(
             "${SITE_PACKAGES}/rag_data/tools.json"
             "${SITE_PACKAGES}/static/index.html"
-            "${SITE_PACKAGES}/README.md"
-            "${SITE_PACKAGES}/SECURITY.md"
-            "${SITE_PACKAGES}/LICENSE"
             "${SITE_PACKAGES}/.here"
           )
 

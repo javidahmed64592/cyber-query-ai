@@ -1,8 +1,4 @@
 {
-  "server": {
-    "host": "0.0.0.0",
-    "port": 443
-  },
   "security": {
     "hsts_max_age": 31536000,
     "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"

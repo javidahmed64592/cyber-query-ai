@@ -1,6 +1,6 @@
 # GitHub Workflows
 
-This document details the CI/CD workflows to build and release the CyberQueryAI application.
+This document details the CI/CD workflows to build and release the application.
 They run automated code quality checks to ensure code remains robust, maintainable, and testable.
 
 ## CI Workflow
@@ -33,7 +33,7 @@ It consists of the following jobs:
 ### bandit
 - Checkout code
 - Setup Python environment with dev dependencies (via custom action)
-- Run security scanning with bandit on `cyber_query_ai/` directory
+- Run security scanning with bandit
 - Generate JSON report for artifacts
 - Fail if security vulnerabilities are found
 
@@ -64,7 +64,7 @@ It consists of the following jobs:
 - Checkout code
 - Set up Node.js and dependencies with npm caching (via custom action)
 - Build frontend with `npm run build`
-- Upload frontend build artifact (`cyber_query_ai_frontend`)
+- Upload frontend build artifact
 
 ### build-wheel
 - Depends on `build-frontend` job
@@ -73,7 +73,7 @@ It consists of the following jobs:
 - Download frontend build artifact to `static/` directory
 - Build wheel with `uv build`
 - Inspect wheel contents for verification
-- Upload wheel artifact (`cyber_query_ai_wheel`)
+- Upload wheel artifact
 
 ### verify-structure
 - Depends on `build-wheel` job
@@ -82,7 +82,6 @@ It consists of the following jobs:
 - Download wheel artifact
 - Install wheel using `uv pip install`
 - Verify installed package structure in site-packages
-- Display directory structure with tree views for verification
 
 ## Docker Workflow
 
@@ -91,22 +90,32 @@ It consists of the following jobs:
 
 ### build-docker
 - Checkout code
-- Build and start services with `docker compose --profile cpu up --build -d`
+- Create `.env` file from `.env.example` template
+- Build and start services with `docker compose up --build -d`
 - Wait for services to start (5 seconds)
-- Show server logs from `cyber-query-ai` container
-- **Health check** using reusable composite action `.github/actions/docker-check-containers`:
-  - Verifies server is running on port 443
-  - Validates Ollama integration
+- Show server logs from container
+- **Health check** using reusable composite action `.github/actions/docker-check-containers` with port 443
 - Stop services with full cleanup: `docker compose down --volumes --remove-orphans`
 
+### prepare-release
+- Depends on `build-docker` job
+- Checkout code
+- Setup Python environment with dev dependencies (via custom action)
+- Extract version from `pyproject.toml` using Python's `tomllib`
+- Prepare release directory
+- Display directory tree structure
+- Create compressed tarball of the release directory
+- Upload tarball as artifact
+
 ### publish-release
-- Depends on `build-docker` and `check-installer` jobs
+- Depends on `prepare-release` job
 - Only runs on push to `main` branch (not PRs)
 - Requires `contents: write` and `packages: write` permissions
 - Checkout code
 - Setup Python environment with dev dependencies (via custom action)
 - Extract version from `pyproject.toml` using Python's `tomllib`
 - Check if Git tag already exists (skip if duplicate)
+- Download release tarball artifact
 - Set up Docker Buildx for multi-platform builds
 - Log in to GitHub Container Registry (ghcr.io)
 - Extract Docker metadata with semantic versioning tags:

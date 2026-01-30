@@ -46,7 +46,7 @@ npm install
 npm run dev  # http://localhost:3000 (proxies /api to https://localhost:443)
 
 # Production build
-npm run build:static  # Outputs to ../static/
+npm run build
 ```
 
 ### Testing
@@ -156,27 +156,7 @@ The RAG system enhances prompts with relevant tool documentation:
 3. Package installer (`release/` with `.sh` script)
 4. Verify installer creates virtualenv, copies static files, and generates launchers
 
-## Deployment & Installation
-
-### Pre-built Release Structure
-
-The build workflow creates a release package containing:
-
-- Python wheel (`cyber_query_ai-*.whl`)
-- Static frontend files in `static/` directory
-- `install_cyber_query_ai.sh` (Linux/macOS)
-- `readme.txt` (comprehensive installation guide)
-
-### Installer Script Behavior
-
-**Linux/macOS (`install_cyber_query_ai.sh`)**:
-
-1. Creates `.venv` using `uv venv`
-2. Installs wheel with `uv pip install`, then deletes wheel
-3. Extracts required files from site-packages to root
-4. Generates `cyber-query-ai` bash executable that launches app
-5. Creates `uninstall_cyber_query_ai.sh` that removes entire installation directory
-6. Self-deletes installer files after completion
+## Deployment
 
 ### Static File Serving Pattern
 
@@ -206,10 +186,6 @@ Users must:
 
 ```json
 {
-  "server": {
-    "host": "0.0.0.0",
-    "port": 443
-  },
   "security": {
     "hsts_max_age": 31536000,
     "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"

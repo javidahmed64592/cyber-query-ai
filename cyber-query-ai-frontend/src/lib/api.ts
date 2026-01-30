@@ -58,12 +58,6 @@ const extractErrorMessage = (error: unknown): string => {
     if (error.response) {
       const errorData = error.response.data;
 
-      // Check for BaseResponse format with message field
-      if (errorData?.message) {
-        return errorData.message;
-      }
-
-      // Check for detail field (common in FastAPI errors)
       if (errorData?.detail) {
         return typeof errorData.detail === "string"
           ? errorData.detail
@@ -81,10 +75,6 @@ const extractErrorMessage = (error: unknown): string => {
   return "An unexpected error occurred";
 };
 
-const isSuccessResponse = (data: { code?: number }): boolean => {
-  return data.code !== undefined && data.code >= 200 && data.code < 300;
-};
-
 // API functions
 export const getHealth = async (): Promise<HealthResponse> => {
   try {
@@ -98,13 +88,7 @@ export const getHealth = async (): Promise<HealthResponse> => {
 export const getConfig = async (): Promise<ApiConfigResponse> => {
   try {
     const response = await api.get<ApiConfigResponse>("/config");
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Failed to get configuration");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }
@@ -117,13 +101,7 @@ export const login = async (apiKey: string): Promise<LoginResponse> => {
         "X-API-KEY": apiKey,
       },
     });
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Login failed");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }
@@ -138,13 +116,7 @@ export const sendChatMessage = async (
 
   try {
     const response = await api.post<ChatResponse>("/model/chat", request);
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Failed to send chat message");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }
@@ -161,13 +133,7 @@ export const generateCode = async (
       "/code/generate",
       request
     );
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Failed to generate code");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }
@@ -184,13 +150,7 @@ export const explainCode = async (
       "/code/explain",
       request
     );
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Failed to explain code");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }
@@ -207,13 +167,7 @@ export const searchExploits = async (
       "/exploit/search",
       request
     );
-    const data = response.data;
-
-    if (!isSuccessResponse(data)) {
-      throw new Error(data.message || "Failed to search exploits");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
   }

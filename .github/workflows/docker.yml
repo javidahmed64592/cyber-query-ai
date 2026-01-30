@@ -10,6 +10,7 @@ on:
   workflow_dispatch:
 
 env:
+  PACKAGE_NAME: cyber_query_ai
   CONTAINER_NAME: cyber-query-ai
 
 jobs:
@@ -21,6 +22,7 @@ jobs:
 
       - name: Build and start services with docker compose
         run: |
+          mv .env.example .env
           docker compose --profile cpu up --build -d
           sleep 5  # Wait for services to start
 
@@ -32,15 +34,48 @@ jobs:
           port: 443
 
       - name: Stop services
-        run: docker compose --profile cpu down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
+
+  prepare-release:
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-python-dev
+
+      - name: Get package name and version from pyproject.toml
+        id: get_package_info
+        run: |
+          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          echo "package_dir=${{ env.PACKAGE_NAME }}_${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Prepare release directory
+        run: |
+          PACKAGE_DIR="${{ steps.get_package_info.outputs.package_dir }}"
+          mkdir $PACKAGE_DIR
+          cp docker-compose.yml README.md LICENSE .env.example $PACKAGE_DIR/
+          tree $PACKAGE_DIR --dirsfirst -F
+
+      - name: Create release tarball
+        run: |
+          PACKAGE_DIR="${{ steps.get_package_info.outputs.package_dir }}"
+          tar -czf ${PACKAGE_DIR}.tar.gz $PACKAGE_DIR
+
+      - name: Upload release tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}_release
+          path: ${{ steps.get_package_info.outputs.package_dir }}.tar.gz
 
   publish-release:
     runs-on: ubuntu-latest
-    needs: [build-docker]
+    needs: [prepare-release]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: write
       packages: write
+
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-python-dev
@@ -61,6 +96,12 @@ jobs:
           else
             echo "tag_exists=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Download release tarball
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.PACKAGE_NAME }}_release
 
       - name: Set up Docker Buildx
         if: steps.check_tag.outputs.tag_exists == 'false'
@@ -107,52 +148,36 @@ jobs:
 
           **AI-powered cybersecurity assistant for ethical hacking and penetration testing**
 
-          ### Quick Start with Docker
+          ### Quick Start
 
           ```bash
-          # Download docker-compose.yml
-          curl -O https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml
+          # Download and extract
+          wget https://github.com/javidahmed64592/${{ env.CONTAINER_NAME }}/releases/download/v${{ steps.get_version.outputs.version }}/${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
+          tar -xzf ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
+          cd ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}
 
-          # Run with GPU support (requires NVIDIA GPU + Container Toolkit)
-          docker compose --profile gpu up -d
+          # Run the container using Docker Compose
+          docker compose --profile gpu up -d  # Use GPU
+          docker compose --profile cpu up -d  # Use CPU
 
-          # OR run with CPU-only mode
-          docker compose --profile cpu up -d
-
-          # Pull required Ollama models
+          # Pull required Ollama models (in a separate terminal)
+          # Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
           docker exec cyber-query-ai-ollama ollama pull mistral
           docker exec cyber-query-ai-ollama ollama pull bge-m3
           ```
 
-          Access the application at `https://localhost:443`
+          ### Access Points
 
-          **Note:** Use `cyber-query-ai-ollama` (GPU) or `cyber-query-ai-ollama-cpu` (CPU) as the container name when pulling models.
-
-          ### Features
-
-          - **Conversational AI Assistant** with full chat history and context awareness
-          - **Code Generation** for security commands and scripts (Python, Bash, PowerShell, etc.)
-          - **Code Analysis** with detailed explanations and security risk assessment
-          - **Exploit Research** for CVEs and attack vectors
-          - **Built-in Security** with input/output sanitization and rate limiting
-          - **RAG-enhanced** prompts with cybersecurity tool documentation
-
-          ### Requirements
-
-          - Docker and Docker Compose installed on your system
-
-          ### Available Docker Tags
-
-          - `${{ steps.get_version.outputs.version }}` - This specific version
-          - `latest` - Latest stable release
-          - `main` - Latest development build
+          - **Web Application**: https://localhost:443
+          - **API Server**: https://localhost:443/api
+          - **Swagger UI**: https://localhost:443/api/docs
+          - **ReDoc**: https://localhost:443/api/redoc
 
           ### Documentation
 
           - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
           - [API Documentation](https://github.com/${{ github.repository }}/blob/main/docs/API.md)
           - [Architecture](https://github.com/${{ github.repository }}/blob/main/docs/ARCHITECTURE.md)
-          - [Docker Deployment](https://github.com/${{ github.repository }}/blob/main/docs/DOCKER_DEPLOYMENT.md)
 
           **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
           EOF
@@ -163,8 +188,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}
-          name: "CyberQueryAI v${{ steps.get_version.outputs.version }}"
+          name: "${{ env.CONTAINER_NAME }} ${{ steps.get_version.outputs.version }}"
           body_path: ${{ steps.release_notes.outputs.release_notes_file }}
           draft: false
           prerelease: false
           generate_release_notes: false
+          files: ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz

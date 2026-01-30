@@ -128,7 +128,6 @@ describe("ChatWindow", () => {
   describe("Sending Messages", () => {
     it("sends message when send button is clicked", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Test response",
@@ -151,7 +150,6 @@ describe("ChatWindow", () => {
 
     it("displays user message immediately", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Test response",
@@ -173,7 +171,6 @@ describe("ChatWindow", () => {
 
     it("displays assistant response after API call", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Hello, user!",
@@ -195,7 +192,6 @@ describe("ChatWindow", () => {
 
     it("clears input after sending message", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
@@ -222,7 +218,6 @@ describe("ChatWindow", () => {
             setTimeout(
               () =>
                 resolve({
-                  code: 200,
                   message: "Successfully generated chat response.",
                   timestamp: "2023-01-01T00:00:00Z",
                   model_message: "Response",
@@ -260,7 +255,6 @@ describe("ChatWindow", () => {
 
     it("includes conversation history in subsequent messages", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response 2",
@@ -283,7 +277,6 @@ describe("ChatWindow", () => {
       // Second message
       mockSendChatMessage.mockClear();
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response 3",
@@ -319,7 +312,6 @@ describe("ChatWindow", () => {
 
     it("hides example prompts after first message", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
@@ -345,7 +337,6 @@ describe("ChatWindow", () => {
   describe("Clear Functionality", () => {
     it("clears all messages when clear button is clicked", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
@@ -374,7 +365,6 @@ describe("ChatWindow", () => {
 
     it("shows welcome message after clearing", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
@@ -444,7 +434,6 @@ describe("ChatWindow", () => {
   describe("Keyboard Shortcuts", () => {
     it("sends message when Enter is pressed without Shift", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
@@ -496,7 +485,6 @@ describe("ChatWindow", () => {
   describe("Auto-Scroll", () => {
     it("scrolls to bottom when new message is added", async () => {
       mockSendChatMessage.mockResolvedValue({
-        code: 200,
         message: "Successfully generated chat response.",
         timestamp: "2023-01-01T00:00:00Z",
         model_message: "Response",
