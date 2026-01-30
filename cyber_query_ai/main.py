@@ -4,9 +4,6 @@ from cyber_query_ai.server import CyberQueryAIServer
 
 
 def run() -> None:
-    """Serve the FastAPI application using uvicorn.
-
-    :raise SystemExit: If configuration fails to load or SSL certificate files are missing
-    """
+    """Serve the FastAPI application using uvicorn."""
     server = CyberQueryAIServer()
     server.run()
