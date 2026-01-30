@@ -159,6 +159,11 @@ jobs:
           # Run the container using Docker Compose
           docker compose --profile gpu up -d  # Use GPU
           docker compose --profile cpu up -d  # Use CPU
+
+          # Pull required Ollama models (in a separate terminal)
+          # Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
+          docker exec cyber-query-ai-ollama ollama pull mistral
+          docker exec cyber-query-ai-ollama ollama pull bge-m3
           ```
 
           ### Access Points
