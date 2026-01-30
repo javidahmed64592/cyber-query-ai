@@ -10,6 +10,7 @@ on:
 
 env:
   PACKAGE_NAME: cyber_query_ai
+  FRONTEND_PACKAGE_NAME: cyber-query-ai-frontend
 
 jobs:
   validate-pyproject:
@@ -76,25 +77,25 @@ jobs:
       - uses: ./.github/actions/setup-node
       - name: Run type checking
         run: |
-          cd cyber-query-ai-frontend
+          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run type-check
       - name: Run linting
         run: |
-          cd cyber-query-ai-frontend
+          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run lint
       - name: Run formatting check
         run: |
-          cd cyber-query-ai-frontend
+          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run format
       - name: Run tests
         run: |
-          cd cyber-query-ai-frontend
+          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run test:coverage
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-report
-          path: cyber-query-ai-frontend/coverage
+          path: ${{ env.FRONTEND_PACKAGE_NAME }}/coverage
   version-check:
     runs-on: ubuntu-latest
     steps:
@@ -106,7 +107,7 @@ jobs:
 
           TOML_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
           LOCK_VERSION=$(uv run python -c "import tomllib; lock_data = tomllib.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '$(echo ${{ env.PACKAGE_NAME }} | tr '_' '-')'), None); print(pkg['version'] if pkg else 'not found')")
-          FRONTEND_VERSION=$(node -p "require('./cyber-query-ai-frontend/package.json').version")
+          FRONTEND_VERSION=$(node -p "require('./${{ env.FRONTEND_PACKAGE_NAME }}/package.json').version")
 
           echo "Version in pyproject.toml: $TOML_VERSION"
           echo "Version in uv.lock: $LOCK_VERSION"
@@ -121,7 +122,7 @@ jobs:
           if [ "$TOML_VERSION" != "$FRONTEND_VERSION" ]; then
             echo "ERROR: Frontend version mismatch!"
             echo "pyproject.toml has $TOML_VERSION but package.json has $FRONTEND_VERSION"
-            echo "Please update cyber-query-ai-frontend/package.json version to match"
+            echo "Please update ${{ env.FRONTEND_PACKAGE_NAME }}/package.json version to match"
             exit 1
           fi
 
