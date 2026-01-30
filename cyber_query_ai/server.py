@@ -2,12 +2,10 @@
 
 import json
 import logging
-from pathlib import Path
 
-from fastapi import Request
+from fastapi import HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from pydantic import ValidationError
-from python_template_server.constants import CONFIG_DIR
 from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
@@ -39,8 +37,6 @@ EXPLOIT_SEARCH_FIELDS = PostExploitSearchResponse.model_fields.keys() - BaseResp
 class CyberQueryAIServer(TemplateServer):
     """AI chatbot server application inheriting from TemplateServer."""
 
-    CONFIG_FILENAME = "config.json"
-
     def __init__(self, config: CyberQueryAIConfig | None = None) -> None:
         """Initialise the CyberQueryAIServer by delegating to the template server.
 
@@ -48,7 +44,8 @@ class CyberQueryAIServer(TemplateServer):
         """
         self.config: CyberQueryAIConfig
         super().__init__(
-            package_name="cyber-query-ai", config_filepath=Path(CONFIG_DIR) / self.CONFIG_FILENAME, config=config
+            package_name="cyber-query-ai",
+            config=config,
         )
 
         self.chatbot = Chatbot(
@@ -56,14 +53,9 @@ class CyberQueryAIServer(TemplateServer):
             embedding_model=self.config.model.embedding_model,
             tools_json_filepath=get_rag_tools_path(),
         )
-        logger.info("Initialized Chatbot with LLM: %s", self.config.model.model)
-        logger.info("Embedding model: %s", self.config.model.embedding_model)
-
-        if not self.static_dir_exists:
-            logger.error("Static directory not found!")
-            raise SystemExit(1)
-
-        logger.info("Serving static files from: %s", self.static_dir)
+        logger.info(
+            "Initialized Chatbot with LLMs: %s & %s", self.config.model.model, self.config.model.embedding_model
+        )
 
     @staticmethod
     def parse_response(response_str: str) -> dict:
@@ -77,17 +69,16 @@ class CyberQueryAIServer(TemplateServer):
         return json.loads(cleaned_response)  # type: ignore[no-any-return]
 
     @staticmethod
-    def validate_keys(required_keys: set[str], response_dict: dict) -> list[str]:
+    def validate_keys(required_keys: set[str], response_dict: dict) -> None:
         """Validate that all required keys are present in the response dictionary.
 
         :param set[str] required_keys: Set of required keys
         :param dict response_dict: Response dictionary to validate
-        :return list[str]: List of missing keys, empty if all required keys are present
+        :raises KeyError: If any required keys are missing
         """
-        missing_keys = list(required_keys - response_dict.keys())
-        if missing_keys:
-            logger.error("Missing required keys in LLM response: %s", missing_keys)
-        return missing_keys
+        if missing_keys := list(required_keys - response_dict.keys()):
+            msg = f"Missing required keys in LLM response: {missing_keys}"
+            raise KeyError(msg)
 
     def validate_config(self, config_data: dict) -> CyberQueryAIConfig:
         """Validate and parse the configuration data into a CyberQueryAIConfig.
@@ -104,25 +95,45 @@ class CyberQueryAIServer(TemplateServer):
     def setup_routes(self) -> None:
         """Set up API routes."""
         self.add_unauthenticated_route(
-            "/config", self.get_api_config, GetApiConfigResponse, methods=["GET"], limited=False
-        )
-        self.add_authenticated_route("/model/chat", self.post_chat, PostChatResponse, methods=["POST"])
-        self.add_authenticated_route(
-            "/code/generate", self.post_generate_code, PostCodeGenerationResponse, methods=["POST"]
-        )
-        self.add_authenticated_route(
-            "/code/explain", self.post_explain_code, PostCodeExplanationResponse, methods=["POST"]
+            endpoint="/config",
+            handler_function=self.get_api_config,
+            response_model=GetApiConfigResponse,
+            methods=["GET"],
+            limited=False,
         )
         self.add_authenticated_route(
-            "/exploit/search", self.post_exploit_search, PostExploitSearchResponse, methods=["POST"]
+            endpoint="/model/chat",
+            handler_function=self.post_chat,
+            response_model=PostChatResponse,
+            methods=["POST"],
+            limited=True,
         )
-        super().setup_routes()
+        self.add_authenticated_route(
+            endpoint="/code/generate",
+            handler_function=self.post_generate_code,
+            response_model=PostCodeGenerationResponse,
+            methods=["POST"],
+            limited=True,
+        )
+        self.add_authenticated_route(
+            endpoint="/code/explain",
+            handler_function=self.post_explain_code,
+            response_model=PostCodeExplanationResponse,
+            methods=["POST"],
+            limited=True,
+        )
+        self.add_authenticated_route(
+            endpoint="/exploit/search",
+            handler_function=self.post_exploit_search,
+            response_model=PostExploitSearchResponse,
+            methods=["POST"],
+            limited=True,
+        )
 
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
         """Get the API configuration including model configuration and version."""
         logger.info("Received request for API configuration.")
         return GetApiConfigResponse(
-            code=ResponseCode.OK,
             message="Successfully retrieved chatbot configuration.",
             timestamp=GetApiConfigResponse.current_timestamp(),
             model=self.config.model,
@@ -143,40 +154,35 @@ class CyberQueryAIServer(TemplateServer):
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
             parsed = self.parse_response(str(model_response.content))
+            self.validate_keys(CHAT_FIELDS, parsed)
 
-            if missing_keys := self.validate_keys(CHAT_FIELDS, parsed):
-                return PostChatResponse(
-                    code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=f"Missing required keys in LLM response: {missing_keys}",
-                    timestamp=PostChatResponse.current_timestamp(),
-                    model_message="",
-                )
-
-            logger.info("Chat response generated successfully.")
+            logger.info("Successfully generated chat response.")
             return PostChatResponse(
-                code=ResponseCode.OK,
                 message="Successfully generated chat response.",
                 timestamp=PostChatResponse.current_timestamp(),
                 model_message=parsed["model_message"],
             )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON response from LLM: {model_response.content}"
             logger.exception(error_msg)
-            return PostChatResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostChatResponse.current_timestamp(),
-                model_message="",
-            )
-        except Exception:
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except KeyError as e:
+            error_msg = "LLM response missing required keys."
+            logger.exception(error_msg)
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except Exception as e:
             error_msg = "An unexpected error occurred during chat."
             logger.exception(error_msg)
-            return PostChatResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostChatResponse.current_timestamp(),
-                model_message="",
-            )
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
 
     async def post_generate_code(self, request: Request) -> PostCodeGenerationResponse:
         """Generate cybersecurity code based on user prompt."""
@@ -187,48 +193,37 @@ class CyberQueryAIServer(TemplateServer):
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
             parsed = self.parse_response(str(model_response.content))
+            self.validate_keys(CODE_GENERATE_FIELDS, parsed)
 
-            if missing_keys := self.validate_keys(CODE_GENERATE_FIELDS, parsed):
-                return PostCodeGenerationResponse(
-                    code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=f"Missing required keys in LLM response: {missing_keys}",
-                    timestamp=PostCodeGenerationResponse.current_timestamp(),
-                    generated_code="",
-                    explanation="",
-                    language="",
-                )
-
-            logger.info("Code generation response generated successfully.")
+            logger.info("Successfully generated code.")
             return PostCodeGenerationResponse(
-                code=ResponseCode.OK,
                 message="Successfully generated code.",
                 timestamp=PostCodeGenerationResponse.current_timestamp(),
                 generated_code=parsed["generated_code"],
                 explanation=parsed["explanation"],
                 language=parsed["language"],
             )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON response from LLM: {model_response.content}"
             logger.exception(error_msg)
-            return PostCodeGenerationResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostCodeGenerationResponse.current_timestamp(),
-                generated_code="",
-                explanation="",
-                language="",
-            )
-        except Exception:
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except KeyError as e:
+            error_msg = "LLM response missing required keys."
+            logger.exception(error_msg)
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except Exception as e:
             error_msg = "An unexpected error occurred during code generation."
             logger.exception(error_msg)
-            return PostCodeGenerationResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostCodeGenerationResponse.current_timestamp(),
-                generated_code="",
-                explanation="",
-                language="",
-            )
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
 
     async def post_explain_code(self, request: Request) -> PostCodeExplanationResponse:
         """Explain code step-by-step."""
@@ -239,40 +234,36 @@ class CyberQueryAIServer(TemplateServer):
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
             parsed = self.parse_response(str(model_response.content))
+            self.validate_keys(CODE_EXPLAIN_FIELDS, parsed)
 
-            if missing_keys := self.validate_keys(CODE_EXPLAIN_FIELDS, parsed):
-                return PostCodeExplanationResponse(
-                    code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=f"Missing required keys in LLM response: {missing_keys}",
-                    timestamp=PostCodeExplanationResponse.current_timestamp(),
-                    explanation="",
-                )
-
-            logger.info("Code explanation response generated successfully.")
+            logger.info("Successfully explained code.")
             return PostCodeExplanationResponse(
                 code=ResponseCode.OK,
                 message="Successfully explained code.",
                 timestamp=PostCodeExplanationResponse.current_timestamp(),
                 explanation=parsed["explanation"],
             )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON response from LLM: {model_response.content}"
             logger.exception(error_msg)
-            return PostCodeExplanationResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostCodeExplanationResponse.current_timestamp(),
-                explanation="",
-            )
-        except Exception:
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except KeyError as e:
+            error_msg = "LLM response missing required keys."
+            logger.exception(error_msg)
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except Exception as e:
             error_msg = "An unexpected error occurred during code explanation."
             logger.exception(error_msg)
-            return PostCodeExplanationResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostCodeExplanationResponse.current_timestamp(),
-                explanation="",
-            )
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
 
     async def post_exploit_search(self, request: Request) -> PostExploitSearchResponse:
         """Search for known exploits based on target description."""
@@ -283,17 +274,9 @@ class CyberQueryAIServer(TemplateServer):
         try:
             model_response = await run_in_threadpool(self.chatbot.llm.invoke, formatted_prompt)
             parsed = self.parse_response(str(model_response.content))
+            self.validate_keys(EXPLOIT_SEARCH_FIELDS, parsed)
 
-            if missing_keys := self.validate_keys(EXPLOIT_SEARCH_FIELDS, parsed):
-                return PostExploitSearchResponse(
-                    code=ResponseCode.INTERNAL_SERVER_ERROR,
-                    message=f"Missing required keys in LLM response: {missing_keys}",
-                    timestamp=PostExploitSearchResponse.current_timestamp(),
-                    exploits=[],
-                    explanation="",
-                )
-
-            logger.info("Exploit search response generated successfully.")
+            logger.info("Successfully searched for exploits.")
             return PostExploitSearchResponse(
                 code=ResponseCode.OK,
                 message="Successfully searched for exploits.",
@@ -301,23 +284,24 @@ class CyberQueryAIServer(TemplateServer):
                 exploits=parsed["exploits"],
                 explanation=parsed["explanation"],
             )
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON response from LLM: {model_response.content}"
             logger.exception(error_msg)
-            return PostExploitSearchResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostExploitSearchResponse.current_timestamp(),
-                exploits=[],
-                explanation="",
-            )
-        except Exception:
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except KeyError as e:
+            error_msg = "LLM response missing required keys."
+            logger.exception(error_msg)
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
+        except Exception as e:
             error_msg = "An unexpected error occurred during exploit search."
             logger.exception(error_msg)
-            return PostExploitSearchResponse(
-                code=ResponseCode.INTERNAL_SERVER_ERROR,
-                message=error_msg,
-                timestamp=PostExploitSearchResponse.current_timestamp(),
-                exploits=[],
-                explanation="",
-            )
+            raise HTTPException(
+                status_code=ResponseCode.INTERNAL_SERVER_ERROR,
+                detail=error_msg,
+            ) from e
