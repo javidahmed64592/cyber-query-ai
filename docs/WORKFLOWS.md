@@ -78,7 +78,7 @@ It consists of the following jobs:
 ### verify-structure
 - Depends on `build-wheel` job
 - Checkout code
-- Setup Python environment (via custom action)
+- Setup Python environment with core dependencies (via custom action)
 - Download wheel artifact
 - Install wheel using `uv pip install`
 - Verify installed package structure in site-packages
@@ -112,7 +112,8 @@ It consists of the following jobs:
 - Only runs on push to `main` branch (not PRs)
 - Requires `contents: write` and `packages: write` permissions
 - Checkout code
-- Setup Python environment with dev dependencies (via custom action)
+- Setup Python environment with core dependencies (via custom action)
+- Check repository name matches package name: Compares repository name with package name in `pyproject.toml` to prevent template-derived repositories from publishing releases under the template name (all subsequent steps skipped if names don't match)
 - Extract version from `pyproject.toml` using Python's `tomllib`
 - Check if Git tag already exists (skip if duplicate)
 - Download release tarball artifact
