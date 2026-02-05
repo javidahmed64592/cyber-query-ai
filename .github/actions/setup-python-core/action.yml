@@ -13,7 +13,7 @@ runs:
       uses: actions/setup-python@v5
       with:
         python-version-file: ".python-version"
-    - name: Create virtual environment
+    - name: Install dependencies
       run: |
         uv sync
       shell: bash
