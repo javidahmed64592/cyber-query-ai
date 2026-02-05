@@ -78,9 +78,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
+      - uses: ./.github/actions/setup-python-core
+
+      - name: Check if repository name matches package name
+        id: check_repo_name
+        run: |
+          PACKAGE_NAME=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
+          REPO_NAME="${{ github.repository }}"
+          REPO_NAME_ONLY="${REPO_NAME##*/}"
+
+          echo "Package name: $PACKAGE_NAME"
+          echo "Repository name: $REPO_NAME_ONLY"
+
+          if [ "$PACKAGE_NAME" != "$REPO_NAME_ONLY" ]; then
+            echo "Repository name ($REPO_NAME_ONLY) does not match package name ($PACKAGE_NAME)"
+            echo "Skipping release - this appears to be a template-derived repository"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+          else
+            echo "Repository name matches package name, proceeding with release"
+            echo "should_release=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Get version from pyproject.toml
+        if: steps.check_repo_name.outputs.should_release == 'true'
         id: get_version
         run: |
           VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
@@ -88,6 +108,7 @@ jobs:
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
+        if: steps.check_repo_name.outputs.should_release == 'true'
         id: check_tag
         run: |
           if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
@@ -98,17 +119,17 @@ jobs:
           fi
 
       - name: Download release tarball
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: actions/download-artifact@v4
         with:
           name: ${{ env.PACKAGE_NAME }}_release
 
       - name: Set up Docker Buildx
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GitHub Container Registry
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -116,7 +137,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata for Docker
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         id: meta
         uses: docker/metadata-action@v5
         with:
@@ -128,7 +149,7 @@ jobs:
             type=raw,value=latest
 
       - name: Build and push Docker image
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -140,7 +161,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Generate release notes
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         id: release_notes
         run: |
           cat > release_notes.md << 'EOF'
@@ -156,6 +177,9 @@ jobs:
           tar -xzf ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
           cd ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}
 
+          # Set up environment variables
+          cp .env.example .env
+
           # Run the container using Docker Compose
           docker compose --profile gpu up -d  # Use GPU
           docker compose --profile cpu up -d  # Use CPU
@@ -168,7 +192,6 @@ jobs:
 
           ### Access Points
 
-          - **Web Application**: https://localhost:443
           - **API Server**: https://localhost:443/api
           - **Swagger UI**: https://localhost:443/api/docs
           - **ReDoc**: https://localhost:443/api/redoc
@@ -177,14 +200,11 @@ jobs:
 
           - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
           - [API Documentation](https://github.com/${{ github.repository }}/blob/main/docs/API.md)
-          - [Architecture](https://github.com/${{ github.repository }}/blob/main/docs/ARCHITECTURE.md)
-
-          **⚠️ Ethical Use Only**: For authorized penetration testing and educational purposes. Always verify AI-generated commands before execution.
           EOF
           echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.tag_exists == 'false'
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.get_version.outputs.tag }}

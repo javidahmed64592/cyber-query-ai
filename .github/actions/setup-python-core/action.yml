@@ -15,5 +15,5 @@ runs:
         python-version-file: ".python-version"
     - name: Create virtual environment
       run: |
-        uv venv
+        uv sync
       shell: bash
