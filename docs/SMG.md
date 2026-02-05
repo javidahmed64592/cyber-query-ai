@@ -76,8 +76,8 @@ uv run pre-commit install
 
 3. Generate API authentication token:
    ```sh
-   uv run generate-new-token
-   # Save the displayed token for authentication!
+   cp .env.example .env       # Set HOST and PORT to override defaults
+   uv run generate-new-token  # Set API_TOKEN_HASH variable
    ```
 
 **Configuration:**
