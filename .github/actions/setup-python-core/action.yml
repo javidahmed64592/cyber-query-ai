@@ -1,5 +1,5 @@
 name: Setup Python Environment (Core)
-description: Sets up Python with uv and creates a virtual environment
+description: Sets up Python with uv and installs core dependencies
 
 runs:
   using: composite
