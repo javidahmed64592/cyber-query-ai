@@ -4,14 +4,19 @@ description: Set up Node.js with npm cache and install dependencies
 runs:
   using: composite
   steps:
+    - name: Set package name
+      run: |
+        REPO_NAME="${{ github.event.repository.name }}"
+        echo "FRONTEND_PACKAGE_NAME=${REPO_NAME}-frontend" >> $GITHUB_ENV
+      shell: bash
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: "22"
         cache: "npm"
-        cache-dependency-path: cyber-query-ai-frontend/package-lock.json
+        cache-dependency-path: ${{ env.FRONTEND_PACKAGE_NAME }}/package-lock.json
     - name: Install dependencies
-      shell: bash
       run: |
-        cd cyber-query-ai-frontend
         npm ci
+      working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+      shell: bash

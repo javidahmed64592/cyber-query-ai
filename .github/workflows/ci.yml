@@ -8,123 +8,93 @@ on:
     branches:
       - main
 
-env:
-  PACKAGE_NAME: cyber_query_ai
-  FRONTEND_PACKAGE_NAME: cyber-query-ai-frontend
-
 jobs:
   validate-pyproject:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Validate pyproject.toml
-        run: |
-          uv run validate-pyproject pyproject.toml
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/validate-pyproject
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/validate-pyproject@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
   ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-python-dev
       - name: Check with ruff
         run: |
           uv run -m ruff check
+
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Check with mypy
-        run: |
-          uv run -m mypy .
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/mypy
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/mypy@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Test with pytest
-        run: |
-          uv run -m pytest --cov-report html --cov-report term
-      - name: Upload backend coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage-report
-          path: htmlcov
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/pytest
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/pytest@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
   bandit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Security check
-        run: |
-          uv run bandit -r ${{ env.PACKAGE_NAME }} -f json -o bandit-report.json || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: bandit-report
-          path: bandit-report.json
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/bandit
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/bandit@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
   pip-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Audit dependencies
-        run: |
-          uv run pip-audit --desc
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/pip-audit
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/pip-audit@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/ci/version-check
+        if: ${{ github.event.repository.name == 'template-python' }}
+      - uses: javidahmed64592/template-python/.github/actions/ci/version-check@main
+        if: ${{ github.event.repository.name != 'template-python' }}
+
   frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/setup-node
       - name: Run type checking
         run: |
-          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run type-check
+        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
       - name: Run linting
         run: |
-          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run lint
+        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
       - name: Run formatting check
         run: |
-          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run format
+        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
       - name: Run tests
         run: |
-          cd ${{ env.FRONTEND_PACKAGE_NAME }}
           npm run test:coverage
+        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-report
           path: ${{ env.FRONTEND_PACKAGE_NAME }}/coverage
-  version-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
-      - name: Check version consistency
-        run: |
-          echo "Checking version consistency across all package files..."
-
-          TOML_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          LOCK_VERSION=$(uv run python -c "import tomllib; lock_data = tomllib.load(open('uv.lock', 'rb')); pkg = next((p for p in lock_data['package'] if p['name'] == '$(echo ${{ env.PACKAGE_NAME }} | tr '_' '-')'), None); print(pkg['version'] if pkg else 'not found')")
-          FRONTEND_VERSION=$(node -p "require('./${{ env.FRONTEND_PACKAGE_NAME }}/package.json').version")
-
-          echo "Version in pyproject.toml: $TOML_VERSION"
-          echo "Version in uv.lock: $LOCK_VERSION"
-          echo "Version in frontend/package.json: $FRONTEND_VERSION"
-
-          if [ "$TOML_VERSION" != "$LOCK_VERSION" ]; then
-            echo "ERROR: Python version mismatch!"
-            echo "pyproject.toml has $TOML_VERSION but uv.lock has $LOCK_VERSION"
-            exit 1
-          fi
-
-          if [ "$TOML_VERSION" != "$FRONTEND_VERSION" ]; then
-            echo "ERROR: Frontend version mismatch!"
-            echo "pyproject.toml has $TOML_VERSION but package.json has $FRONTEND_VERSION"
-            echo "Please update ${{ env.FRONTEND_PACKAGE_NAME }}/package.json version to match"
-            exit 1
-          fi
-
-          echo "All versions match: $TOML_VERSION"
-          echo "Version consistency check passed!"
