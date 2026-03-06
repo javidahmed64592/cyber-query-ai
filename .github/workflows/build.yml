@@ -33,7 +33,7 @@ jobs:
       - name: Download frontend build
         uses: actions/download-artifact@v8
         with:
-          name: ${{ env.FRONTEND_PACKAGE_NAME }}-build
+          name: ${{ env.PACKAGE_NAME }}-frontend-build
           path: static
 
       - uses: ./.github/actions/build/build-wheel
