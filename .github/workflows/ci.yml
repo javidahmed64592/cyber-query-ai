@@ -80,21 +80,21 @@ jobs:
       - name: Run type checking
         run: |
           npm run type-check
-        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+        working-directory: ${{ github.event.repository.name }}-frontend
       - name: Run linting
         run: |
           npm run lint
-        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+        working-directory: ${{ github.event.repository.name }}-frontend
       - name: Run formatting check
         run: |
           npm run format
-        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+        working-directory: ${{ github.event.repository.name }}-frontend
       - name: Run tests
         run: |
           npm run test:coverage
-        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+        working-directory: ${{ github.event.repository.name }}-frontend
       - name: Upload frontend coverage report
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage-report
-          path: ${{ env.FRONTEND_PACKAGE_NAME }}/coverage
+          path: ${{ github.event.repository.name }}-frontend/coverage

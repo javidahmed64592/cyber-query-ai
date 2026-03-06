@@ -17,12 +17,12 @@ jobs:
       - name: Build frontend
         run: |
           npm run build
-        working-directory: ${{ env.FRONTEND_PACKAGE_NAME }}
+        working-directory: ${{ github.event.repository.name }}-frontend
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.FRONTEND_PACKAGE_NAME }}-build
-          path: ${{ env.FRONTEND_PACKAGE_NAME }}/out
+          name: ${{ github.event.repository.name }}-frontend-build
+          path: ${{ github.event.repository.name }}-frontend/out
 
   build-wheel:
     runs-on: ubuntu-latest
@@ -33,7 +33,7 @@ jobs:
       - name: Download frontend build
         uses: actions/download-artifact@v8
         with:
-          name: ${{ env.PACKAGE_NAME }}-frontend-build
+          name: ${{ github.event.repository.name }}-frontend-build
           path: static
 
       - uses: ./.github/actions/build/build-wheel
@@ -57,3 +57,10 @@ jobs:
             rag_data/tools.json
       - uses: javidahmed64592/template-python/.github/actions/build/verify-structure@main
         if: github.event.repository.name != 'template-python'
+        with:
+          expected-directories: |
+            static
+            rag_data
+          expected-files: |
+            static/index.html
+            rag_data/tools.json
