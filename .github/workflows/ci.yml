@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/validate-pyproject
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/validate-pyproject@main
@@ -22,6 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/ruff
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/ruff@main
@@ -31,6 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/mypy
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/mypy@main
@@ -40,6 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/pytest
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/pytest@main
@@ -49,6 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/bandit
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/bandit@main
@@ -58,6 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/pip-audit
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/pip-audit@main
@@ -67,6 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - uses: ./.github/actions/ci/version-check
         if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/version-check@main
@@ -76,25 +83,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: javidahmed64592/python-template-server/.github/actions/setup/setup-node@main
-      - name: Run type checking
-        run: |
-          npm run type-check
-        working-directory: ${{ github.event.repository.name }}-frontend
-      - name: Run linting
-        run: |
-          npm run lint
-        working-directory: ${{ github.event.repository.name }}-frontend
-      - name: Run formatting check
-        run: |
-          npm run format
-        working-directory: ${{ github.event.repository.name }}-frontend
-      - name: Run tests
-        run: |
-          npm run test:coverage
-        working-directory: ${{ github.event.repository.name }}-frontend
-      - name: Upload frontend coverage report
-        uses: actions/upload-artifact@v7
-        with:
-          name: frontend-coverage-report
-          path: ${{ github.event.repository.name }}-frontend/coverage
+
+      - uses: ./.github/actions/build/build-frontend
+        if: github.event.repository.name == 'python-template-server'
+      - uses: javidahmed64592/python-template-server/.github/actions/build/build-frontend@main
+        if: github.event.repository.name != 'python-template-server'
