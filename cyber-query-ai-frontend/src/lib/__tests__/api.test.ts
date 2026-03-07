@@ -62,7 +62,6 @@ describe("API Tests", () => {
       const mockHealth: HealthResponse = {
         message: "Server is healthy",
         timestamp: "2023-01-01T00:00:00Z",
-        status: "healthy",
       };
 
       mockGetHealth.mockResolvedValue(mockHealth);
@@ -71,7 +70,7 @@ describe("API Tests", () => {
 
       expect(mockGetHealth).toHaveBeenCalled();
       expect(health).toEqual(mockHealth);
-      expect(health.status).toBe("healthy");
+      expect(health.message).toBe("Server is healthy");
     });
 
     it("should handle health check error", async () => {

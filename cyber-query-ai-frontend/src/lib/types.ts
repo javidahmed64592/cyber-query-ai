@@ -32,9 +32,7 @@ export interface AuthContextType {
 }
 
 // Response types
-export interface HealthResponse extends BaseResponse {
-  status: string;
-}
+export interface HealthResponse extends BaseResponse {}
 
 export interface ModelConfig {
   model: string;
