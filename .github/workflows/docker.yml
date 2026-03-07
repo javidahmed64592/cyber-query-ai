@@ -14,55 +14,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - name: Build and start services with docker compose
-        run: |
-          mv .env.example .env
-          docker compose --profile cpu up --build -d
-          sleep 5  # Wait for services to start
+      - uses: ./.github/actions/docker/build-start-services
+        if: github.event.repository.name == 'python-template-server'
+        with:
+          build-args: "--profile cpu"
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/build-start-services@main
+        if: github.event.repository.name != 'python-template-server'
+        with:
+          build-args: "--profile cpu"
 
-      - name: Show server logs
-        run: docker compose logs ${{ github.event.repository.name }}
+      - uses: ./.github/actions/docker/show-logs
+        if: github.event.repository.name == 'python-template-server'
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/show-logs@main
+        if: github.event.repository.name != 'python-template-server'
 
-      - uses: ./.github/actions/docker-check-containers
+      - uses: ./.github/actions/docker/check-containers
+        if: github.event.repository.name == 'python-template-server'
+        with:
+          port: 443
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/check-containers@main
+        if: github.event.repository.name != 'python-template-server'
         with:
           port: 443
 
-      - name: Stop services
-        run: docker compose down --volumes --remove-orphans
+      - uses: ./.github/actions/docker/stop-services
+        if: github.event.repository.name == 'python-template-server'
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/stop-services@main
+        if: github.event.repository.name != 'python-template-server'
 
   prepare-release:
     runs-on: ubuntu-latest
     needs: [build-docker]
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-dev
+      - uses: actions/checkout@v6
+      - uses: javidahmed64592/template-python/.github/actions/setup/install-python-dev@main
 
-      - name: Get package name and version from pyproject.toml
-        id: get_package_info
-        run: |
-          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          echo "package_dir=${{ env.PACKAGE_NAME }}_${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Prepare release directory
-        run: |
-          PACKAGE_DIR="${{ steps.get_package_info.outputs.package_dir }}"
-          mkdir $PACKAGE_DIR
-          cp docker-compose.yml README.md LICENSE .env.example $PACKAGE_DIR/
-          tree $PACKAGE_DIR --dirsfirst -F
-
-      - name: Create release tarball
-        run: |
-          PACKAGE_DIR="${{ steps.get_package_info.outputs.package_dir }}"
-          tar -czf ${PACKAGE_DIR}.tar.gz $PACKAGE_DIR
-
-      - name: Upload release tarball
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ env.PACKAGE_NAME }}_release
-          path: ${{ steps.get_package_info.outputs.package_dir }}.tar.gz
+      - uses: ./.github/actions/docker/prepare-release
+        if: github.event.repository.name == 'python-template-server'
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/prepare-release@main
+        if: github.event.repository.name != 'python-template-server'
 
   publish-release:
     runs-on: ubuntu-latest
@@ -73,60 +66,60 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup-python-core
+      - uses: actions/checkout@v6
+      - uses: javidahmed64592/template-python/.github/actions/setup/install-python-core@main
 
-      - name: Check if repository name matches package name
-        id: check_repo_name
-        run: |
-          PACKAGE_NAME=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['name'])")
-          REPO_NAME="${{ github.repository }}"
-          REPO_NAME_ONLY="${REPO_NAME##*/}"
+      - uses: ./.github/actions/docker/check-repo-name
+        if: github.event.repository.name == 'python-template-server'
+        id: check_repo_name_local
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/check-repo-name@main
+        if: github.event.repository.name != 'python-template-server'
+        id: check_repo_name_remote
+      - id: check_repo_name
+        run: echo "should_release=${{ steps.check_repo_name_local.outputs.should_release || steps.check_repo_name_remote.outputs.should_release }}" >> $GITHUB_OUTPUT
+        shell: bash
 
-          echo "Package name: $PACKAGE_NAME"
-          echo "Repository name: $REPO_NAME_ONLY"
-
-          if [ "$PACKAGE_NAME" != "$REPO_NAME_ONLY" ]; then
-            echo "Repository name ($REPO_NAME_ONLY) does not match package name ($PACKAGE_NAME)"
-            echo "Skipping release - this appears to be a template-derived repository"
-            echo "should_release=false" >> $GITHUB_OUTPUT
-          else
-            echo "Repository name matches package name, proceeding with release"
-            echo "should_release=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Get version from pyproject.toml
+      - uses: ./.github/actions/docker/get-version
+        if: steps.check_repo_name.outputs.should_release == 'true' && github.event.repository.name == 'python-template-server'
+        id: get_version_local
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/get-version@main
+        if: steps.check_repo_name.outputs.should_release == 'true' && github.event.repository.name != 'python-template-server'
+        id: get_version_remote
+      - id: get_version
         if: steps.check_repo_name.outputs.should_release == 'true'
-        id: get_version
         run: |
-          VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          echo "version=${{ steps.get_version_local.outputs.version || steps.get_version_remote.outputs.version }}" >> $GITHUB_OUTPUT
+          echo "tag=${{ steps.get_version_local.outputs.tag || steps.get_version_remote.outputs.tag }}" >> $GITHUB_OUTPUT
+        shell: bash
 
-      - name: Check if tag exists
+      - uses: ./.github/actions/docker/check-tag
+        if: steps.check_repo_name.outputs.should_release == 'true' && github.event.repository.name == 'python-template-server'
+        id: check_tag_local
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/check-tag@main
+        if: steps.check_repo_name.outputs.should_release == 'true' && github.event.repository.name != 'python-template-server'
+        id: check_tag_remote
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+      - id: check_tag
         if: steps.check_repo_name.outputs.should_release == 'true'
-        id: check_tag
-        run: |
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag v${{ steps.get_version.outputs.version }} already exists, skipping release creation"
-            echo "tag_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "tag_exists=false" >> $GITHUB_OUTPUT
-          fi
+        run: echo "tag_exists=${{ steps.check_tag_local.outputs.tag_exists || steps.check_tag_remote.outputs.tag_exists }}" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Download release tarball
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: ${{ env.PACKAGE_NAME }}_release
 
       - name: Set up Docker Buildx
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Log in to GitHub Container Registry
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -135,7 +128,7 @@ jobs:
       - name: Extract metadata for Docker
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -146,7 +139,7 @@ jobs:
 
       - name: Build and push Docker image
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
@@ -156,48 +149,20 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64
 
-      - name: Generate release notes
+      - uses: ./.github/actions/docker/generate-release-notes
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false' && github.event.repository.name == 'python-template-server'
+        id: release_notes_local
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+      - uses: javidahmed64592/python-template-server/.github/actions/docker/generate-release-notes@main
+        if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false' && github.event.repository.name != 'python-template-server'
+        id: release_notes_remote
+        with:
+          version: ${{ steps.get_version.outputs.version }}
+      - id: release_notes
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
-        id: release_notes
-        run: |
-          cat > release_notes.md << 'EOF'
-          ## CyberQueryAI v${{ steps.get_version.outputs.version }}
-
-          **AI-powered cybersecurity assistant for ethical hacking and penetration testing**
-
-          ### Quick Start
-
-          ```bash
-          # Download and extract
-          wget https://github.com/javidahmed64592/${{ github.event.repository.name }}/releases/download/v${{ steps.get_version.outputs.version }}/${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
-          tar -xzf ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
-          cd ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}
-
-          # Set up environment variables
-          cp .env.example .env
-
-          # Run the container using Docker Compose
-          docker compose --profile gpu up -d  # Use GPU
-          docker compose --profile cpu up -d  # Use CPU
-
-          # Pull required Ollama models (in a separate terminal)
-          # Use 'cyber-query-ai-ollama' for GPU or 'cyber-query-ai-ollama-cpu' for CPU
-          docker exec cyber-query-ai-ollama ollama pull mistral
-          docker exec cyber-query-ai-ollama ollama pull bge-m3
-          ```
-
-          ### Access Points
-
-          - **API Server**: https://localhost:443/api
-          - **Swagger UI**: https://localhost:443/api/docs
-          - **ReDoc**: https://localhost:443/api/redoc
-
-          ### Documentation
-
-          - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
-          - [API Documentation](https://github.com/${{ github.repository }}/blob/main/docs/API.md)
-          EOF
-          echo "release_notes_file=release_notes.md" >> $GITHUB_OUTPUT
+        run: echo "release_notes_file=${{ steps.release_notes_local.outputs.release_notes_file || steps.release_notes_remote.outputs.release_notes_file }}" >> $GITHUB_OUTPUT
+        shell: bash
 
       - name: Create GitHub Release
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
