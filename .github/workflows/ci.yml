@@ -86,8 +86,13 @@ jobs:
 
       - uses: ./.github/actions/setup/check-frontend-exists
         if: github.event.repository.name == 'python-template-server'
+        id: check-frontend_local
       - uses: javidahmed64592/python-template-server/.github/actions/setup/check-frontend-exists@main
         if: github.event.repository.name != 'python-template-server'
+        id: check-frontend_remote
+      - id: check-frontend
+        run: echo "exists=${{ steps.check-frontend_local.outputs.exists || steps.check-frontend_remote.outputs.exists }}" >> $GITHUB_OUTPUT
+        shell: bash
 
       - uses: ./.github/actions/ci/frontend
         if: steps.check-frontend.outputs.exists == 'true' && github.event.repository.name == 'python-template-server'
