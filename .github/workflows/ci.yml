@@ -94,7 +94,7 @@ jobs:
           npm run test:coverage
         working-directory: ${{ github.event.repository.name }}-frontend
       - name: Upload frontend coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-coverage-report
           path: ${{ github.event.repository.name }}-frontend/coverage
