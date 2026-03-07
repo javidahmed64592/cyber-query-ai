@@ -260,9 +260,7 @@ describe("Navigation", () => {
       const indicator = screen.getByTitle("Server: CHECKING");
       expect(indicator).toBeInTheDocument();
       expect(indicator).toHaveClass("bg-yellow-400");
-      expect(indicator?.className).toContain(
-        "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-      );
+      expect(indicator).toHaveClass("animate-pulse");
     });
 
     it("positions HealthIndicator next to the logo", () => {

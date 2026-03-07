@@ -25,7 +25,8 @@ describe("HealthIndicator", () => {
     const indicator = screen.getByTitle("Server: ONLINE");
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("bg-neon-green");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_#00ff41]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_currentColor]");
+    expect(indicator).toHaveClass("animate-pulse");
     expect(indicator).toHaveAttribute("title", "Server: ONLINE");
   });
 
@@ -37,7 +38,8 @@ describe("HealthIndicator", () => {
     const indicator = screen.getByTitle("Server: OFFLINE");
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("bg-neon-red");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_#ff0040]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_currentColor]");
+    expect(indicator).toHaveClass("animate-pulse");
     expect(indicator).toHaveAttribute("title", "Server: OFFLINE");
   });
 
@@ -49,10 +51,8 @@ describe("HealthIndicator", () => {
     const indicator = screen.getByTitle("Server: CHECKING");
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("bg-yellow-400");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_yellow]");
-    expect(indicator?.className).toContain(
-      "animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]"
-    );
+    expect(indicator).toHaveClass("shadow-[0_0_4px_currentColor]");
+    expect(indicator).toHaveClass("animate-pulse");
     expect(indicator).toHaveAttribute("title", "Server: CHECKING");
   });
 
@@ -62,7 +62,7 @@ describe("HealthIndicator", () => {
     const { container } = render(<HealthIndicator />);
 
     const outerDiv = container.firstChild;
-    expect(outerDiv).toHaveClass("relative", "group");
+    expect(outerDiv).toHaveClass("group", "relative");
   });
 
   it("applies cursor-help class for interactivity indication", () => {
@@ -80,7 +80,7 @@ describe("HealthIndicator", () => {
     render(<HealthIndicator />);
 
     const indicator = screen.getByTitle("Server: ONLINE");
-    expect(indicator).toHaveClass("w-3", "h-3", "rounded-full");
+    expect(indicator).toHaveClass("h-3", "w-3", "rounded-full");
   });
 
   it("handles unknown status gracefully", () => {
@@ -92,7 +92,7 @@ describe("HealthIndicator", () => {
     const indicator = screen.getByTitle("Server: UNKNOWN");
     expect(indicator).toBeInTheDocument();
     expect(indicator).toHaveClass("bg-text-muted");
-    expect(indicator).toHaveClass("shadow-[0_0_4px_#888888]");
+    expect(indicator).toHaveClass("shadow-[0_0_4px_currentColor]");
     expect(indicator).toHaveAttribute("title", "Server: UNKNOWN");
   });
 
@@ -114,12 +114,12 @@ describe("HealthIndicator", () => {
     expect(screen.queryByText("ONLINE")).not.toBeInTheDocument();
   });
 
-  it("maintains consistent styling across status changes", () => {
+  it("has transition animation classes", () => {
     mockUseHealthStatus.mockReturnValue("online");
 
     render(<HealthIndicator />);
 
     const indicator = screen.getByTitle("Server: ONLINE");
-    expect(indicator).toHaveClass("w-3", "h-3", "rounded-full");
+    expect(indicator).toHaveClass("transition-all", "duration-200");
   });
 });

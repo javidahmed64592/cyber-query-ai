@@ -6,13 +6,13 @@ function HealthIndicator() {
   const getStatusStyles = (status: HealthStatus): string => {
     switch (status) {
       case "online":
-        return "bg-neon-green shadow-[0_0_4px_#00ff41]";
+        return "bg-neon-green shadow-[0_0_4px_currentColor] animate-pulse";
       case "offline":
-        return "bg-neon-red shadow-[0_0_4px_#ff0040]";
+        return "bg-neon-red shadow-[0_0_4px_currentColor] animate-pulse";
       case "checking":
-        return "bg-yellow-400 shadow-[0_0_4px_yellow] animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]";
+        return "animate-pulse bg-yellow-400 shadow-[0_0_4px_currentColor]";
       default:
-        return "bg-text-muted shadow-[0_0_4px_#888888]";
+        return "bg-text-muted shadow-[0_0_4px_currentColor]";
     }
   };
 
@@ -21,9 +21,9 @@ function HealthIndicator() {
   };
 
   return (
-    <div className="relative group">
+    <div className="group relative">
       <div
-        className={`w-3 h-3 rounded-full cursor-help ${getStatusStyles(status)}`}
+        className={`h-3 w-3 cursor-help rounded-full transition-all duration-200 ${getStatusStyles(status)}`}
         title={getStatusText(status)}
       />
     </div>
