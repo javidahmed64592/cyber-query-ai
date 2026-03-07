@@ -16,15 +16,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Check if frontend directory exists
-        id: check-frontend
-        run: |
-          if [ -d "${{ github.event.repository.name }}-frontend" ]; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-            echo "Frontend directory does not exist, skipping frontend build"
-          fi
+      - uses: ./.github/actions/setup/check-frontend-exists
+        if: github.event.repository.name == 'python-template-server'
+      - uses: javidahmed64592/python-template-server/.github/actions/setup/check-frontend-exists@main
+        if: github.event.repository.name != 'python-template-server'
 
       - uses: ./.github/actions/build/build-frontend
         if: steps.check-frontend.outputs.exists == 'true' && github.event.repository.name == 'python-template-server'
@@ -57,13 +52,5 @@ jobs:
 
       - uses: ./.github/actions/build/verify-structure
         if: github.event.repository.name == 'template-python'
-        with:
-          expected-directories: |
-            static
-            rag_data
       - uses: javidahmed64592/template-python/.github/actions/build/verify-structure@main
         if: github.event.repository.name != 'template-python'
-        with:
-          expected-directories: |
-            static
-            rag_data
