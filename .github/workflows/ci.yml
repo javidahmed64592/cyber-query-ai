@@ -14,9 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/validate-pyproject
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/validate-pyproject@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   ruff:
     runs-on: ubuntu-latest
@@ -32,45 +32,45 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/mypy
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/mypy@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/pytest
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/pytest@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   bandit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/bandit
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/bandit@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   pip-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/pip-audit
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/pip-audit@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   version-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/ci/version-check
-        if: ${{ github.event.repository.name == 'template-python' }}
+        if: github.event.repository.name == 'template-python'
       - uses: javidahmed64592/template-python/.github/actions/ci/version-check@main
-        if: ${{ github.event.repository.name != 'template-python' }}
+        if: github.event.repository.name != 'template-python'
 
   frontend:
     runs-on: ubuntu-latest
