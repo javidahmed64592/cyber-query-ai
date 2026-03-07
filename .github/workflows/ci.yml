@@ -22,10 +22,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-python-dev
-      - name: Check with ruff
-        run: |
-          uv run -m ruff check
+      - uses: ./.github/actions/ci/ruff
+        if: github.event.repository.name == 'template-python'
+      - uses: javidahmed64592/template-python/.github/actions/ci/ruff@main
+        if: github.event.repository.name != 'template-python'
 
   mypy:
     runs-on: ubuntu-latest
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-node
+      - uses: javidahmed64592/python-template-server/.github/actions/setup/setup-node@main
       - name: Run type checking
         run: |
           npm run type-check

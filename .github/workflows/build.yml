@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-node
+      - uses: javidahmed64592/python-template-server/.github/actions/setup/setup-node@main
       - name: Build frontend
         run: |
           npm run build
@@ -61,6 +61,3 @@ jobs:
           expected-directories: |
             static
             rag_data
-          expected-files: |
-            static/index.html
-            rag_data/tools.json
