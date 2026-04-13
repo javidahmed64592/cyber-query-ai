@@ -78,7 +78,9 @@ jobs:
         if: github.event.repository.name != 'python-template-server'
         id: check_repo_name_remote
       - id: check_repo_name
-        run: echo "should_release=${{ steps.check_repo_name_local.outputs.should_release || steps.check_repo_name_remote.outputs.should_release }}" >> $GITHUB_OUTPUT
+        run: |
+          echo "should_release=${{ steps.check_repo_name_local.outputs.should_release || steps.check_repo_name_remote.outputs.should_release }}" >> $GITHUB_OUTPUT
+          echo "package_name=${{ steps.check_repo_name_local.outputs.package_name || steps.check_repo_name_remote.outputs.package_name }}" >> $GITHUB_OUTPUT
         shell: bash
 
       - uses: ./.github/actions/docker/get-version
@@ -113,7 +115,7 @@ jobs:
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         uses: actions/download-artifact@v8
         with:
-          name: ${{ env.PACKAGE_NAME }}_release
+          name: ${{ steps.check_repo_name.outputs.package_name }}_release
 
       - name: Set up Docker Buildx
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
@@ -156,11 +158,13 @@ jobs:
         id: release_notes_local
         with:
           version: ${{ steps.get_version.outputs.version }}
+          package_name: ${{ steps.check_repo_name.outputs.package_name }}
       - uses: javidahmed64592/python-template-server/.github/actions/docker/generate-release-notes@main
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false' && github.event.repository.name != 'python-template-server'
         id: release_notes_remote
         with:
           version: ${{ steps.get_version.outputs.version }}
+          package_name: ${{ steps.check_repo_name.outputs.package_name }}
       - id: release_notes
         if: steps.check_repo_name.outputs.should_release == 'true' && steps.check_tag.outputs.tag_exists == 'false'
         run: echo "release_notes_file=${{ steps.release_notes_local.outputs.release_notes_file || steps.release_notes_remote.outputs.release_notes_file }}" >> $GITHUB_OUTPUT
@@ -176,4 +180,4 @@ jobs:
           draft: false
           prerelease: false
           generate_release_notes: false
-          files: ${{ env.PACKAGE_NAME }}_${{ steps.get_version.outputs.version }}.tar.gz
+          files: ${{ steps.check_repo_name.outputs.package_name }}_${{ steps.get_version.outputs.version }}.tar.gz
