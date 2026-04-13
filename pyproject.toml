@@ -179,6 +179,7 @@ module = [
     "python_template_server.*",
     "langchain.*",
     "langchain-ollama.*",
-    "slowapi.*"
+    "slowapi.*",
+    "template_python.*",
 ]
 ignore_missing_imports = true
