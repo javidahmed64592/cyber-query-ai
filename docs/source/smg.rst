@@ -139,8 +139,10 @@ This project uses Sphinx for documentation. To build the documentation:
 
 The built documentation will be available at ``docs/build/html/index.html``.
 
+----
+
 Frontend (Next.js)
-----------------
+------------------
 
 .. image:: https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black
    :target: https://reactjs.org/
