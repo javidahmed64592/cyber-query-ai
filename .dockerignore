@@ -1,3 +1,6 @@
+# Static
+static/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -10,6 +13,7 @@ build/
 *.egg
 
 # Virtual environments
+.venv/
 venv/
 env/
 ENV/
@@ -64,9 +68,6 @@ cyber-query-ai-frontend/out/
 cyber-query-ai-frontend/npm-debug.log*
 cyber-query-ai-frontend/yarn-debug.log*
 cyber-query-ai-frontend/yarn-error.log*
-
-# Static files (built in Docker)
-static/
 
 # Miscellaneous
 .DS_Store

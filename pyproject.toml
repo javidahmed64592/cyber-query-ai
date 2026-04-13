@@ -19,9 +19,9 @@ classifiers = [
 ]
 dependencies = [
     "bleach>=6.3.0",
-    "langchain>=1.2.13",
+    "langchain>=1.2.15",
     "langchain-community>=0.4.1",
-    "langchain-ollama>=1.0.1",
+    "langchain-ollama>=1.1.0",
     "langchain-text-splitters>=1.1.1",
     "python-template-server @ git+https://github.com/javidahmed64592/python-template-server.git",
 ]
@@ -30,9 +30,13 @@ dependencies = [
 dev = [
     "python-template-server[dev] @ git+https://github.com/javidahmed64592/python-template-server.git",
 ]
+docs = [
+    "python-template-server[docs] @ git+https://github.com/javidahmed64592/python-template-server.git",
+]
 
 [project.urls]
 repository = "https://github.com/javidahmed64592/cyber-query-ai"
+documentation = "https://javidahmed64592.github.io/cyber-query-ai"
 
 [project.scripts]
 cyber-query-ai = "cyber_query_ai.main:run"
@@ -175,6 +179,7 @@ module = [
     "python_template_server.*",
     "langchain.*",
     "langchain-ollama.*",
-    "slowapi.*"
+    "slowapi.*",
+    "template_python.*",
 ]
 ignore_missing_imports = true
