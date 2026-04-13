@@ -18,7 +18,7 @@ Complete API documentation for all modules and functions.
    :recursive:
    :caption: API Reference
 
-   python_template_server
+   cyber_query_ai
 
 Detailed Documentation
 ======================
