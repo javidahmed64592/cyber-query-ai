@@ -1,11 +1,13 @@
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=ffd343)](https://docs.python.org/3.13/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-Latest-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Ollama](https://img.shields.io/badge/Ollama-AI%20Models-FF6B6B?style=flat-square&logo=ollama&logoColor=white)](https://ollama.ai/)
 [![Kali Linux](https://img.shields.io/badge/Kali%20Linux-Optimized-557C94?style=flat-square&logo=kalilinux&logoColor=white)](https://www.kali.org/)
 [![CI](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/ci.yml?branch=main&style=flat-square&label=CI&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/ci.yml)
 [![Build](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/build.yml?branch=main&style=flat-square&label=Build&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/build.yml)
+[![Docs](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/docs.yml?branch=main&style=flat-square&label=Docs&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/docs.yml)
 [![Docker](https://img.shields.io/github/actions/workflow/status/javidahmed64592/cyber-query-ai/docker.yml?branch=main&style=flat-square&label=Docker&logo=github)](https://github.com/javidahmed64592/cyber-query-ai/actions/workflows/docker.yml)
-[![License](https://img.shields.io/github/license/javidahmed64592/cyber-query-ai?style=flat-square)](https://github.com/javidahmed64592/cyber-query-ai/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 <!-- omit from toc -->
 # CyberQueryAI
@@ -40,7 +42,6 @@ Experience natural language command generation, comprehensive tool explanations,
   - [Installation](#installation)
   - [Configuration](#configuration)
   - [Managing the Container](#managing-the-container)
-- [Links](#links)
 - [Key Features](#key-features)
 - [Web Application Pages](#web-application-pages)
   - [**AI Assistant** (`/`)](#ai-assistant-)
@@ -48,10 +49,7 @@ Experience natural language command generation, comprehensive tool explanations,
   - [**Code Explanation** (`/code-explanation`)](#code-explanation-code-explanation)
   - [**Exploit Search** (`/exploit-search`)](#exploit-search-exploit-search)
   - [**About** (`/about`)](#about-about)
-- [Documentation](#documentation)
 - [Security Policy \& Ethics](#security-policy--ethics)
-  - [Core Principles](#core-principles)
-  - [Prohibited Uses](#prohibited-uses)
 - [License](#license)
 
 ## Why CyberQueryAI?
@@ -105,20 +103,13 @@ docker compose down
 docker compose pull && docker compose up -d
 
 # View the logs
-docker compose logs -f pi-dashboard
+docker compose logs -f cyber-query-ai
 ```
 
 **Note:** You may need to add your user to the Docker group and log out/in for permission changes to take effect:
 ```sh
 sudo usermod -aG docker ${USER}
 ```
-
-## Links
-
-- Access the web application: https://localhost:443
-- Server runs at: https://localhost:443/api
-- Swagger UI: https://localhost:443/api/docs
-- Redoc: https://localhost:443/api/redoc
 
 ## Key Features
 
@@ -206,35 +197,9 @@ Comprehensive information about the application, including:
 - Usage best practices and safety reminders
 - Technical implementation details
 
-## Documentation
-
-Detailed documentation is available in the `docs/` directory:
-
-- **[API Documentation](./docs/API.md)**: API architecture and endpoints
-- **[Architecture Documentation](docs/ARCHITECTURE.md)**: Technical architecture and component overview
-- **[Software Maintenance Guide](./docs/SMG.md)**: Software maintenance guide for developers
-- **[Workflows](docs/WORKFLOWS.md)**: CI/CD pipeline and development workflows
-
-Additional resources:
-- **[Security Policy](SECURITY.md)**: Security guidelines and ethical usage
-
 ## Security Policy & Ethics
 
-CyberQueryAI is designed exclusively for **ethical cybersecurity research**, **authorized penetration testing**, and **educational purposes**.
-
-### Core Principles
-- **Authorization Required**: Only use on systems you own or have explicit written permission to test
-- **Educational Focus**: Designed to accelerate learning and skill development
-- **Responsible Disclosure**: Follow proper vulnerability reporting procedures
-- **Community Growth**: Foster knowledge sharing and collaboration
-
-### Prohibited Uses
-- Unauthorized access to computer systems
-- Real-world exploitation or malicious activities
-- Violation of computer crime laws or regulations
-- Any activity that could cause harm to individuals or organizations
-
-**By using CyberQueryAI, you agree to use it responsibly and ethically. Users are solely responsible for their actions and compliance with applicable laws.**
+By using this tool, you agree to the ethical guidelines outlined in our [Security Policy](SECURITY.md).
 
 ## License
 
