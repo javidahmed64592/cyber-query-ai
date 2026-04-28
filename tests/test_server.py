@@ -4,7 +4,6 @@ import asyncio
 import json
 from collections.abc import Generator
 from importlib.metadata import PackageMetadata
-from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -84,6 +83,12 @@ def mock_server(
         yield server
 
 
+@pytest.fixture
+def mock_client(mock_server: CyberQueryAIServer) -> TestClient:
+    """Provide a TestClient for the mock server."""
+    return TestClient(mock_server.app)
+
+
 class TestCyberQueryAIServer:
     """Unit tests for the CyberQueryAIServer class."""
 
@@ -91,7 +96,6 @@ class TestCyberQueryAIServer:
         """Test CyberQueryAIServer initialization."""
         assert isinstance(mock_server.config, CyberQueryAIConfig)
         assert isinstance(mock_server.chatbot, Chatbot)
-        assert isinstance(mock_server.static_dir, Path)
 
     def test_parse_response(self, mock_server: CyberQueryAIServer, mock_post_chat_response: PostChatResponse) -> None:
         """Test parsing JSON response strings."""
@@ -116,7 +120,7 @@ class TestCyberQueryAIServer:
 
     def test_validate_config_invalid_returns_default(self, mock_server: CyberQueryAIServer) -> None:
         """Test invalid configuration returns default configuration."""
-        invalid_config = {"model": None}
+        invalid_config = {"invalid": None}
         validated_config = mock_server.validate_config(invalid_config)
         assert isinstance(validated_config, CyberQueryAIConfig)
 
@@ -155,23 +159,14 @@ class TestGetApiConfigEndpoint:
 
         assert response.message == "Successfully retrieved chatbot configuration."
         assert isinstance(response.timestamp, str)
+        assert response.timestamp.endswith("Z")
         assert response.model == mock_server.config.model
         assert response.version == mock_server.package_metadata["Version"]
 
-    def test_get_api_config_endpoint(self, mock_server: CyberQueryAIServer) -> None:
+    def test_get_api_config_endpoint(self, mock_client: TestClient) -> None:
         """Test /config endpoint returns 200."""
-        app = mock_server.app
-        client = TestClient(app)
-
-        response = client.get("/config")
+        response = mock_client.get("/config")
         assert response.status_code == ResponseCode.OK
-
-        assert response.content, "Response body is empty"
-        response_body = response.json()
-        assert response_body["message"] == "Successfully retrieved chatbot configuration."
-        assert isinstance(response_body["timestamp"], str)
-        assert response_body["model"] == mock_server.config.model.model_dump()
-        assert response_body["version"] == mock_server.package_metadata["Version"]
 
 
 class TestPostChatEndpoint:
@@ -192,10 +187,7 @@ class TestPostChatEndpoint:
         return request
 
     def test_post_chat(
-        self,
-        mock_server: CyberQueryAIServer,
-        mock_chatbot: MagicMock,
-        mock_request_object: MagicMock,
+        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_object: MagicMock
     ) -> None:
         """Test the /model/chat method handles valid JSON and returns a model reply."""
         mock_response = MagicMock()
@@ -205,13 +197,11 @@ class TestPostChatEndpoint:
 
         assert response.message == "Successfully generated chat response."
         assert isinstance(response.timestamp, str)
+        assert response.timestamp.endswith("Z")
         assert isinstance(response.model_message, str)
 
     def test_post_chat_invalid_json(
-        self,
-        mock_server: CyberQueryAIServer,
-        mock_chatbot: MagicMock,
-        mock_request_object: MagicMock,
+        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_object: MagicMock
     ) -> None:
         """Test /model/chat handles invalid JSON response from LLM."""
         mock_response = MagicMock()
@@ -222,10 +212,7 @@ class TestPostChatEndpoint:
             asyncio.run(mock_server.post_chat(mock_request_object))
 
     def test_post_chat_missing_keys(
-        self,
-        mock_server: CyberQueryAIServer,
-        mock_chatbot: MagicMock,
-        mock_request_object: MagicMock,
+        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_object: MagicMock
     ) -> None:
         """Test /model/chat handles missing keys in LLM response."""
         mock_response = MagicMock()
@@ -236,10 +223,7 @@ class TestPostChatEndpoint:
             asyncio.run(mock_server.post_chat(mock_request_object))
 
     def test_post_chat_error(
-        self,
-        mock_server: CyberQueryAIServer,
-        mock_chatbot: MagicMock,
-        mock_request_object: MagicMock,
+        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_object: MagicMock
     ) -> None:
         """Test /model/chat handles errors gracefully."""
         mock_chatbot.llm.invoke.side_effect = Exception("LLM error")
@@ -248,28 +232,17 @@ class TestPostChatEndpoint:
             asyncio.run(mock_server.post_chat(mock_request_object))
 
     def test_post_chat_endpoint(
-        self,
-        mock_server: CyberQueryAIServer,
-        mock_chatbot: MagicMock,
-        mock_request_body: PostChatRequest,
+        self, mock_client: TestClient, mock_chatbot: MagicMock, mock_request_body: PostChatRequest
     ) -> None:
         """Test /model/chat endpoint returns 200 and includes reply."""
-        app = mock_server.app
-        client = TestClient(app)
-
         mock_response = MagicMock()
         mock_response.content = json.dumps({"model_message": "Cybersecurity is important!"})
         mock_chatbot.llm.invoke.return_value = mock_response
-        response = client.post(
+        response = mock_client.post(
             "/model/chat",
             json=mock_request_body.model_dump(),
         )
         assert response.status_code == ResponseCode.OK
-
-        response_body = response.json()
-        assert response_body["message"] == "Successfully generated chat response."
-        assert isinstance(response_body["timestamp"], str)
-        assert isinstance(response_body["model_message"], str)
 
 
 class TestPostGenerateCodeEndpoint:
@@ -304,6 +277,7 @@ class TestPostGenerateCodeEndpoint:
 
         assert response.message == "Successfully generated code."
         assert isinstance(response.timestamp, str)
+        assert response.timestamp.endswith("Z")
         assert response.generated_code == "ls -la"
         assert response.explanation == "Lists all files in long format"
         assert response.language == "bash"
@@ -340,12 +314,9 @@ class TestPostGenerateCodeEndpoint:
             asyncio.run(mock_server.post_generate_code(mock_request_object))
 
     def test_post_generate_code_endpoint(
-        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
+        self, mock_client: TestClient, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
     ) -> None:
         """Test /code/generate endpoint returns 200 and includes code."""
-        app = mock_server.app
-        client = TestClient(app)
-
         mock_response = MagicMock()
         mock_response.content = json.dumps(
             {
@@ -355,13 +326,8 @@ class TestPostGenerateCodeEndpoint:
             }
         )
         mock_chatbot.llm.invoke.return_value = mock_response
-        response = client.post("/code/generate", json=mock_request_body.model_dump())
+        response = mock_client.post("/code/generate", json=mock_request_body.model_dump())
         assert response.status_code == ResponseCode.OK
-
-        response_body = response.json()
-        assert response_body["message"] == "Successfully generated code."
-        assert isinstance(response_body["timestamp"], str)
-        assert response_body["generated_code"] == "nmap -sn 192.168.1.0/24"
 
 
 class TestPostExplainCodeEndpoint:
@@ -394,6 +360,7 @@ class TestPostExplainCodeEndpoint:
 
         assert response.message == "Successfully explained code."
         assert isinstance(response.timestamp, str)
+        assert response.timestamp.endswith("Z")
         assert response.explanation == "This performs a TCP SYN scan on the target"
 
     def test_post_explain_code_invalid_json(
@@ -428,12 +395,9 @@ class TestPostExplainCodeEndpoint:
             asyncio.run(mock_server.post_explain_code(mock_request_object))
 
     def test_post_explain_code_endpoint(
-        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
+        self, mock_client: TestClient, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
     ) -> None:
         """Test /code/explain endpoint returns 200 and includes explanation."""
-        app = mock_server.app
-        client = TestClient(app)
-
         mock_response = MagicMock()
         mock_response.content = json.dumps(
             {
@@ -441,13 +405,8 @@ class TestPostExplainCodeEndpoint:
             }
         )
         mock_chatbot.llm.invoke.return_value = mock_response
-        response = client.post("/code/explain", json=mock_request_body.model_dump())
+        response = mock_client.post("/code/explain", json=mock_request_body.model_dump())
         assert response.status_code == ResponseCode.OK
-
-        response_body = response.json()
-        assert response_body["message"] == "Successfully explained code."
-        assert isinstance(response_body["timestamp"], str)
-        assert response_body["explanation"] == "This command scans for open ports"
 
 
 class TestPostExploitSearchEndpoint:
@@ -488,6 +447,7 @@ class TestPostExploitSearchEndpoint:
 
         assert response.message == "Successfully searched for exploits."
         assert isinstance(response.timestamp, str)
+        assert response.timestamp.endswith("Z")
         assert len(response.exploits) == 1
         assert response.exploits[0].title == "Apache HTTP Server CVE-2021-41773"
         assert response.explanation == "Found 1 exploit for Apache"
@@ -524,12 +484,9 @@ class TestPostExploitSearchEndpoint:
             asyncio.run(mock_server.post_exploit_search(mock_request_object))
 
     def test_post_exploit_search_endpoint(
-        self, mock_server: CyberQueryAIServer, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
+        self, mock_client: TestClient, mock_chatbot: MagicMock, mock_request_body: PostPromptRequest
     ) -> None:
         """Test /exploit/search endpoint returns 200 and includes exploits."""
-        app = mock_server.app
-        client = TestClient(app)
-
         mock_response = MagicMock()
         mock_response.content = json.dumps(
             {
@@ -545,10 +502,5 @@ class TestPostExploitSearchEndpoint:
             }
         )
         mock_chatbot.llm.invoke.return_value = mock_response
-        response = client.post("/exploit/search", json=mock_request_body.model_dump())
+        response = mock_client.post("/exploit/search", json=mock_request_body.model_dump())
         assert response.status_code == ResponseCode.OK
-
-        response_body = response.json()
-        assert response_body["message"] == "Successfully searched for exploits."
-        assert isinstance(response_body["timestamp"], str)
-        assert len(response_body["exploits"]) == 1

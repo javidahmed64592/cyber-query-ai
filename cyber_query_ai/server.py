@@ -5,7 +5,6 @@ import logging
 
 from fastapi import HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
-from pydantic import ValidationError
 from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
@@ -86,11 +85,7 @@ class CyberQueryAIServer(TemplateServer):
         :param dict config_data: Raw configuration data
         :return CyberQueryAIConfig: Validated CyberQueryAI server configuration
         """
-        try:
-            return CyberQueryAIConfig.model_validate(config_data)  # type: ignore[no-any-return]
-        except ValidationError:
-            logger.warning("Invalid configuration data, loading default configuration.")
-            return CyberQueryAIConfig.model_validate({})  # type: ignore[no-any-return]
+        return CyberQueryAIConfig.model_validate(config_data)  # type: ignore[no-any-return]
 
     def setup_routes(self) -> None:
         """Set up API routes."""
@@ -135,7 +130,6 @@ class CyberQueryAIServer(TemplateServer):
         logger.info("Received request for API configuration.")
         return GetApiConfigResponse(
             message="Successfully retrieved chatbot configuration.",
-            timestamp=GetApiConfigResponse.current_timestamp(),
             model=self.config.model,
             version=self.package_metadata["Version"],
         )
@@ -159,7 +153,6 @@ class CyberQueryAIServer(TemplateServer):
             logger.info("Successfully generated chat response.")
             return PostChatResponse(
                 message="Successfully generated chat response.",
-                timestamp=PostChatResponse.current_timestamp(),
                 model_message=parsed["model_message"],
             )
         except json.JSONDecodeError as e:
@@ -198,7 +191,6 @@ class CyberQueryAIServer(TemplateServer):
             logger.info("Successfully generated code.")
             return PostCodeGenerationResponse(
                 message="Successfully generated code.",
-                timestamp=PostCodeGenerationResponse.current_timestamp(),
                 generated_code=parsed["generated_code"],
                 explanation=parsed["explanation"],
                 language=parsed["language"],
@@ -240,7 +232,6 @@ class CyberQueryAIServer(TemplateServer):
             return PostCodeExplanationResponse(
                 code=ResponseCode.OK,
                 message="Successfully explained code.",
-                timestamp=PostCodeExplanationResponse.current_timestamp(),
                 explanation=parsed["explanation"],
             )
         except json.JSONDecodeError as e:
@@ -280,7 +271,6 @@ class CyberQueryAIServer(TemplateServer):
             return PostExploitSearchResponse(
                 code=ResponseCode.OK,
                 message="Successfully searched for exploits.",
-                timestamp=PostExploitSearchResponse.current_timestamp(),
                 exploits=parsed["exploits"],
                 explanation=parsed["explanation"],
             )
