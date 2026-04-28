@@ -22,7 +22,7 @@ dependencies = [
     "langchain>=1.2.15",
     "langchain-community>=0.4.1",
     "langchain-ollama>=1.1.0",
-    "langchain-text-splitters>=1.1.1",
+    "langchain-text-splitters>=1.1.2",
     "python-template-server @ git+https://github.com/javidahmed64592/python-template-server.git",
 ]
 
