@@ -5,7 +5,6 @@ import logging
 
 from fastapi import HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
-from pydantic import ValidationError
 from python_template_server.models import BaseResponse, ResponseCode
 from python_template_server.template_server import TemplateServer
 
@@ -86,11 +85,7 @@ class CyberQueryAIServer(TemplateServer):
         :param dict config_data: Raw configuration data
         :return CyberQueryAIConfig: Validated CyberQueryAI server configuration
         """
-        try:
-            return CyberQueryAIConfig.model_validate(config_data)  # type: ignore[no-any-return]
-        except ValidationError:
-            logger.warning("Invalid configuration data, loading default configuration.")
-            return CyberQueryAIConfig.model_validate({})  # type: ignore[no-any-return]
+        return CyberQueryAIConfig.model_validate(config_data)  # type: ignore[no-any-return]
 
     def setup_routes(self) -> None:
         """Set up API routes."""
