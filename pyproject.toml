@@ -62,6 +62,9 @@ addopts = [
     "--cov-report",
     "term-missing",
 ]
+env = [
+    "API_TOKEN_HASH=token",
+]
 
 [tool.coverage.run]
 branch = true
