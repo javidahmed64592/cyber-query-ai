@@ -89,40 +89,45 @@ class CyberQueryAIServer(TemplateServer):
 
     def setup_routes(self) -> None:
         """Set up API routes."""
-        self.add_unauthenticated_route(
+        self.add_route(
             endpoint="/config",
             handler_function=self.get_api_config,
             response_model=GetApiConfigResponse,
             methods=["GET"],
             limited=False,
+            authentication_required=False,
         )
-        self.add_authenticated_route(
+        self.add_route(
             endpoint="/model/chat",
             handler_function=self.post_chat,
             response_model=PostChatResponse,
             methods=["POST"],
             limited=True,
+            authentication_required=True,
         )
-        self.add_authenticated_route(
+        self.add_route(
             endpoint="/code/generate",
             handler_function=self.post_generate_code,
             response_model=PostCodeGenerationResponse,
             methods=["POST"],
             limited=True,
+            authentication_required=True,
         )
-        self.add_authenticated_route(
+        self.add_route(
             endpoint="/code/explain",
             handler_function=self.post_explain_code,
             response_model=PostCodeExplanationResponse,
             methods=["POST"],
             limited=True,
+            authentication_required=True,
         )
-        self.add_authenticated_route(
+        self.add_route(
             endpoint="/exploit/search",
             handler_function=self.post_exploit_search,
             response_model=PostExploitSearchResponse,
             methods=["POST"],
             limited=True,
+            authentication_required=True,
         )
 
     async def get_api_config(self, request: Request) -> GetApiConfigResponse:
