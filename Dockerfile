@@ -1,6 +1,6 @@
 # Multi-stage Dockerfile for CyberQueryAI
 # Stage 1: Frontend build stage - build Next.js static export
-FROM node:22-alpine AS frontend-builder
+FROM node:25-alpine AS frontend-builder
 
 WORKDIR /frontend
 
