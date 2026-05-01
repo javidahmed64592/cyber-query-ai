@@ -13,89 +13,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/validate-pyproject
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/validate-pyproject@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/validate-pyproject@main
 
   ruff:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/ruff
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/ruff@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/ruff@main
 
   mypy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/mypy
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/mypy@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/mypy@main
 
   pytest:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/pytest
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/pytest@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-tests-exists@main
+        id: check-tests-exists
+      - uses: javidahmed64592/actions-template-python/actions/ci/pytest@main
+        if: steps.check-tests-exists.outputs.exists == 'true'
 
   bandit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/bandit
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/bandit@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/bandit@main
 
   pip-audit:
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/pip-audit
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/pip-audit@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/pip-audit@main
 
   version-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/ci/version-check
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/ci/version-check@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/ci/version-check@main
 
   frontend:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
+        id: check-frontend-exists
 
-      - uses: ./.github/actions/setup/check-frontend-exists
-        if: github.event.repository.name == 'python-template-server'
-        id: check-frontend_local
-      - uses: javidahmed64592/python-template-server/.github/actions/setup/check-frontend-exists@main
-        if: github.event.repository.name != 'python-template-server'
-        id: check-frontend_remote
-      - id: check-frontend
-        run: echo "exists=${{ steps.check-frontend_local.outputs.exists || steps.check-frontend_remote.outputs.exists }}" >> $GITHUB_OUTPUT
-        shell: bash
-
-      - uses: ./.github/actions/ci/frontend
-        if: steps.check-frontend.outputs.exists == 'true' && github.event.repository.name == 'python-template-server'
-      - uses: javidahmed64592/python-template-server/.github/actions/ci/frontend@main
-        if: steps.check-frontend.outputs.exists == 'true' && github.event.repository.name != 'python-template-server'
+      - uses: javidahmed64592/actions-template-python/actions/ci/frontend@main
+        if: steps.check-frontend-exists.outputs.exists == 'true'

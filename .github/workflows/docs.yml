@@ -13,11 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/docs/build-docs
-        if: github.event.repository.name == 'template-python'
-      - uses: javidahmed64592/template-python/.github/actions/docs/build-docs@main
-        if: github.event.repository.name != 'template-python'
+      - uses: javidahmed64592/actions-template-python/actions/docs/build-docs@main
 
   publish-docs:
     runs-on: ubuntu-latest
@@ -28,13 +24,5 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v6
-
-      - uses: ./.github/actions/docs/publish-docs
-        if: github.event.repository.name == 'template-python'
-        id: publish_local
-      - uses: javidahmed64592/template-python/.github/actions/docs/publish-docs@main
-        if: github.event.repository.name != 'template-python'
-        id: publish_remote
-      - id: publish
-        run: echo "page_url=${{ steps.publish_local.outputs.page_url || steps.publish_remote.outputs.page_url }}" >> $GITHUB_OUTPUT
-        shell: bash
+      - uses: javidahmed64592/actions-template-python/actions/docs/publish-docs@main
+        id: publish
