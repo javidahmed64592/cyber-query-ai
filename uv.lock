@@ -967,14 +967,14 @@ wheels = [
 
 [[package]]
 name = "langchain-protocol"
-version = "0.0.14"
+version = "0.0.15"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/05/bf/efb5e2ed832e4d6d45590e25a9e5191986b291b543bc6a807b48bee070b0/langchain_protocol-0.0.14.tar.gz", hash = "sha256:bc1e8553122e6ede310280462d5813023a172ff2785ccbbdec54d43f3a15e5f2", size = 5862, upload-time = "2026-04-29T16:40:18.657Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/24/9777489d6fbbee64af0c8f96d4f840239c408cf694f3394672807dafc490/langchain_protocol-0.0.15.tar.gz", hash = "sha256:9ab2d11ee73944754f10e037e717098d3a6796f0e58afa9cadda6154e7655ade", size = 5862, upload-time = "2026-05-01T22:30:04.748Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c2/e9/06c47ecb2aff08f83dfa30058da3bf86be64862c19569043ed5331bbeecd/langchain_protocol-0.0.14-py3-none-any.whl", hash = "sha256:ffc35089779bd8ca217015180cef5e660fc3b074efdaa0f2e95df73583f1a047", size = 6984, upload-time = "2026-04-29T16:40:17.841Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/7a/9c97a7b9cbe4c5dc6a44cdb1545450c28f0c8ce89b9c1f0ee7fbad896263/langchain_protocol-0.0.15-py3-none-any.whl", hash = "sha256:461eb794358f83d5e42635a5797799ffec7b4702314e34edf73ac21e75d3ef79", size = 6982, upload-time = "2026-05-01T22:30:03.877Z" },
 ]
 
 [[package]]
@@ -1047,7 +1047,7 @@ wheels = [
 
 [[package]]
 name = "langsmith"
-version = "0.7.38"
+version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -1060,9 +1060,9 @@ dependencies = [
     { name = "xxhash" },
     { name = "zstandard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/af/c9/b3e54cfcb480876dfe33ecfdd64feeb621a86d9e6f4a6b9eb46851807018/langsmith-0.7.38.tar.gz", hash = "sha256:0db529b768d66c45f22fe959a0af7151342704fefafdecf3c60b14097c14fdb1", size = 4431914, upload-time = "2026-04-29T00:21:42.865Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a8/64/95f1f013531395f4e8ed73caeee780f65c7c58fe028cb543f8937b45611b/langsmith-0.8.0.tar.gz", hash = "sha256:59fe5b2a56bbbe14a08aa76691f84b49e8675dd21e11b57d80c6db8c08bac2e3", size = 4432996, upload-time = "2026-04-30T22:13:07.341Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/86/bc/a19d0a6d5575c637796675831dbef3555568e84d913f14ec579f92162ffa/langsmith-0.7.38-py3-none-any.whl", hash = "sha256:9c400ad508c0e4edc37bd55987047c6b8aac36ddd55f6096e3806f4d6a100618", size = 392310, upload-time = "2026-04-29T00:21:40.534Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/e1/a4be2e696c9473bb53298df398237da5674704d781d4b748ed35aeef592a/langsmith-0.8.0-py3-none-any.whl", hash = "sha256:12cc4bc5622b835a6d841964d6034df3617bdb912dae0c1381fd0a68a9b3a3ef", size = 393268, upload-time = "2026-04-30T22:13:05.56Z" },
 ]
 
 [[package]]
@@ -1934,7 +1934,7 @@ wheels = [
 [[package]]
 name = "python-template-server"
 version = "0.1.2"
-source = { git = "https://github.com/javidahmed64592/python-template-server.git#604e5845f42848086dcffc6af9eff7323208262d" }
+source = { git = "https://github.com/javidahmed64592/python-template-server.git#2702bb4f259676085c54b3a61fd4d66a64b32292" }
 dependencies = [
     { name = "cryptography" },
     { name = "fastapi" },
@@ -2291,7 +2291,7 @@ wheels = [
 [[package]]
 name = "template-python"
 version = "0.1.0"
-source = { git = "https://github.com/javidahmed64592/template-python.git#7968ce1c95cb52d983d4f8f222c7e97d653e0a0d" }
+source = { git = "https://github.com/javidahmed64592/template-python.git#f64f7b59b5f406610bcfe3174b184ce886ac0694" }
 dependencies = [
     { name = "pydantic" },
     { name = "pyhere" },
