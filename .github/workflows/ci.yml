@@ -53,7 +53,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
+        id: check-frontend-exists
+
       - uses: javidahmed64592/actions-template-python/actions/ci/version-check@main
+        with:
+          frontend-dir-exists: ${{ steps.check-frontend-exists.outputs.exists }}
 
   frontend:
     runs-on: ubuntu-latest
