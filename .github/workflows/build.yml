@@ -42,8 +42,11 @@ jobs:
     needs: build-wheel
     steps:
       - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
+        id: check-frontend
+
       - uses: javidahmed64592/actions-template-python/actions/build/verify-structure@main
         with:
+          frontend-dir-exists: ${{ steps.check-frontend.outputs.exists }}
           expected-directories: |
-            static
             rag_data
