@@ -7,7 +7,6 @@ import type {
   CodeGenerationResponse,
   CodeExplanationResponse,
   ExploitSearchResponse,
-  ApiConfigResponse,
   HealthResponse,
   ChatRequest,
   ChatResponse,
@@ -79,15 +78,6 @@ const extractErrorMessage = (error: unknown): string => {
 export const getHealth = async (): Promise<HealthResponse> => {
   try {
     const response = await api.get<HealthResponse>("/health");
-    return response.data;
-  } catch (error) {
-    throw new Error(extractErrorMessage(error));
-  }
-};
-
-export const getConfig = async (): Promise<ApiConfigResponse> => {
-  try {
-    const response = await api.get<ApiConfigResponse>("/config");
     return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));

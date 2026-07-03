@@ -34,16 +34,6 @@ export interface AuthContextType {
 // Response types
 export interface HealthResponse extends BaseResponse {}
 
-export interface ModelConfig {
-  model: string;
-  embedding_model: string;
-}
-
-export interface ApiConfigResponse extends BaseResponse {
-  model: ModelConfig;
-  version: string;
-}
-
 export interface ChatResponse extends BaseResponse {
   model_message: string;
 }
