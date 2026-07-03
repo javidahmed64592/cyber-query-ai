@@ -5,67 +5,74 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
-  validate-pyproject:
+  python-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/ci/validate-pyproject@main
-
-  ruff:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/ci/ruff@main
-
-  mypy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/ci/mypy@main
-
-  pytest:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/setup/check-tests-exists@main
-        id: check-tests-exists
-      - uses: javidahmed64592/actions-template-python/actions/ci/pytest@main
-        if: steps.check-tests-exists.outputs.exists == 'true'
-
-  bandit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/ci/bandit@main
-
-  pip-audit:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/ci/pip-audit@main
-
-  version-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/install-python-dev@main
       - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
         id: check-frontend-exists
 
-      - uses: javidahmed64592/actions-template-python/actions/ci/version-check@main
+      - uses: javidahmed64592/actions-template-python/actions/ci/python-validate@main
         with:
           frontend-dir-exists: ${{ steps.check-frontend-exists.outputs.exists }}
 
-  frontend:
+  python-code-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/install-python-dev@main
+      - uses: javidahmed64592/actions-template-python/actions/ci/python-code-check@main
+
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/install-python-dev@main
+
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-tests-exists@main
+        id: check-tests-exists
+
+      - uses: javidahmed64592/actions-template-python/actions/ci/python-tests@main
+        if: steps.check-tests-exists.outputs.exists == 'true'
+
+  python-security-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/install-python-dev@main
+      - uses: javidahmed64592/actions-template-python/actions/ci/python-security-check@main
+
+  npm-code-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
       - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
         id: check-frontend-exists
 
-      - uses: javidahmed64592/actions-template-python/actions/ci/frontend@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-node@main
+        if: steps.check-frontend-exists.outputs.exists == 'true'
+
+      - uses: javidahmed64592/actions-template-python/actions/ci/npm-code-check@main
+        if: steps.check-frontend-exists.outputs.exists == 'true'
+
+  npm-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
+        id: check-frontend-exists
+
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-node@main
+        if: steps.check-frontend-exists.outputs.exists == 'true'
+
+      - uses: javidahmed64592/actions-template-python/actions/ci/npm-tests@main
         if: steps.check-frontend-exists.outputs.exists == 'true'

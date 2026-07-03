@@ -11,16 +11,16 @@ Backend (Python)
    :alt: Python
 
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json&style=flat-square
-   :target: https://github.com/astral-sh/uv
+   :target: https://docs.astral.sh/uv/
    :alt: uv
 
 .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json&style=flat-square
-   :target: https://github.com/astral-sh/ruff
+   :target: https://docs.astral.sh/ruff/
    :alt: Ruff
 
-.. image:: https://img.shields.io/badge/mypy-Latest-2A6DB2?style=flat-square
-   :target: https://mypy.readthedocs.io/
-   :alt: Mypy
+.. image:: https://img.shields.io/badge/ty-Latest-2A6DB2?style=flat-square
+   :target: https://docs.astral.sh/ty/
+   :alt: Ty
 
 .. image:: https://img.shields.io/badge/Sphinx-Latest-000000?style=flat-square&logo=sphinx&logoColor=white
    :target: https://www.sphinx-doc.org/
@@ -109,6 +109,9 @@ Testing, Linting, and Type Checking
 
 .. code-block:: sh
 
+   # Validate pyproject.toml
+   uv run validate-pyproject pyproject.toml
+
    # Lint code
    uv run ruff check .
 
@@ -116,7 +119,7 @@ Testing, Linting, and Type Checking
    uv run ruff format .
 
    # Type check
-   uv run mypy .
+   uv run ty check .
 
    # Run tests
    uv run pytest
