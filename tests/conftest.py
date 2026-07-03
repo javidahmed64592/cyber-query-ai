@@ -6,12 +6,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from python_template_server.models import ResponseCode
 
+from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.models import (
     ChatMessageModel,
     CyberQueryAIConfig,
     CyberQueryAIModelConfig,
     ExploitModel,
-    GetApiConfigResponse,
     PostChatRequest,
     PostChatResponse,
     PostCodeExplanationResponse,
@@ -125,20 +125,6 @@ def mock_post_prompt_request(
 
 # Response schemas
 @pytest.fixture
-def mock_get_api_config_response_dict(
-    mock_cyber_query_ai_model_config_dict: dict,
-) -> dict:
-    """Fixture for GetApiConfigResponse as a dictionary."""
-    return {
-        "code": ResponseCode.OK,
-        "message": "Success",
-        "timestamp": GetApiConfigResponse.current_timestamp(),
-        "model": mock_cyber_query_ai_model_config_dict,
-        "version": "1.0.0",
-    }
-
-
-@pytest.fixture
 def mock_post_chat_response_dict() -> dict:
     """Fixture for PostChatResponse as a dictionary."""
     return {
@@ -199,14 +185,6 @@ def mock_post_exploit_search_response_dict(
 
 
 @pytest.fixture
-def mock_get_api_config_response(
-    mock_get_api_config_response_dict: dict,
-) -> GetApiConfigResponse:
-    """Fixture for GetApiConfigResponse model."""
-    return GetApiConfigResponse.model_validate(mock_get_api_config_response_dict)  # type: ignore[no-any-return]
-
-
-@pytest.fixture
 def mock_post_chat_response(
     mock_post_chat_response_dict: dict,
 ) -> PostChatResponse:
@@ -244,3 +222,22 @@ def mock_post_exploit_search_response(
 ) -> PostExploitSearchResponse:
     """Fixture for PostExploitSearchResponse model."""
     return PostExploitSearchResponse.model_validate(mock_post_exploit_search_response_dict)  # type: ignore[no-any-return]
+
+
+# Server fixtures
+@pytest.fixture
+def mock_chatbot(
+    mock_post_chat_response: PostChatResponse,
+    mock_post_code_generation_response: PostCodeGenerationResponse,
+    mock_post_code_explanation_response: PostCodeExplanationResponse,
+    mock_post_exploit_search_response: PostExploitSearchResponse,
+) -> Chatbot:
+    """Provide a mock Chatbot instance."""
+    mock = MagicMock(spec=Chatbot)
+    mock.llm = MagicMock(autospec=True)
+    mock.llm.invoke = MagicMock(return_value="Mock LLM response")
+    mock.prompt_chat = MagicMock(return_value=str(mock_post_chat_response.model_dump()))
+    mock.prompt_code_generation = MagicMock(return_value=str(mock_post_code_generation_response.model_dump()))
+    mock.prompt_code_explanation = MagicMock(return_value=str(mock_post_code_explanation_response.model_dump()))
+    mock.prompt_exploit_search = MagicMock(return_value=str(mock_post_exploit_search_response.model_dump()))
+    return mock

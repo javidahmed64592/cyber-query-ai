@@ -2,15 +2,8 @@
 
 import json
 import re
-from pathlib import Path
 
 import bleach
-from python_template_server.constants import ROOT_DIR
-
-
-def get_rag_tools_path() -> Path:
-    """Get the rag tools file path."""
-    return Path(ROOT_DIR) / "rag_data" / "tools.json"
 
 
 def clean_json_response(response_text: str) -> str:

@@ -7,9 +7,8 @@ from importlib.metadata import PackageMetadata
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from fastapi import HTTPException, Request, Security
+from fastapi import HTTPException, Request
 from fastapi.routing import APIRoute
-from fastapi.security import APIKeyHeader
 from fastapi.testclient import TestClient
 from python_template_server.models import ResponseCode
 
@@ -19,9 +18,6 @@ from cyber_query_ai.models import (
     CyberQueryAIConfig,
     PostChatRequest,
     PostChatResponse,
-    PostCodeExplanationResponse,
-    PostCodeGenerationResponse,
-    PostExploitSearchResponse,
     PostPromptRequest,
     RoleType,
 )
@@ -44,42 +40,16 @@ def mock_package_metadata() -> Generator[MagicMock]:
 
 
 @pytest.fixture
-def mock_chatbot(
-    mock_post_chat_response: PostChatResponse,
-    mock_post_code_generation_response: PostCodeGenerationResponse,
-    mock_post_code_explanation_response: PostCodeExplanationResponse,
-    mock_post_exploit_search_response: PostExploitSearchResponse,
-) -> MagicMock:
-    """Provide a mock Chatbot instance."""
-    mock = MagicMock(spec=Chatbot)
-    mock.llm = MagicMock(autospec=True)
-    mock.llm.invoke = MagicMock(return_value="Mock LLM response")
-    mock.prompt_chat = MagicMock(return_value=str(mock_post_chat_response.model_dump()))
-    mock.prompt_code_generation = MagicMock(return_value=str(mock_post_code_generation_response.model_dump()))
-    mock.prompt_code_explanation = MagicMock(return_value=str(mock_post_code_explanation_response.model_dump()))
-    mock.prompt_exploit_search = MagicMock(return_value=str(mock_post_exploit_search_response.model_dump()))
-    return mock
-
-
-@pytest.fixture
 def mock_server(
     mock_cyber_query_ai_config: CyberQueryAIConfig,
-    mock_chatbot: MagicMock,
+    mock_chatbot: Chatbot,
 ) -> Generator[CyberQueryAIServer]:
     """Provide a CyberQueryAIServer instance for testing."""
-
-    async def fake_verify_api_key(
-        api_key: str | None = Security(APIKeyHeader(name="X-API-Key", auto_error=False)),
-    ) -> None:
-        """Fake verify API key that accepts the security header and always succeeds in tests."""
-        return
-
     with (
-        patch.object(CyberQueryAIServer, "_verify_api_key", new=fake_verify_api_key),
-        patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
         patch("cyber_query_ai.server.CyberQueryAIConfig.save_to_file"),
+        patch("cyber_query_ai.server.Chatbot", return_value=mock_chatbot),
     ):
-        server = CyberQueryAIServer(mock_cyber_query_ai_config)
+        server = CyberQueryAIServer(config=mock_cyber_query_ai_config)
         yield server
 
 
@@ -143,30 +113,6 @@ class TestCyberQueryAIServerRoutes:
         ]
         for endpoint in expected_endpoints:
             assert endpoint in routes, f"Expected endpoint {endpoint} not found in routes"
-
-
-class TestGetApiConfigEndpoint:
-    """Integration tests for the /config endpoint."""
-
-    @pytest.fixture
-    def mock_request_object(self) -> MagicMock:
-        """Provide a mock Request object with JSON data."""
-        return MagicMock(spec=Request)
-
-    def test_get_api_config(self, mock_server: CyberQueryAIServer, mock_request_object: MagicMock) -> None:
-        """Test the /config endpoint method."""
-        response = asyncio.run(mock_server.get_api_config(mock_request_object))
-
-        assert response.message == "Successfully retrieved chatbot configuration."
-        assert isinstance(response.timestamp, str)
-        assert response.timestamp.endswith("Z")
-        assert response.model == mock_server.config.model
-        assert response.version == mock_server.package_metadata["Version"]
-
-    def test_get_api_config_endpoint(self, mock_client: TestClient) -> None:
-        """Test /config endpoint returns 200."""
-        response = mock_client.get("/config")
-        assert response.status_code == ResponseCode.OK
 
 
 class TestPostChatEndpoint:

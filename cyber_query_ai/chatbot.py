@@ -1,11 +1,14 @@
 """Chatbot logic for the CyberQueryAI application."""
 
+import logging
 from pathlib import Path
 
 from langchain_core.prompts import PromptTemplate
 from langchain_ollama import ChatOllama
 
 from cyber_query_ai.rag import RAGSystem
+
+logger = logging.getLogger(__name__)
 
 # Common formatting rules for all JSON endpoints
 JSON_FORMATTING_RULES = (
@@ -26,7 +29,11 @@ STRING_FORMATTING_RULES = (
 class Chatbot:
     """Chatbot class for LLM queries with RAG support."""
 
-    def __init__(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
+    def __init__(self) -> None:
+        """Initialize the Chatbot with necessary components."""
+        logger.info("Chatbot ready to be configured.")
+
+    def configure(self, model: str, embedding_model: str, tools_json_filepath: Path) -> None:
         """Initialize the Chatbot with necessary components."""
         self.model = model
         self.llm = ChatOllama(model=self.model, format="json")

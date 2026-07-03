@@ -20,7 +20,7 @@ class CyberQueryAIConfig(TemplateServerConfig):
     model: CyberQueryAIModelConfig = Field(default_factory=CyberQueryAIModelConfig, description="Model configuration")
 
 
-# Request schemas
+# Chatbot models
 class RoleType(StrEnum):
     """Role types for chat messages."""
 
@@ -35,27 +35,16 @@ class ChatMessageModel(BaseModel):
     content: str
 
 
-class PostChatRequest(BaseModel):
-    """Request model for chat endpoint."""
+class ExploitModel(BaseModel):
+    """Exploit model for cybersecurity exploits."""
 
-    message: str
-    history: list[ChatMessageModel] = []
-
-
-class PostPromptRequest(BaseModel):
-    """Request model with prompt."""
-
-    prompt: str
+    title: str
+    link: str
+    severity: str
+    description: str
 
 
-# Response schemas
-class GetApiConfigResponse(BaseResponse):
-    """Response model for API config endpoint."""
-
-    model: CyberQueryAIModelConfig
-    version: str
-
-
+# Response models
 class PostChatResponse(BaseResponse):
     """Response model for chat endpoint."""
 
@@ -76,17 +65,22 @@ class PostCodeExplanationResponse(BaseResponse):
     explanation: str
 
 
-class ExploitModel(BaseModel):
-    """Exploit model for cybersecurity exploits."""
-
-    title: str
-    link: str
-    severity: str
-    description: str
-
-
 class PostExploitSearchResponse(BaseResponse):
     """Response model for exploit search endpoint."""
 
     exploits: list[ExploitModel]
     explanation: str
+
+
+# Request models
+class PostChatRequest(BaseModel):
+    """Request model for chat endpoint."""
+
+    message: str
+    history: list[ChatMessageModel] = []
+
+
+class PostPromptRequest(BaseModel):
+    """Request model with prompt."""
+
+    prompt: str
