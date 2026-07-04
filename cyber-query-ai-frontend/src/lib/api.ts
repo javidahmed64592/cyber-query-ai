@@ -105,7 +105,10 @@ export const sendChatMessage = async (
   const request: ChatRequest = { message, history };
 
   try {
-    const response = await api.post<ChatResponse>("/model/chat", request);
+    const response = await api.post<ChatResponse>(
+      "/chatbot/model/chat",
+      request
+    );
     return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
@@ -120,7 +123,7 @@ export const generateCode = async (
 
   try {
     const response = await api.post<CodeGenerationResponse>(
-      "/code/generate",
+      "/chatbot/code/generate",
       request
     );
     return response.data;
@@ -137,7 +140,7 @@ export const explainCode = async (
 
   try {
     const response = await api.post<CodeExplanationResponse>(
-      "/code/explain",
+      "/chatbot/code/explain",
       request
     );
     return response.data;
@@ -154,7 +157,7 @@ export const searchExploits = async (
 
   try {
     const response = await api.post<ExploitSearchResponse>(
-      "/exploit/search",
+      "/chatbot/exploit/search",
       request
     );
     return response.data;
