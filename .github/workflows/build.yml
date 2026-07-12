@@ -5,28 +5,33 @@ on:
     branches:
       - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   build-frontend:
     runs-on: ubuntu-latest
     outputs:
-      frontend-exists: ${{ steps.check-frontend.outputs.exists }}
+      frontend-exists: ${{ steps.check-frontend-exists.outputs.exists }}
     steps:
       - uses: actions/checkout@v6
 
       - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
-        id: check-frontend
+        id: check-frontend-exists
+
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-node@main
+        if: steps.check-frontend-exists.outputs.exists == 'true'
 
       - uses: javidahmed64592/actions-template-python/actions/build/build-frontend@main
-        if: steps.check-frontend.outputs.exists == 'true'
+        if: steps.check-frontend-exists.outputs.exists == 'true'
 
   build-wheel:
     runs-on: ubuntu-latest
     needs: build-frontend
+    outputs:
+      frontend-exists: ${{ needs.build-frontend.outputs.frontend-exists }}
     steps:
       - uses: actions/checkout@v6
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+      - uses: javidahmed64592/actions-template-python/actions/setup/install-python-core@main
 
       - name: Download frontend build
         if: needs.build-frontend.outputs.frontend-exists == 'true'
@@ -42,11 +47,11 @@ jobs:
     needs: build-wheel
     steps:
       - uses: actions/checkout@v6
-      - uses: javidahmed64592/actions-template-python/actions/setup/check-frontend-exists@main
-        id: check-frontend
 
+      - uses: javidahmed64592/actions-template-python/actions/setup/setup-uv-python@main
+        with:
+          create-venv: true
       - uses: javidahmed64592/actions-template-python/actions/build/verify-structure@main
         with:
-          frontend-dir-exists: ${{ steps.check-frontend.outputs.exists }}
-          expected-directories: |
-            rag_data
+          frontend-dir-exists: ${{ needs.build-wheel.outputs.frontend-exists }}
+          expected-directories: rag_data

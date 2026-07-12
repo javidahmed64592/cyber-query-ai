@@ -7,7 +7,6 @@ import type {
   CodeGenerationResponse,
   CodeExplanationResponse,
   ExploitSearchResponse,
-  ApiConfigResponse,
   HealthResponse,
   ChatRequest,
   ChatResponse,
@@ -85,15 +84,6 @@ export const getHealth = async (): Promise<HealthResponse> => {
   }
 };
 
-export const getConfig = async (): Promise<ApiConfigResponse> => {
-  try {
-    const response = await api.get<ApiConfigResponse>("/config");
-    return response.data;
-  } catch (error) {
-    throw new Error(extractErrorMessage(error));
-  }
-};
-
 export const login = async (apiKey: string): Promise<LoginResponse> => {
   try {
     const response = await api.get<LoginResponse>("/login", {
@@ -115,7 +105,10 @@ export const sendChatMessage = async (
   const request: ChatRequest = { message, history };
 
   try {
-    const response = await api.post<ChatResponse>("/model/chat", request);
+    const response = await api.post<ChatResponse>(
+      "/chatbot/model/chat",
+      request
+    );
     return response.data;
   } catch (error) {
     throw new Error(extractErrorMessage(error));
@@ -130,7 +123,7 @@ export const generateCode = async (
 
   try {
     const response = await api.post<CodeGenerationResponse>(
-      "/code/generate",
+      "/chatbot/code/generate",
       request
     );
     return response.data;
@@ -147,7 +140,7 @@ export const explainCode = async (
 
   try {
     const response = await api.post<CodeExplanationResponse>(
-      "/code/explain",
+      "/chatbot/code/explain",
       request
     );
     return response.data;
@@ -164,7 +157,7 @@ export const searchExploits = async (
 
   try {
     const response = await api.post<ExploitSearchResponse>(
-      "/exploit/search",
+      "/chatbot/exploit/search",
       request
     );
     return response.data;

@@ -4,7 +4,6 @@ import {
   generateCode,
   explainCode,
   searchExploits,
-  getConfig,
   getHealth,
   sendChatMessage,
   login,
@@ -15,7 +14,6 @@ import type {
   CodeGenerationResponse,
   CodeExplanationResponse,
   ExploitSearchResponse,
-  ApiConfigResponse,
   HealthResponse,
   ChatResponse,
   LoginResponse,
@@ -35,9 +33,6 @@ jest.mock("../api", () => {
   };
 });
 
-// Mock fetch for config endpoint
-global.fetch = jest.fn();
-
 const mockGenerateCode = generateCode as jest.MockedFunction<
   typeof generateCode
 >;
@@ -45,7 +40,6 @@ const mockExplainCode = explainCode as jest.MockedFunction<typeof explainCode>;
 const mockSearchExploits = searchExploits as jest.MockedFunction<
   typeof searchExploits
 >;
-const mockGetConfig = getConfig as jest.MockedFunction<typeof getConfig>;
 const mockGetHealth = getHealth as jest.MockedFunction<typeof getHealth>;
 const mockSendChatMessage = sendChatMessage as jest.MockedFunction<
   typeof sendChatMessage
@@ -86,44 +80,6 @@ describe("API Tests", () => {
       mockGetHealth.mockRejectedValue(new Error(errorMessage));
 
       await expect(getHealth()).rejects.toThrow(errorMessage);
-    });
-  });
-
-  describe("config", () => {
-    it("should fetch config successfully", async () => {
-      const mockConfig: ApiConfigResponse = {
-        message: "Successfully retrieved chatbot configuration.",
-        timestamp: "2023-01-01T00:00:00Z",
-        model: {
-          model: "mistral",
-          embedding_model: "bge-m3",
-        },
-        version: "x.y.z",
-      };
-
-      mockGetConfig.mockResolvedValue(mockConfig);
-
-      const config = await getConfig();
-
-      expect(mockGetConfig).toHaveBeenCalledTimes(1);
-      expect(config).toEqual(mockConfig);
-      expect(config.model.model).toBe("mistral");
-      expect(config.model.embedding_model).toBe("bge-m3");
-    });
-
-    it("should handle config fetch error", async () => {
-      const errorMessage = "Failed to fetch config";
-      mockGetConfig.mockRejectedValue(new Error(errorMessage));
-
-      await expect(getConfig()).rejects.toThrow(errorMessage);
-    });
-
-    it("should handle network error (no response)", async () => {
-      const errorMessage =
-        "No response from server. Please check if the backend is running.";
-      mockGetConfig.mockRejectedValue(new Error(errorMessage));
-
-      await expect(getConfig()).rejects.toThrow(errorMessage);
     });
   });
 

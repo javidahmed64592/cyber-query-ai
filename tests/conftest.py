@@ -5,13 +5,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from python_template_server.models import ResponseCode
+from slowapi import Limiter
 
+from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.models import (
     ChatMessageModel,
     CyberQueryAIConfig,
     CyberQueryAIModelConfig,
     ExploitModel,
-    GetApiConfigResponse,
     PostChatRequest,
     PostChatResponse,
     PostCodeExplanationResponse,
@@ -20,6 +21,8 @@ from cyber_query_ai.models import (
     PostPromptRequest,
     RoleType,
 )
+from cyber_query_ai.routers import ChatbotRouter
+from cyber_query_ai.server import CHATBOT_ROUTER
 
 
 # General fixtures
@@ -125,20 +128,6 @@ def mock_post_prompt_request(
 
 # Response schemas
 @pytest.fixture
-def mock_get_api_config_response_dict(
-    mock_cyber_query_ai_model_config_dict: dict,
-) -> dict:
-    """Fixture for GetApiConfigResponse as a dictionary."""
-    return {
-        "code": ResponseCode.OK,
-        "message": "Success",
-        "timestamp": GetApiConfigResponse.current_timestamp(),
-        "model": mock_cyber_query_ai_model_config_dict,
-        "version": "1.0.0",
-    }
-
-
-@pytest.fixture
 def mock_post_chat_response_dict() -> dict:
     """Fixture for PostChatResponse as a dictionary."""
     return {
@@ -199,14 +188,6 @@ def mock_post_exploit_search_response_dict(
 
 
 @pytest.fixture
-def mock_get_api_config_response(
-    mock_get_api_config_response_dict: dict,
-) -> GetApiConfigResponse:
-    """Fixture for GetApiConfigResponse model."""
-    return GetApiConfigResponse.model_validate(mock_get_api_config_response_dict)  # type: ignore[no-any-return]
-
-
-@pytest.fixture
 def mock_post_chat_response(
     mock_post_chat_response_dict: dict,
 ) -> PostChatResponse:
@@ -244,3 +225,43 @@ def mock_post_exploit_search_response(
 ) -> PostExploitSearchResponse:
     """Fixture for PostExploitSearchResponse model."""
     return PostExploitSearchResponse.model_validate(mock_post_exploit_search_response_dict)  # type: ignore[no-any-return]
+
+
+# Server fixtures
+@pytest.fixture
+def mock_chatbot(
+    mock_post_chat_response: PostChatResponse,
+    mock_post_code_generation_response: PostCodeGenerationResponse,
+    mock_post_code_explanation_response: PostCodeExplanationResponse,
+    mock_post_exploit_search_response: PostExploitSearchResponse,
+) -> Chatbot:
+    """Provide a mock Chatbot instance."""
+    mock = MagicMock(spec=Chatbot)
+    mock.llm = MagicMock(autospec=True)
+    mock.llm.invoke = MagicMock(return_value="Mock LLM response")
+    mock.prompt_chat = MagicMock(return_value=str(mock_post_chat_response.model_dump()))
+    mock.prompt_code_generation = MagicMock(return_value=str(mock_post_code_generation_response.model_dump()))
+    mock.prompt_code_explanation = MagicMock(return_value=str(mock_post_code_explanation_response.model_dump()))
+    mock.prompt_exploit_search = MagicMock(return_value=str(mock_post_exploit_search_response.model_dump()))
+    return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_limiter() -> Limiter:
+    """Provide a mock Limiter instance for testing."""
+    mock_limiter = MagicMock(spec=Limiter)
+    mock_limiter.limit.return_value = MagicMock(return_value=MagicMock())
+    return mock_limiter
+
+
+@pytest.fixture
+def mock_chatbot_router(mock_limiter: Limiter, mock_chatbot: Chatbot) -> ChatbotRouter:
+    """Provide a ChatbotRouter instance for testing."""
+    CHATBOT_ROUTER.configure(
+        hashed_token="hashed_value",  # noqa: S106
+        limiter=mock_limiter,
+        rate_limit="10/minute",
+    )
+    CHATBOT_ROUTER.setup_routes()
+    CHATBOT_ROUTER.configure_router(chatbot=mock_chatbot)
+    return CHATBOT_ROUTER

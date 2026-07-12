@@ -91,7 +91,7 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ## Code Conventions
 
-### Python (Ruff + mypy enforced)
+### Python (Ruff + ty enforced)
 
 - **120 char lines**, strict type hints, comprehensive docstrings (D203/D213 style)
 - **BaseResponse structure**: All response models extend `BaseResponse` from python-template-server (code: int, message: str, timestamp: str)
@@ -144,7 +144,7 @@ The RAG system enhances prompts with relevant tool documentation:
 ### CI Workflow (`.github/workflows/ci.yml`)
 
 - **Ruff**: Linting/formatting
-- **mypy**: Type checking
+- **ty**: Type checking
 - **pytest**: Backend tests with coverage
 - **Frontend**: type-check + lint + format + jest
 - **version-check**: Ensures `pyproject.toml`, `uv.lock`, `package.json` versions match
