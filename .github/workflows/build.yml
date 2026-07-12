@@ -54,3 +54,4 @@ jobs:
       - uses: javidahmed64592/actions-template-python/actions/build/verify-structure@main
         with:
           frontend-dir-exists: ${{ needs.build-wheel.outputs.frontend-exists }}
+          expected-directories: rag_data
