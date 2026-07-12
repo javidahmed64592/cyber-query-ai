@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: javidahmed64592/actions-template-python/actions/docker/build-start-services@main
         with:
-          build-args: --profile gpu
+          build-args: --profile cpu
       - uses: javidahmed64592/actions-template-python/actions/docker/show-logs@main
 
       - uses: javidahmed64592/actions-template-python/actions/docker/check-containers@main
