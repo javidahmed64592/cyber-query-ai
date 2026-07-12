@@ -7,7 +7,6 @@ from cyber_query_ai.models import (
     CyberQueryAIConfig,
     CyberQueryAIModelConfig,
     ExploitModel,
-    GetApiConfigResponse,
     PostChatRequest,
     PostChatResponse,
     PostCodeExplanationResponse,
@@ -96,20 +95,6 @@ class TestPostPromptRequest:
 
 
 # Response schemas
-class TestGetApiConfigResponse:
-    """Unit tests for the GetApiConfigResponse model."""
-
-    def test_model_dump(
-        self,
-        mock_get_api_config_response: GetApiConfigResponse,
-        mock_get_api_config_response_dict: dict,
-    ) -> None:
-        """Test the model_dump method."""
-        result = mock_get_api_config_response.model_dump()
-        assert result["model"] == mock_get_api_config_response_dict["model"]
-        assert result["version"] == mock_get_api_config_response_dict["version"]
-
-
 class TestPostChatResponse:
     """Unit tests for the PostChatResponse model."""
 

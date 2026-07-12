@@ -1,23 +1,11 @@
 """Unit tests for the cyber_query_ai.helpers module."""
 
-from pathlib import Path
-
 import pytest
-from python_template_server.constants import ROOT_DIR
 
 from cyber_query_ai.helpers import (
     clean_json_response,
-    get_rag_tools_path,
     sanitize_text,
 )
-
-
-class TestFilePaths:
-    """Unit tests for file path helper functions."""
-
-    def test_get_rag_tools_path(self) -> None:
-        """Test that get_rag_tools_path returns the correct path."""
-        assert get_rag_tools_path() == Path(ROOT_DIR) / "rag_data" / "tools.json"
 
 
 class TestCleanJsonResponse:

@@ -27,9 +27,11 @@ def mock_rag_system() -> Generator[MagicMock]:
 @pytest.fixture
 def mock_chatbot() -> Chatbot:
     """Fixture to create a Chatbot instance with mocked ChatOllama."""
-    return Chatbot(
+    chatbot = Chatbot()
+    chatbot.configure(
         model="test-model", embedding_model="test-embedding-model", tools_json_filepath=Path("test-tools.json")
     )
+    return chatbot
 
 
 class TestChatbot:

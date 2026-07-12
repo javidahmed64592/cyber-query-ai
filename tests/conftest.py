@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from python_template_server.models import ResponseCode
+from slowapi import Limiter
 
 from cyber_query_ai.chatbot import Chatbot
 from cyber_query_ai.models import (
@@ -20,6 +21,8 @@ from cyber_query_ai.models import (
     PostPromptRequest,
     RoleType,
 )
+from cyber_query_ai.routers import ChatbotRouter
+from cyber_query_ai.server import CHATBOT_ROUTER
 
 
 # General fixtures
@@ -241,3 +244,24 @@ def mock_chatbot(
     mock.prompt_code_explanation = MagicMock(return_value=str(mock_post_code_explanation_response.model_dump()))
     mock.prompt_exploit_search = MagicMock(return_value=str(mock_post_exploit_search_response.model_dump()))
     return mock
+
+
+@pytest.fixture(autouse=True)
+def mock_limiter() -> Limiter:
+    """Provide a mock Limiter instance for testing."""
+    mock_limiter = MagicMock(spec=Limiter)
+    mock_limiter.limit.return_value = MagicMock(return_value=MagicMock())
+    return mock_limiter
+
+
+@pytest.fixture
+def mock_chatbot_router(mock_limiter: Limiter, mock_chatbot: Chatbot) -> ChatbotRouter:
+    """Provide a ChatbotRouter instance for testing."""
+    CHATBOT_ROUTER.configure(
+        hashed_token="hashed_value",  # noqa: S106
+        limiter=mock_limiter,
+        rate_limit="10/minute",
+    )
+    CHATBOT_ROUTER.setup_routes()
+    CHATBOT_ROUTER.configure_router(chatbot=mock_chatbot)
+    return CHATBOT_ROUTER
