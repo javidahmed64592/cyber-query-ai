@@ -17,12 +17,6 @@
     "rate_limit": "10/minute",
     "storage_uri": ""
   },
-  "certificate": {
-    "directory": "certs",
-    "ssl_keyfile": "key.pem",
-    "ssl_certfile": "cert.pem",
-    "days_valid": 365
-  },
   "json_response": {
     "ensure_ascii": false,
     "allow_nan": false,
