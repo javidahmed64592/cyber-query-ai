@@ -90,19 +90,19 @@ Start the server with:
 
    uv run |repo_name|
 
-The backend will be available at ``https://localhost:443/api`` by default.
+The backend will be available at ``http://localhost:8000/api`` by default.
 
 **Available Endpoints:**
 
-- **Health Check:** ``https://localhost:443/api/health``
-- **Login:** ``https://localhost:443/api/login`` (requires authentication)
+- **Health Check:** ``http://localhost:8000/api/health``
+- **Login:** ``http://localhost:8000/api/login`` (requires authentication)
 
 **Testing the API:**
 
 .. code-block:: sh
 
-   curl -k https://localhost:443/api/health
-   curl -k -H "X-API-Key: your-token-here" https://localhost:443/api/login
+   curl -k http://localhost:8000/api/health
+   curl -k -H "X-API-Key: your-token-here" http://localhost:8000/api/login
 
 Testing, Linting, and Type Checking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

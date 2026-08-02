@@ -1,8 +1,20 @@
 import type { NextConfig } from "next";
+import fs from "fs";
+import path from "path";
 
-// Backend URL for dev proxy
+// Read environment file to get host and port
 const getBackendURL = () => {
-  return process.env.BACKEND_URL || "https://localhost:443";
+  try {
+    const variablesPath = path.resolve(__dirname, "..", ".env");
+    const variables = fs.readFileSync(variablesPath, "utf-8");
+    const matchHost = variables.match(/^HOST=(.*)$/m);
+    const matchPort = variables.match(/^PORT=(.*)$/m);
+    const host = matchHost ? matchHost[1] : "localhost";
+    const port = matchPort ? matchPort[1] : "8000";
+    return `http://${host}:${port}`;
+  } catch (error) {
+    return "http://localhost:8000";
+  }
 };
 
 const nextConfig: NextConfig = {
