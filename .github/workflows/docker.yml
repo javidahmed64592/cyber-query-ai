@@ -20,7 +20,7 @@ jobs:
 
       - uses: javidahmed64592/actions-template-python/actions/docker/check-containers@main
         with:
-          port: 443
+          port: 8000
 
       - uses: javidahmed64592/actions-template-python/actions/docker/stop-services@main
 

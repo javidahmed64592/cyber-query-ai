@@ -14,12 +14,12 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 - **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
 - **JSON-only LLM contract**: All prompts enforce strict JSON responses; use `clean_json_response()` before `json.loads()` to handle LLM formatting quirks (code blocks, single quotes, trailing commas)
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
-- **HTTPS-only**: Server runs on port 443 with SSL certificates from `certs/` directory (auto-generated)
+- **HTTP-only**: Server runs on port 8000
 
 ### Frontend: Next.js App Router + Static Export + Authentication
 
 - **Dual deployment modes**: Dev uses Next.js HTTPS proxy to backend; production serves static build from `static/` with same-origin API calls
-- **Single source of truth**: `configuration/config.json` is read by `next.config.ts` at build time to configure the dev proxy URL (HTTPS with self-signed cert support)
+- **Single source of truth**: `configuration/config.json` is read by `next.config.ts` at build time to configure the dev proxy URL
 - **Authentication**: X-API-KEY header authentication managed via `AuthContext` with localStorage persistence; automatic redirect to `/login/` for unauthenticated users
 - **API client with interceptors**: `src/lib/api.ts` adds X-API-KEY header to all requests and handles 401 redirects
 - **Error notifications**: Portal-based toast notifications using `createPortal(component, document.body)` for proper z-index stacking
@@ -38,12 +38,12 @@ uv run generate-new-token  # Generate API authentication token
 
 # Backend only
 uv sync --extra dev
-cyber-query-ai  # Runs on https://localhost:443 by default
+cyber-query-ai  # Runs on http://localhost:8000 by default
 
 # Frontend dev (proxies to HTTPS backend)
 cd cyber-query-ai-frontend
 npm install
-npm run dev  # http://localhost:3000 (proxies /api to https://localhost:443)
+npm run dev  # http://localhost:3000 (proxies /api to http://localhost:8000)
 
 # Production build
 npm run build
@@ -178,7 +178,7 @@ Users must:
 2. Generate API authentication token: `uv run generate-new-token` (save the displayed token!)
 3. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
 4. Ensure Ollama is running: `ollama serve`
-5. Access application at `https://localhost:443` and login with API token
+5. Access application at `http://localhost:8000` and login with API token
 
 ## Configuration
 
@@ -195,11 +195,6 @@ Users must:
     "rate_limit": "10/minute",
     "storage_uri": ""
   },
-  "certificate": {
-    "directory": "certs",
-    "ssl_keyfile": "key.pem",
-    "ssl_certfile": "cert.pem",
-    "days_valid": 365
   },
   "json_response": {
     "ensure_ascii": false,

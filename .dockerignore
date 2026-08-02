@@ -46,9 +46,6 @@ docs/
 logs/
 *.log
 
-# Certs (will be generated at runtime)
-certs/
-
 # Environment files (use docker-compose env instead)
 .env
 .env.*

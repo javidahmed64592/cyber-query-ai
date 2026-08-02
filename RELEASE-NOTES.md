@@ -25,6 +25,6 @@ docker exec cyber-query-ai-ollama ollama pull bge-m3
 
 ### Access Points
 
-- **API Server**: https://localhost:443/api
-- **Swagger UI**: https://localhost:443/api/docs
-- **ReDoc**: https://localhost:443/api/redoc
+- **API Server**: http://localhost:8000/api
+- **Swagger UI**: http://localhost:8000/api/docs
+- **ReDoc**: http://localhost:8000/api/redoc
