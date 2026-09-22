@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system extends python-template-server (FastAPI-based with built-in authentication, rate limiting, and observability) and combines it with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
+CyberQueryAI is an AI-powered cybersecurity assistant that converts natural language into security commands, scripts, and insights using local Ollama LLMs. The system extends python-template-server (FastAPI-based with built-in rate limiting, and observability) and combines it with Next.js 16 (TypeScript/React 19) to provide ethical hacking tools for authorized penetration testing.
 
 ## Architecture Patterns
 
 ### Backend: TemplateServer + LangChain + Ollama
 
-- **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting authentication (X-API-KEY), rate limiting (10/min), security headers and request logging
+- **TemplateServer inheritance**: `CyberQueryAIServer` extends `TemplateServer` from python-template-server, inheriting rate limiting (10/min), security headers and request logging
 - **Single chatbot instance**: Created during `CyberQueryAIServer.__init__()` and stored as `self.chatbot` for all routes to access
 - **Configuration**: Config loaded from `configuration/config.json` using `CyberQueryAIConfig.load_from_file()` which extends `TemplateServerConfig`
 - **Async LLM calls**: Always wrap `self.chatbot.llm.invoke()` with `run_in_threadpool()` to prevent blocking the event loop
@@ -16,11 +16,10 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 - **RAG-enhanced prompts**: The `RAGSystem` injects relevant tool documentation into prompts using vector similarity search (embeddings via `bge-m3`)
 - **HTTP-only**: Server runs on port 8000
 
-### Frontend: Next.js App Router + Static Export + Authentication
+### Frontend: Next.js App Router + Static Export
 
 - **Dual deployment modes**: Dev uses Next.js HTTPS proxy to backend; production serves static build from `static/` with same-origin API calls
 - **Single source of truth**: `configuration/config.json` is read by `next.config.ts` at build time to configure the dev proxy URL
-- **Authentication**: X-API-KEY header authentication managed via `AuthContext` with localStorage persistence; automatic redirect to `/login/` for unauthenticated users
 - **API client with interceptors**: `src/lib/api.ts` adds X-API-KEY header to all requests and handles 401 redirects
 - **Error notifications**: Portal-based toast notifications using `createPortal(component, document.body)` for proper z-index stacking
 - **Type safety**: Keep `src/lib/types.ts` interfaces synchronized with backend Pydantic models in `cyber_query_ai/models.py` (all response types extend `BaseResponse`)
@@ -34,7 +33,6 @@ CyberQueryAI is an AI-powered cybersecurity assistant that converts natural lang
 # Backend prerequisites
 ollama serve  # Ensure Ollama is running
 ollama pull mistral && ollama pull bge-m3  # Pull required models
-uv run generate-new-token  # Generate API authentication token
 
 # Backend only
 uv sync --extra dev
@@ -69,14 +67,6 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 
 ## Security & Sanitization Requirements
 
-### Authentication
-
-- **X-API-KEY header**: All authenticated endpoints require this header with a SHA-256 hashed token
-- **Token generation**: Use `uv run generate-new-token` to create tokens (hash stored in `.env` file)
-- **Frontend storage**: API key stored in localStorage via `src/lib/auth.ts` (saveApiKey, getApiKey, removeApiKey, isAuthenticated)
-- **Route protection**: `AuthContext` wraps app and redirects unauthenticated users to `/login/` using `useRef` to prevent redirect loops
-- **Unauthenticated endpoints**: `/api/health`, `/api/config`, and static file serving do not require authentication
-
 ### Input/Output Sanitization
 
 - **Backend**: All user prompts and LLM responses pass through `sanitize_text()` (uses `bleach` to strip HTML/scripts)
@@ -105,7 +95,6 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 - **DOMPurify for LLM content**: Never render LLM text without sanitization
 - **Axios interceptors**: Request interceptor adds X-API-KEY header from `getApiKey()`; response interceptor handles 401 redirects
 - **Portal for notifications**: Use `createPortal(component, document.body)` for toast notifications to avoid z-index issues
-- **Auth context**: Use `useAuth()` hook for login/logout functionality and `isAuthenticated` state
 
 ## Key Files & Their Roles
 
@@ -121,13 +110,10 @@ The CI enforces version alignment across `pyproject.toml`, `uv.lock`, and `cyber
 ### Frontend
 
 - `src/lib/api.ts`: Single source for all backend communication; axios instance with request interceptor (adds X-API-KEY) and response interceptor (handles 401); includes `loginWithApiKey()`, `sendChatMessage()`, `generateCode()`, `explainCode()`, `searchExploits()`, `getConfig()`, `getHealth()`; 30s timeout, error normalization
-- `src/lib/auth.ts`: localStorage management for API key (saveApiKey, getApiKey, removeApiKey, isAuthenticated)
-- `src/contexts/AuthContext.tsx`: Global authentication state with `login()`, `logout()`, redirect logic using `useRef` to prevent loops; wraps app in `layout.tsx`
 - `src/lib/types.ts`: TypeScript interfaces synchronized with backend Pydantic models; all extend `BaseResponse: { code: number, message: string, timestamp: string }`
 - `src/lib/sanitization.ts`: DOMPurify wrapper + command safety checker
 - `src/components/ErrorNotification.tsx`: Portal-based toast notifications using `createPortal(component, document.body)` with z-index 9999; `useErrorNotification()` hook
 - `src/components/`: Presentational components including `ChatWindow.tsx`, `ChatMessage.tsx`, `Navigation.tsx` (with logout), `Footer.tsx`, `HealthIndicator.tsx`; keep business logic in `api.ts`
-- `src/app/login/page.tsx`: API key authentication page with form validation
 - `next.config.ts`: Reads `configuration/config.json` at build time; HTTPS proxy with custom agent (`rejectUnauthorized: false`) for self-signed certs; `NODE_TLS_REJECT_UNAUTHORIZED=0`
 
 ## RAG System Details
@@ -175,10 +161,9 @@ See `helpers.py:get_static_files()` for implementation.
 Users must:
 
 1. Pull required Ollama models: `ollama pull mistral && ollama pull bge-m3`
-2. Generate API authentication token: `uv run generate-new-token` (save the displayed token!)
-3. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
-4. Ensure Ollama is running: `ollama serve`
-5. Access application at `http://localhost:8000` and login with API token
+2. Edit `configuration/config.json` to customize server settings (host, port, models, rate limits)
+3. Ensure Ollama is running: `ollama serve`
+4. Access application at `http://localhost:8000`
 
 ## Configuration
 
@@ -223,13 +208,12 @@ Users must:
 3. **Frontend/backend type drift**: Update both `types.ts` and `models.py` together; ensure all response types extend `BaseResponse`
 4. **Missing sanitization**: All user input and LLM output must be sanitized
 5. **Wrong config path**: Configuration is in `configuration/config.json`
-6. **Missing authentication**: Most endpoints require X-API-KEY header; generate token with `uv run generate-new-token`
-7. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
-8. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime
-9. **HTTPS certificate warnings**: Self-signed certificates cause browser warnings in dev; this is expected
-10. **Redirect loops**: Use `useRef` in AuthContext to track redirect state and prevent infinite loops
-11. **Z-index stacking**: Use `createPortal(component, document.body)` for notifications to avoid stacking context issues
-12. **Directory context in terminal commands**: Check the current working directory before using `cd` commands; if already in the target directory, omit the `cd` command to avoid errors
+6. **Breaking version checks**: Update all 3 files when bumping versions (`pyproject.toml`, `uv.lock`, `package.json`)
+7. **Ollama not running**: Application requires local Ollama server with `mistral` and `bge-m3` models at runtime
+8. **HTTPS certificate warnings**: Self-signed certificates cause browser warnings in dev; this is expected
+9. **Redirect loops**: Use `useRef` in AuthContext to track redirect state and prevent infinite loops
+10. **Z-index stacking**: Use `createPortal(component, document.body)` for notifications to avoid stacking context issues
+11. **Directory context in terminal commands**: Check the current working directory before using `cd` commands; if already in the target directory, omit the `cd` command to avoid errors
 
 ## Terminal Command Best Practices
 

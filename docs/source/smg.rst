@@ -53,23 +53,6 @@ To include extra dependencies:
    uv sync --extra docs
    uv sync --all-extras
 
-Setting Up Authentication
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Before running the server, you need to generate an API authentication token.
-
-.. code-block:: sh
-
-   cp .env.example .env       # Set HOST and PORT to override defaults
-   uv run generate-new-token  # Set API_TOKEN_HASH variable
-
-This command:
-
-- Creates a cryptographically secure token using Python's ``secrets`` module
-- Hashes the token with SHA-256 for safe storage
-- Stores the hash in ``.env`` file
-- Displays the plain token (save it securely - it won't be shown again)
-
 Running the Backend
 ~~~~~~~~~~~~~~~~~~~
 
@@ -91,18 +74,6 @@ Start the server with:
    uv run |repo_name|
 
 The backend will be available at ``http://localhost:8000/api`` by default.
-
-**Available Endpoints:**
-
-- **Health Check:** ``http://localhost:8000/api/health``
-- **Login:** ``http://localhost:8000/api/login`` (requires authentication)
-
-**Testing the API:**
-
-.. code-block:: sh
-
-   curl -k http://localhost:8000/api/health
-   curl -k -H "X-API-Key: your-token-here" http://localhost:8000/api/login
 
 Testing, Linting, and Type Checking
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
