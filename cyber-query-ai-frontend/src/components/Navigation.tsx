@@ -3,15 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import HealthIndicator from "@/components/HealthIndicator";
-import { useAuth } from "@/contexts/AuthContext";
+import { getAuthEnabled } from "@/lib/api";
 
 const Navigation = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { logout, isAuthenticated } = useAuth();
+  const [authEnabled, setAuthEnabled] = useState(false);
 
   const navItems = [
     {
@@ -40,6 +40,30 @@ const Navigation = () => {
       active: pathname === "/about/",
     },
   ];
+
+  useEffect(() => {
+    const checkAuthEnabled = async () => {
+      try {
+        const response = await getAuthEnabled();
+        setAuthEnabled(response.auth_enabled);
+      } catch {
+        setAuthEnabled(false);
+      }
+    };
+
+    checkAuthEnabled();
+  }, []);
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    await new Promise(r => setTimeout(r, 100));
+
+    window.location.replace("/");
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -97,9 +121,9 @@ const Navigation = () => {
                 </Link>
               );
             })}
-            {isAuthenticated && (
+            {authEnabled && (
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="ml-4 px-4 py-2 rounded-md text-sm font-medium text-neon-red hover:bg-background-tertiary transition-all duration-200"
               >
                 Logout
@@ -178,11 +202,11 @@ const Navigation = () => {
                 </Link>
               );
             })}
-            {isAuthenticated && (
+            {authEnabled && (
               <button
                 onClick={() => {
                   closeMenu();
-                  logout();
+                  handleLogout();
                 }}
                 className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-neon-red hover:bg-background-tertiary transition-all duration-200"
               >

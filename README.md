@@ -80,7 +80,6 @@ Rename `.env.example` to `.env` and edit it to configure the server.
 
 - `HOST`: Server host address (default: 0.0.0.0)
 - `PORT`: Server port (default: 8000)
-- `API_TOKEN_HASH`: Leave blank to auto-generate on first run, or provide your own token hash
 
 ### Managing the Container
 

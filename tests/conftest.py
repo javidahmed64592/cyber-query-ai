@@ -258,7 +258,6 @@ def mock_limiter() -> Limiter:
 def mock_chatbot_router(mock_limiter: Limiter, mock_chatbot: Chatbot) -> ChatbotRouter:
     """Provide a ChatbotRouter instance for testing."""
     CHATBOT_ROUTER.configure(
-        hashed_token="hashed_value",  # noqa: S106
         limiter=mock_limiter,
         rate_limit="10/minute",
     )

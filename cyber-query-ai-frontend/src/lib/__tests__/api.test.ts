@@ -6,7 +6,6 @@ import {
   searchExploits,
   getHealth,
   sendChatMessage,
-  login,
   useHealthStatus,
   type HealthStatus,
 } from "@/lib/api";
@@ -16,7 +15,6 @@ import type {
   ExploitSearchResponse,
   HealthResponse,
   ChatResponse,
-  LoginResponse,
 } from "@/lib/types";
 
 jest.mock("../api", () => {
@@ -29,7 +27,6 @@ jest.mock("../api", () => {
     explainCode: jest.fn(),
     searchExploits: jest.fn(),
     sendChatMessage: jest.fn(),
-    login: jest.fn(),
   };
 });
 
@@ -44,7 +41,6 @@ const mockGetHealth = getHealth as jest.MockedFunction<typeof getHealth>;
 const mockSendChatMessage = sendChatMessage as jest.MockedFunction<
   typeof sendChatMessage
 >;
-const mockLogin = login as jest.MockedFunction<typeof login>;
 
 describe("API Tests", () => {
   beforeEach(() => {
@@ -477,44 +473,6 @@ And check service versions`;
       await expect(searchExploits("Apache server")).rejects.toThrow(
         errorMessage
       );
-    });
-  });
-
-  describe("login", () => {
-    it("should successfully login with valid API key", async () => {
-      const mockResponse: LoginResponse = {
-        message: "Login successful.",
-        timestamp: "2023-01-01T00:00:00Z",
-      };
-
-      mockLogin.mockResolvedValue(mockResponse);
-
-      const result = await login("valid-api-key-123");
-
-      expect(result).toEqual(mockResponse);
-      expect(mockLogin).toHaveBeenCalledWith("valid-api-key-123");
-    });
-
-    it("should reject with error for invalid API key", async () => {
-      const errorMessage = "Invalid API key";
-      mockLogin.mockRejectedValue(new Error(errorMessage));
-
-      await expect(login("invalid-key")).rejects.toThrow(errorMessage);
-    });
-
-    it("should reject with unauthorized error", async () => {
-      const errorMessage = "Missing API key";
-      mockLogin.mockRejectedValue(new Error(errorMessage));
-
-      await expect(login("")).rejects.toThrow(errorMessage);
-    });
-
-    it("should handle network error", async () => {
-      const errorMessage =
-        "No response from server. Please check if the backend is running.";
-      mockLogin.mockRejectedValue(new Error(errorMessage));
-
-      await expect(login("test-key")).rejects.toThrow(errorMessage);
     });
   });
 

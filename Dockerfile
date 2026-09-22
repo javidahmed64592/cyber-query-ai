@@ -69,13 +69,6 @@ RUN SITE_PACKAGES_DIR=$(find /usr/local/lib -name "site-packages" -type d | head
 RUN echo '#!/bin/sh\n\
     set -e\n\
     \n\
-    # Generate API token if needed\n\
-    if [ -z "$API_TOKEN_HASH" ]; then\n\
-    echo "Generating new token..."\n\
-    generate-new-token\n\
-    export $(grep -v "^#" .env | xargs)\n\
-    fi\n\
-    \n\
     # Check Ollama connection and models\n\
     echo "Checking Ollama connection at $OLLAMA_HOST..."\n\
     MAX_RETRIES=30\n\

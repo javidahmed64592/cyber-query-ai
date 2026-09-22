@@ -59,11 +59,11 @@ services:
     container_name: cyber-query-ai
     profiles: ["gpu", "cpu"]
     ports:
-      - "127.0.0.1:${PORT:-8000}:${PORT:-8000}"
+      - "${PORT:-8000}:${PORT:-8000}"
     environment:
       - HOST=${HOST:-0.0.0.0}
       - PORT=${PORT:-8000}
-      - API_TOKEN_HASH=${API_TOKEN_HASH:-}
+      - NGINX_PROXY_URL=${NGINX_PROXY_URL:-}
       - OLLAMA_HOST=http://ollama:11434
     volumes:
       - ./.env:/app/.env
@@ -78,18 +78,6 @@ services:
       cyber-query-ai-ollama-cpu:
         condition: service_healthy
         required: false
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "sh",
-          "-c",
-          'python -c "import urllib.request; urllib.request.urlopen(''http://localhost:$PORT/api/health'').read()"',
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
 networks:
   monitoring:

@@ -42,7 +42,6 @@ class ChatbotRouter(BaseRouter):
             response_model=PostChatResponse,
             methods=["POST"],
             limited=True,
-            authentication_required=True,
         )
         self.add_route(
             endpoint="/code/generate",
@@ -50,7 +49,6 @@ class ChatbotRouter(BaseRouter):
             response_model=PostCodeGenerationResponse,
             methods=["POST"],
             limited=True,
-            authentication_required=True,
         )
         self.add_route(
             endpoint="/code/explain",
@@ -58,7 +56,6 @@ class ChatbotRouter(BaseRouter):
             response_model=PostCodeExplanationResponse,
             methods=["POST"],
             limited=True,
-            authentication_required=True,
         )
         self.add_route(
             endpoint="/exploit/search",
@@ -66,7 +63,6 @@ class ChatbotRouter(BaseRouter):
             response_model=PostExploitSearchResponse,
             methods=["POST"],
             limited=True,
-            authentication_required=True,
         )
 
     @staticmethod

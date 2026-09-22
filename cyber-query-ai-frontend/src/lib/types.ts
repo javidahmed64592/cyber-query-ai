@@ -21,18 +21,12 @@ export interface PromptRequest {
   prompt: string;
 }
 
-// Authentication types
-export interface LoginResponse extends BaseResponse {}
-
-export interface AuthContextType {
-  apiKey: string | null;
-  isAuthenticated: boolean;
-  login: (apiKey: string) => Promise<void>;
-  logout: () => void;
-}
-
 // Response types
 export interface HealthResponse extends BaseResponse {}
+
+export interface GetAuthEnabledResponse extends BaseResponse {
+  auth_enabled: boolean;
+}
 
 export interface ChatResponse extends BaseResponse {
   model_message: string;
